@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proactive GeoEdge Dashboard</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page:           #f9f9f7;
+    --surface-1:      #fcfcfb;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --accent:         #2a78d6;
+    --accent-soft:    #cde2fb;
+    --status-good:      #0ca30c;
+    --status-warning:   #fab219;
+    --status-serious:   #ec835a;
+    --status-critical:  #d03b3b;
+    --warning-ink:    #b07c00;
+    --slot-bg:        rgba(11,11,11,0.03);
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page:           #0d0d0d;
+    --surface-1:      #1a1a19;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --accent:         #3987e5;
+    --accent-soft:    #184f95;
+    --warning-ink:    #fab219;
+    --slot-bg:        rgba(255,255,255,0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .slot { color: var(--text-muted); font-style: italic; }
+  .slot::before { content: "⟨"; }
+  .slot::after  { content: "⟩"; }
+
+  .chart-slot {
+    border: 1.5px dashed var(--baseline);
+    border-radius: 6px;
+    background: var(--slot-bg);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 11px; font-style: italic;
+    text-align: center; padding: 6px 10px;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border); border-radius: 7px;
+    background: var(--surface-1); color: var(--text-primary);
+    font: inherit; font-size: 12.5px; font-weight: 550;
+    padding: 6px 11px; cursor: pointer;
+  }
+  .btn:hover { border-color: var(--baseline); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ============ top bar ============ */
+  header.top {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 28px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-logo {
+    height: 34px; width: auto; display: block; flex: none;
+  }
+  :root[data-theme="dark"] .brand-logo {
+    background: #fff; border-radius: 6px; padding: 3px 7px;
+  }
+  .brand-mark {
+    width: 32px; height: 32px; border-radius: 8px; flex: none;
+    background: var(--accent); color: #fff;
+    display: none; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 15px;
+  }
+  .brand h1 { font-size: 16px; font-weight: 700; line-height: 1.15; }
+  .brand .tag { font-size: 11px; color: var(--text-muted); }
+  .crumb { font-size: 12.5px; color: var(--text-muted); display: none; align-items: center; gap: 6px; }
+  .crumb a { color: var(--accent); text-decoration: none; cursor: pointer; }
+  .top-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .search-slot {
+    border: 1.5px dashed var(--baseline); border-radius: 7px;
+    background: var(--slot-bg); color: var(--text-muted);
+    font-size: 12px; font-style: italic; padding: 6px 14px; min-width: 200px;
+  }
+
+  main { max-width: 1160px; margin: 0 auto; padding: 26px 28px 48px; }
+
+  /* ============ home: hero ============ */
+  .hero { margin-bottom: 22px; }
+  .hero h2 { font-size: 24px; font-weight: 750; }
+  .hero p { color: var(--text-secondary); margin-top: 3px; font-size: 13.5px; }
+
+  .attention-strip {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px; margin: 18px 0 26px;
+  }
+  .att {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .att .n { font-size: 24px; font-weight: 700; color: var(--text-muted); font-style: italic; line-height: 1; }
+  .att .t { font-size: 12px; color: var(--text-secondary); line-height: 1.3; }
+  .att .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; align-self: flex-start; margin-top: 5px; }
+
+  /* ============ home: nav cards ============ */
+  .nav-grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+  .nav-card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px;
+    display: flex; flex-direction: column; gap: 10px;
+    cursor: pointer; text-align: left; font: inherit; color: inherit;
+    transition: border-color .12s ease, transform .12s ease;
+  }
+  .nav-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .nav-head { display: flex; align-items: center; gap: 11px; }
+  .nav-icon {
+    width: 38px; height: 38px; border-radius: 9px; flex: none;
+    background: var(--accent-soft); color: var(--text-primary);
+    display: flex; align-items: center; justify-content: center; font-size: 17px;
+  }
+  .nav-card h3 { font-size: 15.5px; font-weight: 700; }
+  .nav-card .desc { font-size: 12.5px; color: var(--text-secondary); }
+  .nav-stats { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 2px; }
+  .mini { font-size: 12px; color: var(--text-muted); }
+  .mini b { display: block; font-size: 16px; font-weight: 650; color: var(--text-muted); font-style: italic; }
+  .nav-cta {
+    margin-top: auto; align-self: flex-start;
+    font-size: 12.5px; font-weight: 600; color: var(--accent);
+  }
+
+  /* ============ sub pages ============ */
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+  .page-head h2 { font-size: 21px; font-weight: 750; }
+  .page-head .desc { width: 100%; color: var(--text-secondary); font-size: 13px; }
+  .stub-note {
+    font-size: 12px; color: var(--text-muted); font-style: italic;
+    margin: 10px 0 18px;
+  }
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; margin-bottom: 14px;
+  }
+  .card h4 { font-size: 13.5px; font-weight: 650; margin-bottom: 8px; }
+  .row-slot {
+    display: grid; grid-template-columns: 1fr auto; gap: 10px;
+    padding: 9px 0; border-bottom: 1px solid var(--grid);
+    font-size: 12.5px; align-items: baseline;
+  }
+  .row-slot:last-child { border-bottom: none; }
+  .pill {
+    font-size: 10.5px; font-weight: 650; border-radius: 999px; padding: 2px 9px;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .pill .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  .tile-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .tile {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 13px 14px; min-height: 96px;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .tile .label { font-size: 12px; color: var(--text-secondary); }
+  .tile .value { font-size: 24px; font-weight: 650; color: var(--text-muted); font-style: italic; line-height: 1.1; }
+  .tile .delta { font-size: 11.5px; color: var(--text-muted); font-style: italic; }
+
+  #toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    background: var(--text-primary); color: var(--page);
+    font-size: 12.5px; border-radius: 8px; padding: 9px 16px;
+    z-index: 100; display: none;
+  }
+  footer { font-size: 11.5px; color: var(--text-muted); text-align: center; padding: 10px 0 30px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <img class="brand-logo" src="https://www.geoedge.com/wp-content/uploads/2023/01/Logo-Geoedge-1-1-1-1.png"
+         alt="GeoEdge" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div class="brand-mark">G</div>
+    <div>
+      <h1>Proactive GeoEdge Dashboard</h1>
+      <div class="tag">Customer success command center</div>
+    </div>
+  </div>
+  <nav class="crumb" id="crumb"><a data-nav="home">Home</a> <span>›</span> <span id="crumbHere"></span></nav>
+  <div class="top-actions">
+    <div class="search-slot">search accounts, tasks, contacts…</div>
+    <button class="btn" data-action="Notifications">🔔 <span class="slot">n</span></button>
+    <button class="btn" id="themeToggle" title="Toggle light/dark">◐</button>
+    <span class="slot" style="font-size:12px;">user name</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= HOME / WELCOME ================= -->
+  <section class="page active" id="page-home">
+    <div class="hero">
+      <h2>Good morning, <span class="slot">first name</span></h2>
+      <p>Here's what needs your attention today, <span class="slot">Weekday, DD Month YYYY</span>.</p>
+    </div>
+
+    <div class="attention-strip">
+      <div class="att">
+        <span class="dot" style="background:var(--status-critical)"></span>
+        <div><div class="n">—</div><div class="t">accounts at risk</div></div>
+      </div>
+      <div class="att">
+        <span class="dot" style="background:var(--status-warning)"></span>
+        <div><div class="n">—</div><div class="t">renewals in next 90 days</div></div>
+      </div>
+      <div class="att">
+        <span class="dot" style="background:var(--status-good)"></span>
+        <div><div class="n">—</div><div class="t">open opportunities</div></div>
+      </div>
+      <div class="att">
+        <span class="dot" style="background:var(--accent)"></span>
+        <div><div class="n">—</div><div class="t">tasks due this week</div></div>
+      </div>
+      <div class="att">
+        <span class="dot" style="background:var(--accent)"></span>
+        <div><div class="n">—</div><div class="t">accounts in onboarding</div></div>
+      </div>
+    </div>
+
+    <div class="nav-grid">
+
+      <button class="nav-card" data-nav="health">
+        <div class="nav-head">
+          <div class="nav-icon">♥</div>
+          <div>
+            <h3>Customer Health</h3>
+            <div class="desc">Portfolio health scores, at-risk accounts, drill into any customer</div>
+          </div>
+        </div>
+        <div class="nav-stats">
+          <span class="mini"><b>—</b>healthy</span>
+          <span class="mini"><b>—</b>needs attention</span>
+          <span class="mini"><b>—</b>at risk</span>
+        </div>
+        <span class="nav-cta">Open Customer Health →</span>
+      </button>
+
+      <button class="nav-card" data-nav="opportunities">
+        <div class="nav-head">
+          <div class="nav-icon">↗</div>
+          <div>
+            <h3>Opportunities</h3>
+            <div class="desc">Upsell, cross-sell and expansion flags across the book of business</div>
+          </div>
+        </div>
+        <div class="nav-stats">
+          <span class="mini"><b>—</b>open flags</span>
+          <span class="mini"><b>$—</b>pipeline value</span>
+        </div>
+        <span class="nav-cta">Open Opportunities →</span>
+      </button>
+
+      <button class="nav-card" data-nav="renewals">
+        <div class="nav-head">
+          <div class="nav-icon">⟳</div>
+          <div>
+            <h3>Renewals</h3>
+            <div class="desc">Upcoming renewals by window, readiness status and churn risk</div>
+          </div>
+        </div>
+        <div class="nav-stats">
+          <span class="mini"><b>—</b>next 30d</span>
+          <span class="mini"><b>—</b>next 60d</span>
+          <span class="mini"><b>—</b>next 90d</span>
+        </div>
+        <span class="nav-cta">Open Renewals →</span>
+      </button>
+
+      <button class="nav-card" data-nav="kpi">
+        <div class="nav-head">
+          <div class="nav-icon">▦</div>
+          <div>
+            <h3>KPI Tracker</h3>
+            <div class="desc">Team and portfolio KPIs against targets — NRR, adoption, NPS, SLA</div>
+          </div>
+        </div>
+        <div class="nav-stats">
+          <span class="mini"><b>—</b>on target</span>
+          <span class="mini"><b>—</b>off target</span>
+        </div>
+        <span class="nav-cta">Open KPI Tracker →</span>
+      </button>
+
+      <button class="nav-card" data-nav="onboarding">
+        <div class="nav-head">
+          <div class="nav-icon">➤</div>
+          <div>
+            <h3>Onboarding</h3>
+            <div class="desc">Accounts in onboarding, stage progress, blockers and go-live dates</div>
+          </div>
+        </div>
+        <div class="nav-stats">
+          <span class="mini"><b>—</b>in progress</span>
+          <span class="mini"><b>—</b>blocked</span>
+          <span class="mini"><b>—</b>go-lives this month</span>
+        </div>
+        <span class="nav-cta">Open Onboarding →</span>
+      </button>
+
+      <button class="nav-card" data-nav="tasks">
+        <div class="nav-head">
+          <div class="nav-icon">☑</div>
+          <div>
+            <h3>Tasks</h3>
+            <div class="desc">Everything owed across accounts — by due date, owner and source</div>
+          </div>
+        </div>
+        <div class="nav-stats">
+          <span class="mini"><b>—</b>overdue</span>
+          <span class="mini"><b>—</b>due today</span>
+          <span class="mini"><b>—</b>this week</span>
+        </div>
+        <span class="nav-cta">Open Tasks →</span>
+      </button>
+
+    </div>
+  </section>
+
+  <!-- ================= CUSTOMER HEALTH ================= -->
+  <section class="page" id="page-health">
+    <div class="page-head">
+      <button class="btn" data-nav="home">← Home</button>
+      <h2>Customer Health</h2>
+      <div class="desc">Portfolio view — each row drills into the customer dashboard (the deep-dive page already built).</div>
+    </div>
+    <div class="stub-note">Stub page — outline of what lives here. Say the word and I'll build it out like the customer page.</div>
+
+    <div class="tile-row">
+      <div class="tile"><span class="label">Healthy</span><span class="value">—</span></div>
+      <div class="tile"><span class="label">Needs attention</span><span class="value">—</span></div>
+      <div class="tile"><span class="label">At risk</span><span class="value">—</span></div>
+      <div class="tile"><span class="label">Avg health score</span><span class="value">—</span><span class="delta">± vs last month</span></div>
+    </div>
+
+    <div class="card">
+      <h4>Accounts by health</h4>
+      <div class="row-slot">
+        <span><b class="slot">account name</b> · <span class="slot">tier</span> · ARR <span class="slot">$—</span> · CSM <span class="slot">owner</span></span>
+        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-critical)"></span>At risk</span>
+      </div>
+      <div class="row-slot">
+        <span><b class="slot">account name</b> · <span class="slot">tier</span> · ARR <span class="slot">$—</span> · CSM <span class="slot">owner</span></span>
+        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-warning)"></span>Needs attention</span>
+      </div>
+      <div class="row-slot">
+        <span><b class="slot">account name</b> · <span class="slot">tier</span> · ARR <span class="slot">$—</span> · CSM <span class="slot">owner</span></span>
+        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-good)"></span>Healthy</span>
+      </div>
+    </div>
+    <div class="chart-slot" style="height:90px;">health-score distribution / trend chart</div>
+  </section>
+
+  <!-- ================= OPPORTUNITIES ================= -->
+  <section class="page" id="page-opportunities">
+    <div class="page-head">
+      <button class="btn" data-nav="home">← Home</button>
+      <h2>Opportunities</h2>
+      <div class="desc">Upsell / cross-sell / expansion flags rolled up from every account's signals zone.</div>
+    </div>
+    <div class="stub-note">Stub page — outline of what lives here.</div>
+
+    <div class="tile-row">
+      <div class="tile"><span class="label">Open flags</span><span class="value">—</span></div>
+      <div class="tile"><span class="label">Est. pipeline value</span><span class="value">$—</span></div>
+      <div class="tile"><span class="label">Converted this quarter</span><span class="value">—</span></div>
+    </div>
+
+    <div class="card">
+      <h4>Open opportunity flags</h4>
+      <div class="row-slot">
+        <span><b class="slot">account</b> — <span class="slot">upsell fit: product / module</span> · est. <span class="slot">$—</span></span>
+        <button class="btn" data-action="Create opportunity">＋ Opp</button>
+      </div>
+      <div class="row-slot">
+        <span><b class="slot">account</b> — <span class="slot">expansion intent: team / region</span> · est. <span class="slot">$—</span></span>
+        <button class="btn" data-action="Create opportunity">＋ Opp</button>
+      </div>
+      <div class="row-slot">
+        <span><b class="slot">account</b> — <span class="slot">feature adoption potential</span> · est. <span class="slot">$—</span></span>
+        <button class="btn" data-action="Create opportunity">＋ Opp</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RENEWALS ================= -->
+  <section class="page" id="page-renewals">
+    <div class="page-head">
+      <button class="btn" data-nav="home">← Home</button>
+      <h2>Renewals</h2>
+      <div class="desc">Every renewal by window with readiness: auto-renew, PO required, churn risk.</div>
+    </div>
+    <div class="stub-note">Stub page — outline of what lives here.</div>
+
+    <div class="tile-row">
+      <div class="tile"><span class="label">Next 30 days</span><span class="value">—</span><span class="delta">$— ARR</span></div>
+      <div class="tile"><span class="label">Next 60 days</span><span class="value">—</span><span class="delta">$— ARR</span></div>
+      <div class="tile"><span class="label">Next 90 days</span><span class="value">—</span><span class="delta">$— ARR</span></div>
+      <div class="tile"><span class="label">At-risk renewals</span><span class="value">—</span><span class="delta">$— ARR exposed</span></div>
+    </div>
+
+    <div class="card">
+      <h4>Upcoming renewals</h4>
+      <div class="row-slot">
+        <span><b class="slot">account</b> · renews <span class="slot">DD Mon YYYY</span> · <span class="slot">auto / manual</span> · PO: <span class="slot">yes / no</span></span>
+        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-critical)"></span>High risk</span>
+      </div>
+      <div class="row-slot">
+        <span><b class="slot">account</b> · renews <span class="slot">DD Mon YYYY</span> · <span class="slot">auto / manual</span> · PO: <span class="slot">yes / no</span></span>
+        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-warning)"></span>Watch</span>
+      </div>
+      <div class="row-slot">
+        <span><b class="slot">account</b> · renews <span class="slot">DD Mon YYYY</span> · <span class="slot">auto / manual</span> · PO: <span class="slot">yes / no</span></span>
+        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-good)"></span>On track</span>
+      </div>
+    </div>
+    <div class="chart-slot" style="height:90px;">renewal timeline / waterfall by month</div>
+  </section>
+
+  <!-- ================= KPI TRACKER ================= -->
+  <section class="page" id="page-kpi">
+    <div class="page-head">
+      <button class="btn" data-nav="home">← Home</button>
+      <h2>KPI Tracker</h2>
+      <div class="desc">Team and portfolio KPIs vs targets for the selected period.</div>
+    </div>
+    <div class="stub-note">Stub page — outline of what lives here.</div>
+
+    <div class="tile-row">
+      <div class="tile"><span class="label">Net revenue retention</span><span class="value">— %</span><span class="delta">target — %</span></div>
+      <div class="tile"><span class="label">Gross churn</span><span class="value">— %</span><span class="delta">target — %</span></div>
+      <div class="tile"><span class="label">Portfolio adoption</span><span class="value">— %</span><span class="delta">target — %</span></div>
+      <div class="tile"><span class="label">NPS</span><span class="value">—</span><span class="delta">target —</span></div>
+      <div class="tile"><span class="label">SLA adherence</span><span class="value">— %</span><span class="delta">target — %</span></div>
+      <div class="tile"><span class="label">QBRs completed</span><span class="value">— / —</span><span class="delta">this quarter</span></div>
+    </div>
+    <div class="chart-slot" style="height:110px;">KPI trend charts — one small multiple per KPI, actual vs target</div>
+  </section>
+
+  <!-- ================= ONBOARDING ================= -->
+  <section class="page" id="page-onboarding">
+    <div class="page-head">
+      <button class="btn" data-nav="home">← Home</button>
+      <h2>Onboarding</h2>
+      <div class="desc">Accounts in onboarding with stage, progress, blockers and target go-live.</div>
+    </div>
+    <div class="stub-note">Stub page — outline of what lives here.</div>
+
+    <div class="tile-row">
+      <div class="tile"><span class="label">In progress</span><span class="value">—</span></div>
+      <div class="tile"><span class="label">Blocked</span><span class="value">—</span></div>
+      <div class="tile"><span class="label">Avg days to go-live</span><span class="value">—</span></div>
+      <div class="tile"><span class="label">Go-lives this month</span><span class="value">—</span></div>
+    </div>
+
+    <div class="card">
+      <h4>Onboarding pipeline</h4>
+      <div class="row-slot">
+        <span><b class="slot">account</b> · stage <span class="slot">kickoff / setup / training / validation</span> · go-live <span class="slot">DD Mon</span></span>
+        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-good)"></span>On track</span>
+      </div>
+      <div class="row-slot">
+        <span><b class="slot">account</b> · stage <span class="slot">stage</span> · go-live <span class="slot">DD Mon</span> · blocker: <span class="slot">description</span></span>
+        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-serious)"></span>Blocked</span>
+      </div>
+      <div class="row-slot">
+        <span><b class="slot">account</b> · stage <span class="slot">stage</span> · go-live <span class="slot">DD Mon</span></span>
+        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-warning)"></span>Delayed</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TASKS ================= -->
+  <section class="page" id="page-tasks">
+    <div class="page-head">
+      <button class="btn" data-nav="home">← Home</button>
+      <h2>Tasks</h2>
+      <div class="desc">Every open task across accounts — from signals, renewals, onboarding and manual entry.</div>
+      <button class="btn primary" data-action="Create task" style="margin-left:auto;">＋ Create task</button>
+    </div>
+    <div class="stub-note">Stub page — outline of what lives here.</div>
+
+    <div class="tile-row">
+      <div class="tile"><span class="label">Overdue</span><span class="value">—</span></div>
+      <div class="tile"><span class="label">Due today</span><span class="value">—</span></div>
+      <div class="tile"><span class="label">Due this week</span><span class="value">—</span></div>
+      <div class="tile"><span class="label">Completed this week</span><span class="value">—</span></div>
+    </div>
+
+    <div class="card">
+      <h4>Open tasks</h4>
+      <div class="row-slot">
+        <span>☐ <b class="slot">task title</b> · <span class="slot">account</span> · owner <span class="slot">name</span> · <span style="color:var(--status-critical);font-weight:650;">overdue</span> <span class="slot">DD Mon</span></span>
+        <button class="btn" data-action="Complete task">Done</button>
+      </div>
+      <div class="row-slot">
+        <span>☐ <b class="slot">task title</b> · <span class="slot">account</span> · owner <span class="slot">name</span> · due <span class="slot">today</span></span>
+        <button class="btn" data-action="Complete task">Done</button>
+      </div>
+      <div class="row-slot">
+        <span>☐ <b class="slot">task title</b> · <span class="slot">account</span> · owner <span class="slot">name</span> · due <span class="slot">DD Mon</span></span>
+        <button class="btn" data-action="Complete task">Done</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Welcome / hub template — the six pages are navigation stubs; each can be built out to full depth
+    (Customer Health rows drill into the customer dashboard page already built).
+  </footer>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var pageNames = {
+    home: "Home",
+    health: "Customer Health",
+    opportunities: "Opportunities",
+    renewals: "Renewals",
+    kpi: "KPI Tracker",
+    onboarding: "Onboarding",
+    tasks: "Tasks"
+  };
+
+  var crumb = document.getElementById("crumb");
+  var crumbHere = document.getElementById("crumbHere");
+
+  function show(name) {
+    if (!pageNames[name]) name = "home";
+    document.querySelectorAll(".page").forEach(function (p) { p.classList.remove("active"); });
+    var target = document.getElementById("page-" + name);
+    if (target) target.classList.add("active");
+    if (name === "home") {
+      crumb.style.display = "none";
+    } else {
+      crumb.style.display = "flex";
+      crumbHere.textContent = pageNames[name];
+    }
+    window.scrollTo(0, 0);
+  }
+
+  document.addEventListener("click", function (e) {
+    var nav = e.target.closest ? e.target.closest("[data-nav]") : null;
+    if (nav) {
+      var name = nav.getAttribute("data-nav");
+      if (location.hash !== "#" + name) location.hash = name;
+      else show(name);
+    }
+  });
+
+  window.addEventListener("hashchange", function () {
+    show(location.hash.replace("#", "") || "home");
+  });
+  show(location.hash.replace("#", "") || "home");
+
+  /* toast stubs */
+  var toast = document.getElementById("toast");
+  var toastTimer = null;
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest ? e.target.closest("[data-action]") : null;
+    if (!btn) return;
+    toast.textContent = "“" + btn.getAttribute("data-action") + "” — placeholder action; wire to your workflow tool.";
+    toast.style.display = "block";
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.style.display = "none"; }, 2200);
+  });
+
+  /* theme toggle */
+  document.getElementById("themeToggle").addEventListener("click", function () {
+    var root = document.documentElement;
+    root.setAttribute("data-theme",
+      root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  });
+})();
+</script>
+</body>
+</html>
