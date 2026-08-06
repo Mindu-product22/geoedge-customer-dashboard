@@ -119,7 +119,11 @@
     background: var(--surface-1); border: 1px solid var(--border);
     border-radius: 10px; padding: 12px 14px;
     display: flex; gap: 10px; align-items: center;
+    font: inherit; text-align: left; width: 100%; color: inherit;
+    cursor: pointer; transition: border-color .12s ease, transform .12s ease;
   }
+  .att:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .att:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .att .n { font-size: 24px; font-weight: 700; color: var(--text-muted); font-style: italic; line-height: 1; }
   .att .t { font-size: 12px; color: var(--text-secondary); line-height: 1.3; }
   .att .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; align-self: flex-start; margin-top: 5px; }
@@ -168,6 +172,16 @@
     border-radius: 10px; padding: 16px; margin-bottom: 14px;
   }
   .card h4 { font-size: 13.5px; font-weight: 650; margin-bottom: 8px; }
+  .card-head-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .card-head-row h4 { margin-bottom: 0; }
+  .filter-clear { font-size: 12px; font-weight: 600; color: var(--accent); cursor: pointer; text-decoration: none; }
+  .filter-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    background: var(--slot-bg); border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px 10px; margin-left: 4px;
+  }
+  .empty-note { font-size: 12.5px; color: var(--text-muted); font-style: italic; padding: 10px 0; }
   .row-slot {
     display: grid; grid-template-columns: 1fr auto; gap: 10px;
     padding: 9px 0; border-bottom: 1px solid var(--grid);
@@ -230,26 +244,26 @@
     </div>
 
     <div class="attention-strip">
-      <div class="att">
+      <button class="att" data-nav="health" data-filter="at-risk" title="View accounts at risk">
         <span class="dot" style="background:var(--status-critical)"></span>
         <div><div class="n">—</div><div class="t">accounts at risk</div></div>
-      </div>
-      <div class="att">
+      </button>
+      <button class="att" data-nav="renewals" title="View renewals in the next 90 days">
         <span class="dot" style="background:var(--status-warning)"></span>
         <div><div class="n">—</div><div class="t">renewals in next 90 days</div></div>
-      </div>
-      <div class="att">
+      </button>
+      <button class="att" data-nav="opportunities" title="View open opportunities">
         <span class="dot" style="background:var(--status-good)"></span>
         <div><div class="n">—</div><div class="t">open opportunities</div></div>
-      </div>
-      <div class="att">
+      </button>
+      <button class="att" data-nav="tasks" title="View tasks due this week">
         <span class="dot" style="background:var(--accent)"></span>
         <div><div class="n">—</div><div class="t">tasks due this week</div></div>
-      </div>
-      <div class="att">
+      </button>
+      <button class="att" data-nav="onboarding" title="View accounts in onboarding">
         <span class="dot" style="background:var(--accent)"></span>
         <div><div class="n">—</div><div class="t">accounts in onboarding</div></div>
-      </div>
+      </button>
     </div>
 
     <div class="nav-grid">
@@ -361,26 +375,30 @@
     <div class="stub-note">Stub page — outline of what lives here. Say the word and I'll build it out like the customer page.</div>
 
     <div class="tile-row">
-      <div class="tile"><span class="label">Healthy</span><span class="value">—</span></div>
-      <div class="tile"><span class="label">Needs attention</span><span class="value">—</span></div>
-      <div class="tile"><span class="label">At risk</span><span class="value">—</span></div>
-      <div class="tile"><span class="label">Avg health score</span><span class="value">—</span><span class="delta">± vs last month</span></div>
+      <div class="tile" data-health-tile="healthy"><span class="label">Healthy</span><span class="value">—</span></div>
+      <div class="tile" data-health-tile="needs-attention"><span class="label">Needs attention</span><span class="value">—</span></div>
+      <div class="tile" data-health-tile="at-risk"><span class="label">At risk</span><span class="value">—</span></div>
+      <div class="tile" data-health-tile="avg"><span class="label">Avg health score</span><span class="value">—</span><span class="delta">± vs last month</span></div>
     </div>
 
     <div class="card">
-      <h4>Accounts by health</h4>
-      <div class="row-slot">
+      <div class="card-head-row">
+        <h4 id="healthCardTitle">Accounts by health<span class="filter-chip" id="healthFilterChip" style="display:none;"></span></h4>
+        <a class="filter-clear" id="healthClearFilter" data-nav="health" style="display:none;">Show all accounts ✕</a>
+      </div>
+      <div class="row-slot" data-health-status="at-risk">
         <span><b class="slot">account name</b> · <span class="slot">tier</span> · ARR <span class="slot">$—</span> · CSM <span class="slot">owner</span></span>
         <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-critical)"></span>At risk</span>
       </div>
-      <div class="row-slot">
+      <div class="row-slot" data-health-status="needs-attention">
         <span><b class="slot">account name</b> · <span class="slot">tier</span> · ARR <span class="slot">$—</span> · CSM <span class="slot">owner</span></span>
         <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-warning)"></span>Needs attention</span>
       </div>
-      <div class="row-slot">
+      <div class="row-slot" data-health-status="healthy">
         <span><b class="slot">account name</b> · <span class="slot">tier</span> · ARR <span class="slot">$—</span> · CSM <span class="slot">owner</span></span>
         <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-good)"></span>Healthy</span>
       </div>
+      <div class="empty-note" id="healthEmptyNote" style="display:none;">No accounts match this filter.</div>
     </div>
     <div class="chart-slot" style="height:90px;">health-score distribution / trend chart</div>
   </section>
@@ -564,33 +582,73 @@
   var crumb = document.getElementById("crumb");
   var crumbHere = document.getElementById("crumbHere");
 
-  function show(name) {
-    if (!pageNames[name]) name = "home";
+  var healthLabels = { "at-risk": "At risk", "needs-attention": "Needs attention", "healthy": "Healthy" };
+
+  function applyHealthFilter(filter) {
+    var rows = document.querySelectorAll("#page-health [data-health-status]");
+    var tiles = document.querySelectorAll("#page-health [data-health-tile]");
+    var title = document.getElementById("healthCardTitle");
+    var chip = document.getElementById("healthFilterChip");
+    var clear = document.getElementById("healthClearFilter");
+    var empty = document.getElementById("healthEmptyNote");
+    var shown = 0;
+
+    rows.forEach(function (r) {
+      var match = !filter || r.getAttribute("data-health-status") === filter;
+      r.style.display = match ? "" : "none";
+      if (match) shown++;
+    });
+    // when filtered, show only the matching summary tile
+    tiles.forEach(function (t) {
+      t.style.display = (!filter || t.getAttribute("data-health-tile") === filter) ? "" : "none";
+    });
+
+    if (chip) {
+      if (filter) { chip.textContent = healthLabels[filter] || filter; chip.style.display = ""; }
+      else { chip.style.display = "none"; }
+    }
+    if (clear) clear.style.display = filter ? "" : "none";
+    if (empty) empty.style.display = (filter && shown === 0) ? "" : "none";
+  }
+
+  function show(name, filter) {
+    if (!pageNames[name]) { name = "home"; filter = null; }
     document.querySelectorAll(".page").forEach(function (p) { p.classList.remove("active"); });
     var target = document.getElementById("page-" + name);
     if (target) target.classList.add("active");
+    applyHealthFilter(name === "health" ? filter : null);
     if (name === "home") {
       crumb.style.display = "none";
     } else {
       crumb.style.display = "flex";
-      crumbHere.textContent = pageNames[name];
+      crumbHere.textContent = pageNames[name] + (name === "health" && filter ? " · " + (healthLabels[filter] || filter) : "");
     }
     window.scrollTo(0, 0);
+  }
+
+  function parseHash() {
+    var raw = location.hash.replace("#", "");
+    var parts = raw.split("/");
+    return { name: parts[0] || "home", filter: parts[1] || null };
   }
 
   document.addEventListener("click", function (e) {
     var nav = e.target.closest ? e.target.closest("[data-nav]") : null;
     if (nav) {
       var name = nav.getAttribute("data-nav");
-      if (location.hash !== "#" + name) location.hash = name;
-      else show(name);
+      var filter = nav.getAttribute("data-filter");
+      var hash = "#" + name + (filter ? "/" + filter : "");
+      if (location.hash !== hash) location.hash = hash;
+      else { var h = parseHash(); show(h.name, h.filter); }
     }
   });
 
   window.addEventListener("hashchange", function () {
-    show(location.hash.replace("#", "") || "home");
+    var h = parseHash();
+    show(h.name, h.filter);
   });
-  show(location.hash.replace("#", "") || "home");
+  var init = parseHash();
+  show(init.name, init.filter);
 
   /* toast stubs */
   var toast = document.getElementById("toast");
