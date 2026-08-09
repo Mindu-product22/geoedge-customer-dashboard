@@ -117,7 +117,15 @@
     background: var(--surface-1); border: 1px solid var(--border);
     border-radius: 12px; padding: 16px 20px; margin: 0 0 22px;
   }
-  .ps-total { display: flex; flex-direction: column; padding-right: 22px; border-right: 1px solid var(--border); }
+  .ps-total {
+    display: flex; flex-direction: column; padding-right: 22px;
+    border: none; border-right: 1px solid var(--border);
+    background: none; font: inherit; color: inherit; text-align: left;
+    cursor: pointer; transition: color .12s ease;
+  }
+  .ps-total:hover .num, .ps-total:hover .label { color: var(--accent); }
+  .ps-total:hover .label { text-decoration: underline; }
+  .ps-total:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 8px; }
   .ps-total .num { font-size: 30px; font-weight: 750; color: var(--text-muted); font-style: italic; line-height: 1; }
   .ps-total .label { font-size: 12px; color: var(--text-secondary); margin-top: 5px; }
   .ps-tiers { display: flex; gap: 26px; flex-wrap: wrap; }
@@ -193,6 +201,18 @@
     font-size: 12.5px; align-items: baseline;
   }
   .row-slot:last-child { border-bottom: none; }
+
+  /* data table (Customers list) */
+  .table-wrap { overflow-x: auto; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .data-table th {
+    text-align: left; font-weight: 650; color: var(--text-secondary);
+    padding: 8px 12px; border-bottom: 1px solid var(--grid); white-space: nowrap;
+  }
+  .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--grid); vertical-align: middle; white-space: nowrap; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .admin-link { color: var(--accent); font-weight: 600; text-decoration: none; cursor: pointer; }
+  .admin-link:hover { text-decoration: underline; }
   .pill {
     font-size: 10.5px; font-weight: 650; border-radius: 999px; padding: 2px 9px;
     display: inline-flex; align-items: center; gap: 5px;
@@ -256,10 +276,10 @@
     </div>
 
     <div class="portfolio-summary">
-      <div class="ps-total">
+      <button class="ps-total" data-nav="customers" title="View the full customer list">
         <span class="num">—</span>
         <span class="label">total customers</span>
-      </div>
+      </button>
       <div class="ps-tiers">
         <div class="ps-tier"><span class="dot" style="background:var(--status-critical)"></span><span class="num">—</span><span class="label">Strategic</span></div>
         <div class="ps-tier"><span class="dot" style="background:var(--status-warning)"></span><span class="num">—</span><span class="label">Gold</span></div>
@@ -564,6 +584,63 @@
     </div>
   </section>
 
+  <!-- ================= CUSTOMERS ================= -->
+  <section class="page" id="page-customers">
+    <div class="page-head">
+      <button class="btn" data-nav="home">← Home</button>
+      <h2>Customers</h2>
+      <div class="desc">All paying customers with commercials, renewal timing and quick links.</div>
+    </div>
+    <div class="stub-note">Stub page — outline of what lives here.</div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Customer name</th>
+              <th>Account name</th>
+              <th>MRR</th>
+              <th>Renewal date</th>
+              <th>Contact</th>
+              <th>Location</th>
+              <th>Admin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b class="slot">customer name</b></td>
+              <td><span class="slot">account name</span></td>
+              <td><span class="slot">$—</span></td>
+              <td><span class="slot">DD Mon YYYY</span></td>
+              <td><span class="slot">contact</span></td>
+              <td><span class="slot">city, country</span></td>
+              <td><a class="admin-link" data-action="Open admin panel">Open ↗</a></td>
+            </tr>
+            <tr>
+              <td><b class="slot">customer name</b></td>
+              <td><span class="slot">account name</span></td>
+              <td><span class="slot">$—</span></td>
+              <td><span class="slot">DD Mon YYYY</span></td>
+              <td><span class="slot">contact</span></td>
+              <td><span class="slot">city, country</span></td>
+              <td><a class="admin-link" data-action="Open admin panel">Open ↗</a></td>
+            </tr>
+            <tr>
+              <td><b class="slot">customer name</b></td>
+              <td><span class="slot">account name</span></td>
+              <td><span class="slot">$—</span></td>
+              <td><span class="slot">DD Mon YYYY</span></td>
+              <td><span class="slot">contact</span></td>
+              <td><span class="slot">city, country</span></td>
+              <td><a class="admin-link" data-action="Open admin panel">Open ↗</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <footer>
     Welcome / hub template — the six pages are navigation stubs; each can be built out to full depth
     (Customer Health rows drill into the customer dashboard page already built).
@@ -584,7 +661,8 @@
     renewals: "Renewals",
     kpi: "KPI Tracker",
     onboarding: "Onboarding",
-    tasks: "Tasks"
+    tasks: "Tasks",
+    customers: "Customers"
   };
 
   var crumb = document.getElementById("crumb");
