@@ -210,6 +210,7 @@
     padding: 8px 12px; border-bottom: 1px solid var(--grid); white-space: nowrap;
   }
   .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--grid); vertical-align: middle; white-space: nowrap; }
+  .data-table td.wrap { white-space: normal; min-width: 150px; }
   .data-table tr:last-child td { border-bottom: none; }
   .admin-link { color: var(--accent); font-weight: 600; text-decoration: none; cursor: pointer; }
   .admin-link:hover { text-decoration: underline; }
@@ -418,19 +419,36 @@
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
       <h2>Opportunities</h2>
-      <div class="desc">Upsell / cross-sell / expansion flags rolled up from every account's signals zone.</div>
+      <div class="desc">All open opportunities — owner, stage, amount, probability, close date and next steps.</div>
     </div>
     <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
 
     <div class="tile-row">
-      <div class="tile" id="oppTileFlags"><span class="label">Open flags</span><span class="value">—</span></div>
+      <div class="tile" id="oppTileFlags"><span class="label">Open opportunities</span><span class="value">—</span></div>
       <div class="tile" id="oppTileValue"><span class="label">Est. pipeline value</span><span class="value">$—</span></div>
-      <div class="tile" id="oppTileConverted"><span class="label">Converted this quarter</span><span class="value">—</span></div>
+      <div class="tile" id="oppTileConverted"><span class="label">Won this quarter</span><span class="value">—</span></div>
     </div>
 
     <div class="card">
-      <h4>Open opportunity flags</h4>
-      <div id="oppRows"></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Opportunity Owner</th>
+              <th>Stage</th>
+              <th>Account Name</th>
+              <th>Opportunity Name</th>
+              <th>Monthly Amount</th>
+              <th>Probability (%)</th>
+              <th>Close Date</th>
+              <th>Created Date</th>
+              <th>Next Step</th>
+              <th>Next Step Update</th>
+            </tr>
+          </thead>
+          <tbody id="oppRows"></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -768,9 +786,18 @@
   setText("#oppTileValue .value", money(pipeline));
   setText("#oppTileConverted .value", K.convertedThisQuarter);
   document.getElementById("oppRows").innerHTML = D.opportunities.map(function (o) {
-    return '<div class="row-slot">' +
-      '<span><b>' + esc(o.account) + '</b> — ' + esc(o.desc) + ' · est. ' + money(o.est) + ' ARR</span>' +
-      '<button class="btn" data-action="Create opportunity">＋ Opp</button></div>';
+    return '<tr>' +
+      '<td>' + esc(o.owner) + '</td>' +
+      '<td>' + esc(o.stage) + '</td>' +
+      '<td><b>' + esc(o.account) + '</b></td>' +
+      '<td>' + esc(o.oppName) + '</td>' +
+      '<td>' + money(o.monthly) + '</td>' +
+      '<td>' + o.probability + '%</td>' +
+      '<td>' + fmtDate(o.closeDate) + '</td>' +
+      '<td>' + fmtDate(o.createdDate) + '</td>' +
+      '<td class="wrap">' + esc(o.nextStep) + '</td>' +
+      '<td>' + fmtDate(o.nextStepUpdate) + '</td>' +
+      '</tr>';
   }).join("");
 
   /* ---- renewals ---- */
