@@ -118,12 +118,12 @@
     border-radius: 12px; padding: 16px 20px; margin: 0 0 22px;
   }
   .ps-total { display: flex; flex-direction: column; padding-right: 22px; border-right: 1px solid var(--border); }
-  .ps-total .num { font-size: 30px; font-weight: 750; color: var(--text-muted); font-style: italic; line-height: 1; }
+  .ps-total .num { font-size: 30px; font-weight: 750; color: var(--text-primary); line-height: 1; }
   .ps-total .label { font-size: 12px; color: var(--text-secondary); margin-top: 5px; }
   .ps-tiers { display: flex; gap: 26px; flex-wrap: wrap; }
   .ps-tier { display: flex; align-items: baseline; gap: 7px; }
   .ps-tier .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; align-self: center; }
-  .ps-tier .num { font-size: 20px; font-weight: 700; color: var(--text-muted); font-style: italic; line-height: 1; }
+  .ps-tier .num { font-size: 20px; font-weight: 700; color: var(--text-primary); line-height: 1; }
   .ps-tier .label { font-size: 12.5px; color: var(--text-secondary); }
   @media (max-width: 520px) {
     .ps-total { padding-right: 0; border-right: none; padding-bottom: 12px; border-bottom: 1px solid var(--border); width: 100%; }
@@ -152,7 +152,7 @@
   .nav-card .desc { font-size: 12.5px; color: var(--text-secondary); }
   .nav-stats { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 2px; }
   .mini { font-size: 12px; color: var(--text-muted); }
-  .mini b { display: block; font-size: 16px; font-weight: 650; color: var(--text-muted); font-style: italic; }
+  .mini b { display: block; font-size: 16px; font-weight: 650; color: var(--text-primary); }
   .mini-link { cursor: pointer; border-radius: 6px; }
   .mini-link:hover { color: var(--accent); text-decoration: underline; }
   .mini-link:hover b { color: var(--accent); }
@@ -206,8 +206,8 @@
     display: flex; flex-direction: column; gap: 5px;
   }
   .tile .label { font-size: 12px; color: var(--text-secondary); }
-  .tile .value { font-size: 24px; font-weight: 650; color: var(--text-muted); font-style: italic; line-height: 1.1; }
-  .tile .delta { font-size: 11.5px; color: var(--text-muted); font-style: italic; }
+  .tile .value { font-size: 24px; font-weight: 650; color: var(--text-primary); line-height: 1.1; }
+  .tile .delta { font-size: 11.5px; color: var(--text-muted); }
 
   /* KPI goal tiles (MRR / ARR) */
   .tile.kpi-goal { min-height: 128px; }
@@ -240,9 +240,9 @@
   <nav class="crumb" id="crumb"><a data-nav="home">Home</a> <span>›</span> <span id="crumbHere"></span></nav>
   <div class="top-actions">
     <div class="search-slot">search accounts, tasks, contacts…</div>
-    <button class="btn" data-action="Notifications">🔔 <span class="slot">n</span></button>
+    <button class="btn" data-action="Notifications">🔔 <span id="notifCount">0</span></button>
     <button class="btn" id="themeToggle" title="Toggle light/dark">◐</button>
-    <span class="slot" style="font-size:12px;">user name</span>
+    <span id="topUser" style="font-size:12px;color:var(--text-secondary);"></span>
   </div>
 </header>
 
@@ -251,19 +251,19 @@
   <!-- ================= HOME / WELCOME ================= -->
   <section class="page active" id="page-home">
     <div class="hero">
-      <h2>Good morning, <span class="slot">first name</span></h2>
-      <p>Here's what needs your attention today, <span class="slot">Weekday, DD Month YYYY</span>.</p>
+      <h2 id="heroGreeting">Good morning</h2>
+      <p>Here's what needs your attention today, <span id="heroDate"></span>.</p>
     </div>
 
     <div class="portfolio-summary">
       <div class="ps-total">
-        <span class="num">—</span>
+        <span class="num" id="psTotal">—</span>
         <span class="label">total customers</span>
       </div>
       <div class="ps-tiers">
-        <div class="ps-tier"><span class="dot" style="background:var(--status-critical)"></span><span class="num">—</span><span class="label">Strategic</span></div>
-        <div class="ps-tier"><span class="dot" style="background:var(--status-warning)"></span><span class="num">—</span><span class="label">Gold</span></div>
-        <div class="ps-tier"><span class="dot" style="background:var(--baseline)"></span><span class="num">—</span><span class="label">Silver</span></div>
+        <div class="ps-tier"><span class="dot" style="background:var(--status-critical)"></span><span class="num" data-tier-count="Strategic">—</span><span class="label">Strategic</span></div>
+        <div class="ps-tier"><span class="dot" style="background:var(--status-warning)"></span><span class="num" data-tier-count="Gold">—</span><span class="label">Gold</span></div>
+        <div class="ps-tier"><span class="dot" style="background:var(--baseline)"></span><span class="num" data-tier-count="Silver">—</span><span class="label">Silver</span></div>
       </div>
     </div>
 
@@ -278,9 +278,9 @@
           </div>
         </div>
         <div class="nav-stats">
-          <span class="mini"><b>—</b>healthy</span>
-          <span class="mini"><b>—</b>needs attention</span>
-          <span class="mini mini-link" data-nav="health" data-filter="at-risk" role="link" tabindex="0" title="View only at-risk accounts"><b>—</b>at risk</span>
+          <span class="mini"><b data-stat="healthy">—</b>healthy</span>
+          <span class="mini"><b data-stat="needs-attention">—</b>needs attention</span>
+          <span class="mini mini-link" data-nav="health" data-filter="at-risk" role="link" tabindex="0" title="View only at-risk accounts"><b data-stat="at-risk">—</b>at risk</span>
         </div>
         <span class="nav-cta">Open Customer Health →</span>
       </button>
@@ -294,8 +294,8 @@
           </div>
         </div>
         <div class="nav-stats">
-          <span class="mini"><b>—</b>open flags</span>
-          <span class="mini"><b>$—</b>pipeline value</span>
+          <span class="mini"><b data-stat="oppFlags">—</b>open flags</span>
+          <span class="mini"><b data-stat="oppValue">$—</b>pipeline value</span>
         </div>
         <span class="nav-cta">Open Opportunities →</span>
       </button>
@@ -309,9 +309,9 @@
           </div>
         </div>
         <div class="nav-stats">
-          <span class="mini"><b>—</b>next 30d</span>
-          <span class="mini"><b>—</b>next 60d</span>
-          <span class="mini"><b>—</b>next 90d</span>
+          <span class="mini"><b data-stat="r30">—</b>next 30d</span>
+          <span class="mini"><b data-stat="r60">—</b>next 60d</span>
+          <span class="mini"><b data-stat="r90">—</b>next 90d</span>
         </div>
         <span class="nav-cta">Open Renewals →</span>
       </button>
@@ -325,8 +325,8 @@
           </div>
         </div>
         <div class="nav-stats">
-          <span class="mini"><b>—</b>on target</span>
-          <span class="mini"><b>—</b>off target</span>
+          <span class="mini"><b data-stat="kpiOn">—</b>on target</span>
+          <span class="mini"><b data-stat="kpiOff">—</b>off target</span>
         </div>
         <span class="nav-cta">Open KPI Tracker →</span>
       </button>
@@ -340,9 +340,9 @@
           </div>
         </div>
         <div class="nav-stats">
-          <span class="mini"><b>—</b>in progress</span>
-          <span class="mini"><b>—</b>blocked</span>
-          <span class="mini"><b>—</b>go-lives this month</span>
+          <span class="mini"><b data-stat="obProgress">—</b>in progress</span>
+          <span class="mini"><b data-stat="obBlocked">—</b>blocked</span>
+          <span class="mini"><b data-stat="obGoLives">—</b>go-lives this month</span>
         </div>
         <span class="nav-cta">Open Onboarding →</span>
       </button>
@@ -356,9 +356,9 @@
           </div>
         </div>
         <div class="nav-stats">
-          <span class="mini"><b>—</b>overdue</span>
-          <span class="mini"><b>—</b>due today</span>
-          <span class="mini"><b>—</b>this week</span>
+          <span class="mini"><b data-stat="tOverdue">—</b>overdue</span>
+          <span class="mini"><b data-stat="tToday">—</b>due today</span>
+          <span class="mini"><b data-stat="tWeek">—</b>this week</span>
         </div>
         <span class="nav-cta">Open Tasks →</span>
       </button>
@@ -373,7 +373,7 @@
       <h2>Customer Health</h2>
       <div class="desc">Portfolio view — each row drills into the customer dashboard (the deep-dive page already built).</div>
     </div>
-    <div class="stub-note">Stub page — outline of what lives here. Say the word and I'll build it out like the customer page.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" data-health-tile="healthy"><span class="label">Healthy</span><span class="value">—</span></div>
@@ -387,18 +387,7 @@
         <h4 id="healthCardTitle">Accounts by health<span class="filter-chip" id="healthFilterChip" style="display:none;"></span></h4>
         <a class="filter-clear" id="healthClearFilter" data-nav="health" style="display:none;">Show all accounts ✕</a>
       </div>
-      <div class="row-slot" data-health-status="at-risk">
-        <span><b class="slot">account name</b> · <span class="slot">tier</span> · ARR <span class="slot">$—</span> · CSM <span class="slot">owner</span></span>
-        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-critical)"></span>At risk</span>
-      </div>
-      <div class="row-slot" data-health-status="needs-attention">
-        <span><b class="slot">account name</b> · <span class="slot">tier</span> · ARR <span class="slot">$—</span> · CSM <span class="slot">owner</span></span>
-        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-warning)"></span>Needs attention</span>
-      </div>
-      <div class="row-slot" data-health-status="healthy">
-        <span><b class="slot">account name</b> · <span class="slot">tier</span> · ARR <span class="slot">$—</span> · CSM <span class="slot">owner</span></span>
-        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-good)"></span>Healthy</span>
-      </div>
+      <div id="healthRows"></div>
       <div class="empty-note" id="healthEmptyNote" style="display:none;">No accounts match this filter.</div>
     </div>
     <div class="chart-slot" style="height:90px;">health-score distribution / trend chart</div>
@@ -411,28 +400,17 @@
       <h2>Opportunities</h2>
       <div class="desc">Upsell / cross-sell / expansion flags rolled up from every account's signals zone.</div>
     </div>
-    <div class="stub-note">Stub page — outline of what lives here.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
 
     <div class="tile-row">
-      <div class="tile"><span class="label">Open flags</span><span class="value">—</span></div>
-      <div class="tile"><span class="label">Est. pipeline value</span><span class="value">$—</span></div>
-      <div class="tile"><span class="label">Converted this quarter</span><span class="value">—</span></div>
+      <div class="tile" id="oppTileFlags"><span class="label">Open flags</span><span class="value">—</span></div>
+      <div class="tile" id="oppTileValue"><span class="label">Est. pipeline value</span><span class="value">$—</span></div>
+      <div class="tile" id="oppTileConverted"><span class="label">Converted this quarter</span><span class="value">—</span></div>
     </div>
 
     <div class="card">
       <h4>Open opportunity flags</h4>
-      <div class="row-slot">
-        <span><b class="slot">account</b> — <span class="slot">upsell fit: product / module</span> · est. <span class="slot">$—</span></span>
-        <button class="btn" data-action="Create opportunity">＋ Opp</button>
-      </div>
-      <div class="row-slot">
-        <span><b class="slot">account</b> — <span class="slot">expansion intent: team / region</span> · est. <span class="slot">$—</span></span>
-        <button class="btn" data-action="Create opportunity">＋ Opp</button>
-      </div>
-      <div class="row-slot">
-        <span><b class="slot">account</b> — <span class="slot">feature adoption potential</span> · est. <span class="slot">$—</span></span>
-        <button class="btn" data-action="Create opportunity">＋ Opp</button>
-      </div>
+      <div id="oppRows"></div>
     </div>
   </section>
 
@@ -443,29 +421,18 @@
       <h2>Renewals</h2>
       <div class="desc">Every renewal by window with readiness: auto-renew, PO required, churn risk.</div>
     </div>
-    <div class="stub-note">Stub page — outline of what lives here.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
 
     <div class="tile-row">
-      <div class="tile"><span class="label">Next 30 days</span><span class="value">—</span><span class="delta">$— ARR</span></div>
-      <div class="tile"><span class="label">Next 60 days</span><span class="value">—</span><span class="delta">$— ARR</span></div>
-      <div class="tile"><span class="label">Next 90 days</span><span class="value">—</span><span class="delta">$— ARR</span></div>
-      <div class="tile"><span class="label">At-risk renewals</span><span class="value">—</span><span class="delta">$— ARR exposed</span></div>
+      <div class="tile" data-renewal-tile="30"><span class="label">Next 30 days</span><span class="value">—</span><span class="delta">$— ARR</span></div>
+      <div class="tile" data-renewal-tile="60"><span class="label">Next 60 days</span><span class="value">—</span><span class="delta">$— ARR</span></div>
+      <div class="tile" data-renewal-tile="90"><span class="label">Next 90 days</span><span class="value">—</span><span class="delta">$— ARR</span></div>
+      <div class="tile" data-renewal-tile="risk"><span class="label">At-risk renewals</span><span class="value">—</span><span class="delta">$— ARR exposed</span></div>
     </div>
 
     <div class="card">
-      <h4>Upcoming renewals</h4>
-      <div class="row-slot">
-        <span><b class="slot">account</b> · renews <span class="slot">DD Mon YYYY</span> · <span class="slot">auto / manual</span> · PO: <span class="slot">yes / no</span></span>
-        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-critical)"></span>High risk</span>
-      </div>
-      <div class="row-slot">
-        <span><b class="slot">account</b> · renews <span class="slot">DD Mon YYYY</span> · <span class="slot">auto / manual</span> · PO: <span class="slot">yes / no</span></span>
-        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-warning)"></span>Watch</span>
-      </div>
-      <div class="row-slot">
-        <span><b class="slot">account</b> · renews <span class="slot">DD Mon YYYY</span> · <span class="slot">auto / manual</span> · PO: <span class="slot">yes / no</span></span>
-        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-good)"></span>On track</span>
-      </div>
+      <h4>Upcoming renewals (next 90 days)</h4>
+      <div id="renewalRows"></div>
     </div>
     <div class="chart-slot" style="height:90px;">renewal timeline / waterfall by month</div>
   </section>
@@ -477,23 +444,23 @@
       <h2>KPI Tracker</h2>
       <div class="desc">Core revenue and churn KPIs — MRR and ARR tracked against goal.</div>
     </div>
-    <div class="stub-note">Stub page — outline of what lives here.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all numbers are fictional.</div>
 
     <div class="tile-row">
-      <div class="tile kpi-goal">
+      <div class="tile kpi-goal" id="kpiMrr">
         <span class="label">MRR</span>
         <span class="value">$—</span>
         <div class="goal-bar"><div class="goal-fill"></div></div>
-        <div class="goal-meta"><span>goal $—</span><span class="gap">$— to goal</span></div>
+        <div class="goal-meta"><span class="goal-txt">goal $—</span><span class="gap">$— to goal</span></div>
       </div>
-      <div class="tile kpi-goal">
+      <div class="tile kpi-goal" id="kpiArr">
         <span class="label">ARR</span>
         <span class="value">$—</span>
         <div class="goal-bar"><div class="goal-fill"></div></div>
-        <div class="goal-meta"><span>goal $—</span><span class="gap">$— to goal</span></div>
+        <div class="goal-meta"><span class="goal-txt">goal $—</span><span class="gap">$— to goal</span></div>
       </div>
-      <div class="tile"><span class="label">Logo churn</span><span class="value">— %</span><span class="delta">year to date</span></div>
-      <div class="tile"><span class="label">Accounts churned this year</span><span class="value">—</span><span class="delta">count, YTD</span></div>
+      <div class="tile" id="kpiChurn"><span class="label">Logo churn</span><span class="value">— %</span><span class="delta">year to date</span></div>
+      <div class="tile" id="kpiChurned"><span class="label">Accounts churned this year</span><span class="value">—</span><span class="delta">count, YTD</span></div>
     </div>
   </section>
 
@@ -504,29 +471,18 @@
       <h2>Onboarding</h2>
       <div class="desc">Accounts in onboarding with stage, progress, blockers and target go-live.</div>
     </div>
-    <div class="stub-note">Stub page — outline of what lives here.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
 
     <div class="tile-row">
-      <div class="tile"><span class="label">In progress</span><span class="value">—</span></div>
-      <div class="tile"><span class="label">Blocked</span><span class="value">—</span></div>
-      <div class="tile"><span class="label">Avg days to go-live</span><span class="value">—</span></div>
-      <div class="tile"><span class="label">Go-lives this month</span><span class="value">—</span></div>
+      <div class="tile" id="obTileProgress"><span class="label">In progress</span><span class="value">—</span></div>
+      <div class="tile" id="obTileBlocked"><span class="label">Blocked</span><span class="value">—</span></div>
+      <div class="tile" id="obTileAvg"><span class="label">Avg days to go-live</span><span class="value">—</span></div>
+      <div class="tile" id="obTileGoLives"><span class="label">Go-lives this month</span><span class="value">—</span></div>
     </div>
 
     <div class="card">
       <h4>Onboarding pipeline</h4>
-      <div class="row-slot">
-        <span><b class="slot">account</b> · stage <span class="slot">kickoff / setup / training / validation</span> · go-live <span class="slot">DD Mon</span></span>
-        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-good)"></span>On track</span>
-      </div>
-      <div class="row-slot">
-        <span><b class="slot">account</b> · stage <span class="slot">stage</span> · go-live <span class="slot">DD Mon</span> · blocker: <span class="slot">description</span></span>
-        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-serious)"></span>Blocked</span>
-      </div>
-      <div class="row-slot">
-        <span><b class="slot">account</b> · stage <span class="slot">stage</span> · go-live <span class="slot">DD Mon</span></span>
-        <span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);"><span class="dot" style="background:var(--status-warning)"></span>Delayed</span>
-      </div>
+      <div id="onboardingRows"></div>
     </div>
   </section>
 
@@ -538,41 +494,30 @@
       <div class="desc">Every open task across accounts — from signals, renewals, onboarding and manual entry.</div>
       <button class="btn primary" data-action="Create task" style="margin-left:auto;">＋ Create task</button>
     </div>
-    <div class="stub-note">Stub page — outline of what lives here.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
 
     <div class="tile-row">
-      <div class="tile"><span class="label">Overdue</span><span class="value">—</span></div>
-      <div class="tile"><span class="label">Due today</span><span class="value">—</span></div>
-      <div class="tile"><span class="label">Due this week</span><span class="value">—</span></div>
-      <div class="tile"><span class="label">Completed this week</span><span class="value">—</span></div>
+      <div class="tile" id="tTileOverdue"><span class="label">Overdue</span><span class="value">—</span></div>
+      <div class="tile" id="tTileToday"><span class="label">Due today</span><span class="value">—</span></div>
+      <div class="tile" id="tTileWeek"><span class="label">Due this week</span><span class="value">—</span></div>
+      <div class="tile" id="tTileDone"><span class="label">Completed this week</span><span class="value">—</span></div>
     </div>
 
     <div class="card">
       <h4>Open tasks</h4>
-      <div class="row-slot">
-        <span>☐ <b class="slot">task title</b> · <span class="slot">account</span> · owner <span class="slot">name</span> · <span style="color:var(--status-critical);font-weight:650;">overdue</span> <span class="slot">DD Mon</span></span>
-        <button class="btn" data-action="Complete task">Done</button>
-      </div>
-      <div class="row-slot">
-        <span>☐ <b class="slot">task title</b> · <span class="slot">account</span> · owner <span class="slot">name</span> · due <span class="slot">today</span></span>
-        <button class="btn" data-action="Complete task">Done</button>
-      </div>
-      <div class="row-slot">
-        <span>☐ <b class="slot">task title</b> · <span class="slot">account</span> · owner <span class="slot">name</span> · due <span class="slot">DD Mon</span></span>
-        <button class="btn" data-action="Complete task">Done</button>
-      </div>
+      <div id="taskRows"></div>
     </div>
   </section>
 
   <footer>
-    Welcome / hub template — the six pages are navigation stubs; each can be built out to full depth
-    (Customer Health rows drill into the customer dashboard page already built).
+    Preview build — populated with fictional sample data (see data.js). No real customer information.
   </footer>
 
 </main>
 
 <div id="toast"></div>
 
+<script src="data.js"></script>
 <script>
 (function () {
   "use strict";
@@ -676,6 +621,215 @@
     root.setAttribute("data-theme",
       root.getAttribute("data-theme") === "dark" ? "light" : "dark");
   });
+})();
+</script>
+
+<script>
+/* ============ render dashboard from window.DASHBOARD_DATA ============ */
+(function () {
+  "use strict";
+  var D = window.DASHBOARD_DATA;
+  if (!D) return;
+  var A = D.accounts;
+  var K = D.kpi;
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+
+  /* ---- helpers ---- */
+  function money(n) { return "$" + n.toLocaleString("en-US"); }
+  function moneyK(n) {
+    if (n >= 1e6) return "$" + (n / 1e6).toFixed(2) + "M";
+    if (n >= 1e3) return "$" + Math.round(n / 1e3).toLocaleString("en-US") + "k";
+    return "$" + n;
+  }
+  function fmtDate(iso) {
+    var d = new Date(iso + "T00:00:00");
+    return d.getDate() + " " + d.toLocaleString("en-US", { month: "short" }) + " " + d.getFullYear();
+  }
+  function fmtDateShort(iso) {
+    var d = new Date(iso + "T00:00:00");
+    return d.getDate() + " " + d.toLocaleString("en-US", { month: "short" });
+  }
+  function daysUntil(iso) {
+    return Math.round((new Date(iso + "T00:00:00") - today) / 86400000);
+  }
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function setText(sel, txt) {
+    var el = document.querySelector(sel);
+    if (el) el.textContent = txt;
+  }
+  function setStat(key, txt) { setText('[data-stat="' + key + '"]', txt); }
+  function pill(label, colorVar) {
+    return '<span class="pill" style="background:var(--slot-bg);border:1px solid var(--border);">' +
+      '<span class="dot" style="background:var(--' + colorVar + ')"></span>' + esc(label) + '</span>';
+  }
+  function arr(a) { return a.mrr * 12; }
+  function displayName(a) { return a.name + " (" + a.portal + ")"; }
+
+  /* ---- header / hero ---- */
+  var hour = new Date().getHours();
+  var greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  setText("#heroGreeting", greet + ", " + D.user.firstName);
+  setText("#heroDate", today.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }));
+  setText("#topUser", D.user.displayName);
+
+  /* ---- portfolio summary ---- */
+  setText("#psTotal", A.length);
+  ["Strategic", "Gold", "Silver"].forEach(function (t) {
+    setText('[data-tier-count="' + t + '"]', A.filter(function (a) { return a.tier === t; }).length);
+  });
+
+  /* ---- customer health ---- */
+  var HEALTH = {
+    "at-risk":         { label: "At risk",         color: "status-critical", order: 0 },
+    "needs-attention": { label: "Needs attention", color: "status-warning",  order: 1 },
+    "healthy":         { label: "Healthy",         color: "status-good",     order: 2 }
+  };
+  var healthCounts = { "healthy": 0, "needs-attention": 0, "at-risk": 0 };
+  A.forEach(function (a) { healthCounts[a.health]++; });
+  setStat("healthy", healthCounts["healthy"]);
+  setStat("needs-attention", healthCounts["needs-attention"]);
+  setStat("at-risk", healthCounts["at-risk"]);
+  setText('#page-health [data-health-tile="healthy"] .value', healthCounts["healthy"]);
+  setText('#page-health [data-health-tile="needs-attention"] .value', healthCounts["needs-attention"]);
+  setText('#page-health [data-health-tile="at-risk"] .value', healthCounts["at-risk"]);
+  var avgScore = Math.round(A.reduce(function (s, a) { return s + a.healthScore; }, 0) / A.length);
+  setText('#page-health [data-health-tile="avg"] .value', avgScore);
+  setText('#page-health [data-health-tile="avg"] .delta', K.avgHealthDelta);
+
+  var sorted = A.slice().sort(function (a, b) {
+    var d = HEALTH[a.health].order - HEALTH[b.health].order;
+    return d !== 0 ? d : arr(b) - arr(a);
+  });
+  document.getElementById("healthRows").innerHTML = sorted.map(function (a) {
+    var h = HEALTH[a.health];
+    return '<div class="row-slot" data-health-status="' + a.health + '">' +
+      '<span><b>' + esc(displayName(a)) + '</b> · ' + esc(a.tier) + ' · ' + esc(a.product) +
+      ' · ARR ' + moneyK(arr(a)) + ' · CSM ' + esc(a.csm) + '</span>' +
+      pill(h.label, h.color) + '</div>';
+  }).join("");
+
+  /* ---- opportunities ---- */
+  var pipeline = D.opportunities.reduce(function (s, o) { return s + o.est; }, 0);
+  setStat("oppFlags", D.opportunities.length);
+  setStat("oppValue", moneyK(pipeline));
+  setText("#oppTileFlags .value", D.opportunities.length);
+  setText("#oppTileValue .value", money(pipeline));
+  setText("#oppTileConverted .value", K.convertedThisQuarter);
+  document.getElementById("oppRows").innerHTML = D.opportunities.map(function (o) {
+    return '<div class="row-slot">' +
+      '<span><b>' + esc(o.account) + '</b> — ' + esc(o.desc) + ' · est. ' + money(o.est) + ' ARR</span>' +
+      '<button class="btn" data-action="Create opportunity">＋ Opp</button></div>';
+  }).join("");
+
+  /* ---- renewals ---- */
+  var RISK = {
+    high:  { label: "High risk", color: "status-critical" },
+    watch: { label: "Watch",     color: "status-warning"  },
+    low:   { label: "On track",  color: "status-good"     }
+  };
+  function inWindow(a, days) { var d = daysUntil(a.renewal); return d >= 0 && d <= days; }
+  [30, 60, 90].forEach(function (w) {
+    var hits = A.filter(function (a) { return inWindow(a, w); });
+    var sum = hits.reduce(function (s, a) { return s + arr(a); }, 0);
+    setStat("r" + w, hits.length);
+    setText('[data-renewal-tile="' + w + '"] .value', hits.length);
+    setText('[data-renewal-tile="' + w + '"] .delta', moneyK(sum) + " ARR");
+  });
+  var risky = A.filter(function (a) { return a.churnRisk === "high"; });
+  setText('[data-renewal-tile="risk"] .value', risky.length);
+  setText('[data-renewal-tile="risk"] .delta',
+    moneyK(risky.reduce(function (s, a) { return s + arr(a); }, 0)) + " ARR exposed");
+  var upcoming = A.filter(function (a) { return inWindow(a, 90); })
+    .sort(function (a, b) { return daysUntil(a.renewal) - daysUntil(b.renewal); });
+  document.getElementById("renewalRows").innerHTML = upcoming.length ? upcoming.map(function (a) {
+    var r = RISK[a.churnRisk];
+    return '<div class="row-slot">' +
+      '<span><b>' + esc(displayName(a)) + '</b> · renews ' + fmtDate(a.renewal) +
+      ' · ' + (a.autoRenew ? "auto-renew" : "manual") + ' · PO: ' + (a.requirePO ? "yes" : "no") + '</span>' +
+      pill(r.label, r.color) + '</div>';
+  }).join("") : '<div class="empty-note">No renewals in the next 90 days.</div>';
+
+  /* ---- KPI tracker ---- */
+  var mrr = A.reduce(function (s, a) { return s + a.mrr; }, 0);
+  var arrTotal = mrr * 12;
+  function goalTile(id, value, goal) {
+    var tile = document.getElementById(id);
+    if (!tile) return value >= goal;
+    tile.querySelector(".value").textContent = money(value);
+    tile.querySelector(".goal-fill").style.width = Math.min(100, Math.round(value / goal * 100)) + "%";
+    tile.querySelector(".goal-txt").textContent = "goal " + money(goal);
+    tile.querySelector(".gap").textContent = value >= goal
+      ? "goal reached ✓" : money(goal - value) + " to goal";
+    return value >= goal;
+  }
+  var on = 0, off = 0;
+  goalTile("kpiMrr", mrr, K.mrrGoal) ? on++ : off++;
+  goalTile("kpiArr", arrTotal, K.arrGoal) ? on++ : off++;
+  setText("#kpiChurn .value", K.logoChurnYtd + " %");
+  (K.logoChurnYtd <= K.logoChurnTarget) ? on++ : off++;
+  setText("#kpiChurned .value", K.churnedYtd);
+  (K.churnedYtd <= K.churnedTarget) ? on++ : off++;
+  setStat("kpiOn", on);
+  setStat("kpiOff", off);
+
+  /* ---- onboarding ---- */
+  var OB = {
+    "on-track": { label: "On track", color: "status-good"    },
+    "blocked":  { label: "Blocked",  color: "status-serious" },
+    "delayed":  { label: "Delayed",  color: "status-warning" }
+  };
+  var blocked = D.onboarding.filter(function (o) { return o.status === "blocked"; }).length;
+  var goLivesThisMonth = D.onboarding.filter(function (o) {
+    var d = new Date(o.goLive + "T00:00:00");
+    return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+  }).length;
+  setStat("obProgress", D.onboarding.length);
+  setStat("obBlocked", blocked);
+  setStat("obGoLives", goLivesThisMonth);
+  setText("#obTileProgress .value", D.onboarding.length);
+  setText("#obTileBlocked .value", blocked);
+  setText("#obTileAvg .value", K.onboardingAvgDaysToGoLive);
+  setText("#obTileGoLives .value", goLivesThisMonth);
+  document.getElementById("onboardingRows").innerHTML = D.onboarding.map(function (o) {
+    var s = OB[o.status];
+    return '<div class="row-slot">' +
+      '<span><b>' + esc(o.account) + '</b> · stage ' + esc(o.stage) + ' · go-live ' + fmtDateShort(o.goLive) +
+      (o.blocker ? ' · blocker: ' + esc(o.blocker) : '') + '</span>' +
+      pill(s.label, s.color) + '</div>';
+  }).join("");
+
+  /* ---- tasks ---- */
+  var tOverdue = 0, tToday = 0, tWeek = 0;
+  var taskRows = D.tasks.map(function (t) {
+    var d = daysUntil(t.due), dueTxt;
+    if (d < 0) {
+      tOverdue++;
+      dueTxt = '<span style="color:var(--status-critical);font-weight:650;">overdue</span> ' + fmtDateShort(t.due);
+    } else if (d === 0) {
+      tToday++;
+      dueTxt = 'due <b>today</b>';
+    } else {
+      if (d <= 7) tWeek++;
+      dueTxt = 'due ' + fmtDateShort(t.due);
+    }
+    return '<div class="row-slot">' +
+      '<span>☐ <b>' + esc(t.title) + '</b> · ' + esc(t.account) + ' · owner ' + esc(t.owner) + ' · ' + dueTxt + '</span>' +
+      '<button class="btn" data-action="Complete task">Done</button></div>';
+  });
+  document.getElementById("taskRows").innerHTML = taskRows.join("");
+  setStat("tOverdue", tOverdue);
+  setStat("tToday", tToday);
+  setStat("tWeek", tWeek);
+  setText("#tTileOverdue .value", tOverdue);
+  setText("#tTileToday .value", tToday);
+  setText("#tTileWeek .value", tWeek);
+  setText("#tTileDone .value", K.completedTasksThisWeek);
+  setText("#notifCount", tOverdue + tToday);
+
+  /* re-apply any active health filter now that rows exist */
+  window.dispatchEvent(new Event("hashchange"));
 })();
 </script>
 </body>
