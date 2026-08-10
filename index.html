@@ -498,19 +498,19 @@
 
     <div class="card">
       <div class="table-wrap">
-        <table class="data-table">
+        <table class="data-table" id="oppTable">
           <thead>
             <tr>
-              <th>Opportunity Owner</th>
-              <th>Stage</th>
-              <th>Account Name</th>
-              <th>Opportunity Name</th>
-              <th>Monthly Amount</th>
-              <th>Probability (%)</th>
-              <th>Close Date</th>
-              <th>Created Date</th>
-              <th>Next Step</th>
-              <th>Next Step Update</th>
+              <th class="sortable" data-sort="owner">Opportunity Owner<span class="arrow"></span></th>
+              <th class="sortable" data-sort="stage">Stage<span class="arrow"></span></th>
+              <th class="sortable" data-sort="account">Account Name<span class="arrow"></span></th>
+              <th class="sortable" data-sort="oppName">Opportunity Name<span class="arrow"></span></th>
+              <th class="sortable" data-sort="monthly">Monthly Amount<span class="arrow"></span></th>
+              <th class="sortable" data-sort="probability">Probability (%)<span class="arrow"></span></th>
+              <th class="sortable" data-sort="closeDate">Close Date<span class="arrow"></span></th>
+              <th class="sortable" data-sort="createdDate">Created Date<span class="arrow"></span></th>
+              <th class="sortable" data-sort="nextStep">Next Step<span class="arrow"></span></th>
+              <th class="sortable" data-sort="nextStepUpdate">Next Step Update<span class="arrow"></span></th>
             </tr>
           </thead>
           <tbody id="oppRows"></tbody>
@@ -928,6 +928,12 @@
       return '<option value="' + esc(s) + '"' + (s === current ? ' selected' : '') + '>' + esc(s) + '</option>';
     }).join("");
   }
+  var oppSort = { key: null, dir: 1 };
+  function oppVal(o, k) {
+    if (k === "monthly" || k === "probability") return o[k];
+    if (k === "stage") return OPP_STAGES.indexOf(o.stage);
+    return String(o[k]).toLowerCase();
+  }
   function renderOpps() {
     var stage = oppStageFilter ? oppStageFilter.value : "";
     var from  = oppFromFilter ? oppFromFilter.value : "";
@@ -938,26 +944,45 @@
       if (to && o.closeDate > to) return false;
       return true;
     });
+    if (oppSort.key) {
+      rows.sort(function (a, b) {
+        var va = oppVal(a, oppSort.key), vb = oppVal(b, oppSort.key);
+        return (va < vb ? -1 : va > vb ? 1 : 0) * oppSort.dir;
+      });
+    }
     if (!rows.length) {
       oppBody.innerHTML = '<tr><td colspan="10" class="empty-note">No opportunities match these filters.</td></tr>';
-      return;
+    } else {
+      oppBody.innerHTML = rows.map(function (o) {
+        var i = D.opportunities.indexOf(o);
+        return '<tr>' +
+          '<td>' + esc(o.owner) + '</td>' +
+          '<td><select class="stage-select" data-opp="' + i + '">' + stageOptions(o.stage) + '</select></td>' +
+          '<td><b>' + esc(o.account) + '</b></td>' +
+          '<td>' + esc(o.oppName) + '</td>' +
+          '<td>' + money(o.monthly) + '</td>' +
+          '<td>' + o.probability + '%</td>' +
+          '<td>' + fmtDate(o.closeDate) + '</td>' +
+          '<td>' + fmtDate(o.createdDate) + '</td>' +
+          '<td class="wrap">' + esc(o.nextStep) + '</td>' +
+          '<td>' + fmtDate(o.nextStepUpdate) + '</td>' +
+          '</tr>';
+      }).join("");
     }
-    oppBody.innerHTML = rows.map(function (o) {
-      var i = D.opportunities.indexOf(o);
-      return '<tr>' +
-        '<td>' + esc(o.owner) + '</td>' +
-        '<td><select class="stage-select" data-opp="' + i + '">' + stageOptions(o.stage) + '</select></td>' +
-        '<td><b>' + esc(o.account) + '</b></td>' +
-        '<td>' + esc(o.oppName) + '</td>' +
-        '<td>' + money(o.monthly) + '</td>' +
-        '<td>' + o.probability + '%</td>' +
-        '<td>' + fmtDate(o.closeDate) + '</td>' +
-        '<td>' + fmtDate(o.createdDate) + '</td>' +
-        '<td class="wrap">' + esc(o.nextStep) + '</td>' +
-        '<td>' + fmtDate(o.nextStepUpdate) + '</td>' +
-        '</tr>';
-    }).join("");
+    document.querySelectorAll("#oppTable th.sortable").forEach(function (th) {
+      th.querySelector(".arrow").textContent =
+        th.getAttribute("data-sort") === oppSort.key ? (oppSort.dir === 1 ? "▲" : "▼") : "";
+    });
   }
+
+  document.querySelectorAll("#oppTable th.sortable").forEach(function (th) {
+    th.addEventListener("click", function () {
+      var k = th.getAttribute("data-sort");
+      if (oppSort.key === k) oppSort.dir = -oppSort.dir;
+      else { oppSort.key = k; oppSort.dir = 1; }
+      renderOpps();
+    });
+  });
 
   document.addEventListener("change", function (e) {
     var t = e.target;
