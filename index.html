@@ -260,6 +260,8 @@
     font: inherit; font-size: 12px; padding: 5px 8px; border-radius: 7px;
     border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary);
   }
+  .data-table tfoot .table-total td { border-top: 2px solid var(--baseline); font-weight: 700; padding: 11px 12px; }
+  .data-table tfoot .table-total td:first-child { color: var(--text-secondary); font-weight: 650; text-align: right; }
   .data-table th.sortable { cursor: pointer; user-select: none; }
   .data-table th.sortable:hover { color: var(--accent); }
   .data-table th .arrow { font-size: 9px; margin-left: 4px; display: inline-block; min-width: 9px; }
@@ -481,6 +483,7 @@
       <div class="tile" id="oppTileFlags"><span class="label">Open opportunities</span><span class="value">—</span></div>
       <div class="tile" id="oppTileValue"><span class="label">Est. pipeline value</span><span class="value">$—</span></div>
       <div class="tile" id="oppTileConverted"><span class="label">Won this quarter</span><span class="value">—</span></div>
+      <div class="tile" id="oppTileLost"><span class="label">Lost this quarter</span><span class="value">—</span></div>
     </div>
 
     <div class="filter-bar">
@@ -514,6 +517,13 @@
             </tr>
           </thead>
           <tbody id="oppRows"></tbody>
+          <tfoot>
+            <tr class="table-total">
+              <td colspan="4">Total (monthly)</td>
+              <td id="oppTotal">$—</td>
+              <td colspan="5"></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
@@ -912,6 +922,7 @@
   setText("#oppTileFlags .value", D.opportunities.length);
   setText("#oppTileValue .value", money(pipeline));
   setText("#oppTileConverted .value", K.convertedThisQuarter);
+  setText("#oppTileLost .value", K.lostThisQuarter);
 
   var oppStageFilter = document.getElementById("oppFilterStage");
   var oppFromFilter  = document.getElementById("oppFilterFrom");
@@ -950,6 +961,8 @@
         return (va < vb ? -1 : va > vb ? 1 : 0) * oppSort.dir;
       });
     }
+    var monthlyTotal = rows.reduce(function (s, o) { return s + o.monthly; }, 0);
+    setText("#oppTotal", money(monthlyTotal));
     if (!rows.length) {
       oppBody.innerHTML = '<tr><td colspan="10" class="empty-note">No opportunities match these filters.</td></tr>';
     } else {

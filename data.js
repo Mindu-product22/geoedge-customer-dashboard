@@ -61,6 +61,7 @@ window.DASHBOARD_DATA = {
     churnedYtd: 3,            /* count — target: 5 or fewer */
     churnedTarget: 5,
     convertedThisQuarter: 2,
+    lostThisQuarter: 1,
     completedTasksThisWeek: 4,
     avgHealthDelta: "+2 vs last month",
     onboardingAvgDaysToGoLive: 34
