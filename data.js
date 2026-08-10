@@ -32,11 +32,11 @@ window.DASHBOARD_DATA = {
 
   /* est = annual pipeline value (used for the pipeline tile); monthly = monthly amount */
   opportunities: [
-    { account: "AdNexa",                owner: "Tom Rosen",  stage: "Negotiation", oppName: "APAC team rollout",           monthly: 4000, est: 48000, probability: 70, closeDate: "2026-09-30", createdDate: "2026-06-12", nextStep: "Send updated pricing for APAC seats",     nextStepUpdate: "2026-08-04" },
-    { account: "Daily Chronicle Group", owner: "Dana Katz",  stage: "Proposal",    oppName: "AppHarbr SDK upsell",         monthly: 3000, est: 36000, probability: 55, closeDate: "2026-10-15", createdDate: "2026-07-01", nextStep: "Schedule technical review with ad-ops",  nextStepUpdate: "2026-08-05" },
-    { account: "Velocity Ads",          owner: "Noa Levi",   stage: "Discovery",   oppName: "Video verification module",   monthly: 1500, est: 18000, probability: 40, closeDate: "2026-11-20", createdDate: "2026-07-18", nextStep: "Confirm video inventory volumes",        nextStepUpdate: "2026-08-01" },
-    { account: "Nordpress Media",       owner: "Noa Levi",   stage: "Proposal",    oppName: "SpecHub cross-sell",          monthly: 1000, est: 12000, probability: 50, closeDate: "2026-10-05", createdDate: "2026-06-28", nextStep: "Share SpecHub ROI one-pager",           nextStepUpdate: "2026-07-30" },
-    { account: "Sunrise Media House",   owner: "Maya Stern", stage: "Discovery",   oppName: "RUM impression tier upgrade", monthly: 750,  est: 9000,  probability: 35, closeDate: "2026-12-01", createdDate: "2026-07-22", nextStep: "Review current impression overage",     nextStepUpdate: "2026-08-02" }
+    { account: "AdNexa",                owner: "Tom Rosen",  stage: "Negotiation/Review",    oppName: "APAC team rollout",           monthly: 4000, est: 48000, probability: 70, closeDate: "2026-09-30", createdDate: "2026-06-12", nextStep: "Send updated pricing for APAC seats",     nextStepUpdate: "2026-08-04" },
+    { account: "Daily Chronicle Group", owner: "Dana Katz",  stage: "Commercial Discussion", oppName: "AppHarbr SDK upsell",         monthly: 3000, est: 36000, probability: 55, closeDate: "2026-10-15", createdDate: "2026-07-01", nextStep: "Schedule technical review with ad-ops",  nextStepUpdate: "2026-08-05" },
+    { account: "Velocity Ads",          owner: "Noa Levi",   stage: "Discovery",             oppName: "Video verification module",   monthly: 1500, est: 18000, probability: 40, closeDate: "2026-11-20", createdDate: "2026-07-18", nextStep: "Confirm video inventory volumes",        nextStepUpdate: "2026-08-01" },
+    { account: "Nordpress Media",       owner: "Noa Levi",   stage: "Commercial Discussion", oppName: "SpecHub cross-sell",          monthly: 1000, est: 12000, probability: 50, closeDate: "2026-10-05", createdDate: "2026-06-28", nextStep: "Share SpecHub ROI one-pager",           nextStepUpdate: "2026-07-30" },
+    { account: "Sunrise Media House",   owner: "Maya Stern", stage: "Discovery",             oppName: "RUM impression tier upgrade", monthly: 750,  est: 9000,  probability: 35, closeDate: "2026-12-01", createdDate: "2026-07-22", nextStep: "Review current impression overage",     nextStepUpdate: "2026-08-02" }
   ],
 
   onboarding: [

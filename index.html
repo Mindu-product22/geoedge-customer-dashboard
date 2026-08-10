@@ -214,6 +214,22 @@
   .data-table tr:last-child td { border-bottom: none; }
   .admin-link { color: var(--accent); font-weight: 600; text-decoration: none; cursor: pointer; }
   .admin-link:hover { text-decoration: underline; }
+
+  /* filter bar + editable stage select (opportunities) */
+  .filter-bar { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 14px; }
+  .filter-bar label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 650; color: var(--text-secondary); }
+  .filter-bar select, .filter-bar input[type="date"] {
+    font: inherit; font-size: 12.5px; padding: 6px 10px;
+    border: 1px solid var(--border); border-radius: 7px;
+    background: var(--surface-1); color: var(--text-primary); min-width: 150px;
+  }
+  .filter-bar .btn { padding: 7px 12px; }
+  .stage-select {
+    font: inherit; font-size: 12px; padding: 4px 7px; max-width: 190px;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: var(--surface-1); color: var(--text-primary); cursor: pointer;
+  }
+  .stage-select:hover { border-color: var(--accent); }
   .pill {
     font-size: 10.5px; font-weight: 650; border-radius: 999px; padding: 2px 9px;
     display: inline-flex; align-items: center; gap: 5px;
@@ -427,6 +443,19 @@
       <div class="tile" id="oppTileFlags"><span class="label">Open opportunities</span><span class="value">—</span></div>
       <div class="tile" id="oppTileValue"><span class="label">Est. pipeline value</span><span class="value">$—</span></div>
       <div class="tile" id="oppTileConverted"><span class="label">Won this quarter</span><span class="value">—</span></div>
+    </div>
+
+    <div class="filter-bar">
+      <label>Stage
+        <select id="oppFilterStage"></select>
+      </label>
+      <label>Close date from
+        <input type="date" id="oppFilterFrom">
+      </label>
+      <label>Close date to
+        <input type="date" id="oppFilterTo">
+      </label>
+      <button class="btn" id="oppFilterClear" type="button">Clear filters</button>
     </div>
 
     <div class="card">
@@ -779,26 +808,79 @@
   }).join("");
 
   /* ---- opportunities ---- */
+  var OPP_STAGES = ["Discovery", "Demo", "Trial", "Commercial Discussion",
+    "Negotiation/Review", "Closed Won", "Closed Lost", "Nurture", "Not Qualified"];
   var pipeline = D.opportunities.reduce(function (s, o) { return s + o.est; }, 0);
   setStat("oppFlags", D.opportunities.length);
   setStat("oppValue", moneyK(pipeline));
   setText("#oppTileFlags .value", D.opportunities.length);
   setText("#oppTileValue .value", money(pipeline));
   setText("#oppTileConverted .value", K.convertedThisQuarter);
-  document.getElementById("oppRows").innerHTML = D.opportunities.map(function (o) {
-    return '<tr>' +
-      '<td>' + esc(o.owner) + '</td>' +
-      '<td>' + esc(o.stage) + '</td>' +
-      '<td><b>' + esc(o.account) + '</b></td>' +
-      '<td>' + esc(o.oppName) + '</td>' +
-      '<td>' + money(o.monthly) + '</td>' +
-      '<td>' + o.probability + '%</td>' +
-      '<td>' + fmtDate(o.closeDate) + '</td>' +
-      '<td>' + fmtDate(o.createdDate) + '</td>' +
-      '<td class="wrap">' + esc(o.nextStep) + '</td>' +
-      '<td>' + fmtDate(o.nextStepUpdate) + '</td>' +
-      '</tr>';
-  }).join("");
+
+  var oppStageFilter = document.getElementById("oppFilterStage");
+  var oppFromFilter  = document.getElementById("oppFilterFrom");
+  var oppToFilter    = document.getElementById("oppFilterTo");
+  var oppClearBtn    = document.getElementById("oppFilterClear");
+  var oppBody        = document.getElementById("oppRows");
+
+  if (oppStageFilter) {
+    oppStageFilter.innerHTML = '<option value="">All stages</option>' +
+      OPP_STAGES.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join("");
+  }
+  function stageOptions(current) {
+    return OPP_STAGES.map(function (s) {
+      return '<option value="' + esc(s) + '"' + (s === current ? ' selected' : '') + '>' + esc(s) + '</option>';
+    }).join("");
+  }
+  function renderOpps() {
+    var stage = oppStageFilter ? oppStageFilter.value : "";
+    var from  = oppFromFilter ? oppFromFilter.value : "";
+    var to    = oppToFilter ? oppToFilter.value : "";
+    var rows = D.opportunities.filter(function (o) {
+      if (stage && o.stage !== stage) return false;
+      if (from && o.closeDate < from) return false;
+      if (to && o.closeDate > to) return false;
+      return true;
+    });
+    if (!rows.length) {
+      oppBody.innerHTML = '<tr><td colspan="10" class="empty-note">No opportunities match these filters.</td></tr>';
+      return;
+    }
+    oppBody.innerHTML = rows.map(function (o) {
+      var i = D.opportunities.indexOf(o);
+      return '<tr>' +
+        '<td>' + esc(o.owner) + '</td>' +
+        '<td><select class="stage-select" data-opp="' + i + '">' + stageOptions(o.stage) + '</select></td>' +
+        '<td><b>' + esc(o.account) + '</b></td>' +
+        '<td>' + esc(o.oppName) + '</td>' +
+        '<td>' + money(o.monthly) + '</td>' +
+        '<td>' + o.probability + '%</td>' +
+        '<td>' + fmtDate(o.closeDate) + '</td>' +
+        '<td>' + fmtDate(o.createdDate) + '</td>' +
+        '<td class="wrap">' + esc(o.nextStep) + '</td>' +
+        '<td>' + fmtDate(o.nextStepUpdate) + '</td>' +
+        '</tr>';
+    }).join("");
+  }
+
+  document.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t && t.classList && t.classList.contains("stage-select")) {
+      var i = +t.getAttribute("data-opp");
+      if (D.opportunities[i]) { D.opportunities[i].stage = t.value; renderOpps(); }
+      return;
+    }
+    if (t === oppStageFilter || t === oppFromFilter || t === oppToFilter) renderOpps();
+  });
+  if (oppClearBtn) {
+    oppClearBtn.addEventListener("click", function () {
+      if (oppStageFilter) oppStageFilter.value = "";
+      if (oppFromFilter) oppFromFilter.value = "";
+      if (oppToFilter) oppToFilter.value = "";
+      renderOpps();
+    });
+  }
+  renderOpps();
 
   /* ---- renewals ---- */
   var RISK = {
