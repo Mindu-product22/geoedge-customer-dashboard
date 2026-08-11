@@ -54,6 +54,232 @@ window.DASHBOARD_DATA = {
     { title: "Share July block-rate report",     account: "Nordpress Media",     owner: "Dana Katz",  due: "2026-08-14" }
   ],
 
+  /* per-client detail (keyed by portal) — health breakdown dims average to the
+     account's healthScore; contacts/tickets/news are fictional like everything else */
+  clientDetails: {
+    "adnexa.verif": {
+      healthBreakdown: { "Usage & adoption": 85, "Engagement": 80, "Support health": 70, "Sentiment": 77 },
+      contacts: [
+        { name: "Sarah Mitchell", title: "VP Ad Operations", location: "New York, USA", tz: "ET (UTC-5)" },
+        { name: "Kevin Zhao", title: "Programmatic Lead", location: "New York, USA", tz: "ET (UTC-5)" },
+        { name: "Rina Patel", title: "Procurement Manager", location: "Jersey City, USA", tz: "ET (UTC-5)" }
+      ],
+      tickets: [
+        { id: "GE-4812", title: "Discrepancy in blocked-impression counts vs internal logs", status: "Open", priority: "Medium", opened: "2026-07-29" }
+      ],
+      news: [
+        { date: "2026-08-01", title: "AdNexa Q2 revenue up 18% YoY" },
+        { date: "2026-07-15", title: "AdNexa launches CTV marketplace expansion in APAC" }
+      ],
+      contractNotes: "PO required each term — procurement lead time ~3 weeks. SLA addendum on discrepancy reporting signed last renewal. 60-day out clause.",
+      recentActivity: "QBR prep underway for 8 Sep. Steady product usage; two pricing calls in July about APAC seats. Last exec touch 22 Jul."
+    },
+    "bidcore.verif": {
+      healthBreakdown: { "Usage & adoption": 92, "Engagement": 90, "Support health": 82, "Sentiment": 88 },
+      contacts: [
+        { name: "Lukas Weber", title: "Head of Supply Quality", location: "Berlin, Germany", tz: "CET (UTC+1)" },
+        { name: "Anja Fischer", title: "Ad Ops Manager", location: "Berlin, Germany", tz: "CET (UTC+1)" }
+      ],
+      tickets: [],
+      news: [
+        { date: "2026-06-20", title: "BidCore named among fastest-growing EU SSPs" }
+      ],
+      contractNotes: "Auto-renews annually on 1 Apr. Multi-year discussion open — their legal prefers 1-year + auto. No PO.",
+      recentActivity: "Healthy cadence with monthly syncs. Champion demoed our reporting to their exec team in July."
+    },
+    "chronicle.rum": {
+      healthBreakdown: { "Usage & adoption": 88, "Engagement": 78, "Support health": 79, "Sentiment": 83 },
+      contacts: [
+        { name: "James Porter", title: "Director of Ad Revenue", location: "Chicago, USA", tz: "CT (UTC-6)" },
+        { name: "Maria Gonzalez", title: "Head of Programmatic", location: "Chicago, USA", tz: "CT (UTC-6)" },
+        { name: "Tom Wills", title: "Ad Ops Analyst", location: "Austin, USA", tz: "CT (UTC-6)" }
+      ],
+      tickets: [
+        { id: "GE-4790", title: "False-positive block on house creative", status: "Open", priority: "Low", opened: "2026-08-03" }
+      ],
+      news: [
+        { date: "2026-07-22", title: "Daily Chronicle Group acquires two regional news sites" }
+      ],
+      contractNotes: "Auto-renew, no PO. Rate locked through Feb 2027; AppHarbr SDK upsell must go on a separate order form.",
+      recentActivity: "Expanded RUM to two new sites in June; AppHarbr demo scheduled for the Dec bundle discussion."
+    },
+    "advantage.rum": {
+      healthBreakdown: { "Usage & adoption": 80, "Engagement": 74, "Support health": 68, "Sentiment": 78 },
+      contacts: [
+        { name: "Emily Chen", title: "VP Marketplace Operations", location: "Austin, USA", tz: "CT (UTC-6)" },
+        { name: "Derek Johnson", title: "Exchange QA Lead", location: "Austin, USA", tz: "CT (UTC-6)" }
+      ],
+      tickets: [
+        { id: "GE-4801", title: "Slow dashboard load on large date ranges", status: "Open", priority: "Low", opened: "2026-07-25" }
+      ],
+      news: [
+        { date: "2026-07-30", title: "AdVantage Exchange partners with major CTV platform" }
+      ],
+      contractNotes: "Auto-renew 1 Dec. Usage running ~20% above tier — upgrade conversation recommended before renewal.",
+      recentActivity: "Usage growth continues; champion reconfirmed auto-renew at the Q2 check-in."
+    },
+    "nordpress.rum": {
+      healthBreakdown: { "Usage & adoption": 86, "Engagement": 88, "Support health": 78, "Sentiment": 84 },
+      contacts: [
+        { name: "Mats Lindqvist", title: "Programmatic Director", location: "Stockholm, Sweden", tz: "CET (UTC+1)" },
+        { name: "Elin Berg", title: "Ad Quality Analyst", location: "Stockholm, Sweden", tz: "CET (UTC+1)" }
+      ],
+      tickets: [],
+      news: [
+        { date: "2026-06-12", title: "Nordpress Media wins Nordic digital publishing award" }
+      ],
+      contractNotes: "Auto-renew 10 Jan. SpecHub to be quoted as an add-on module; champion wants a single combined invoice.",
+      recentActivity: "Strong block-rate results shared with their leadership; SpecHub demo booked for Nov."
+    },
+    "mobireach.verif": {
+      healthBreakdown: { "Usage & adoption": 62, "Engagement": 50, "Support health": 55, "Sentiment": 65 },
+      contacts: [
+        { name: "Priya Nair", title: "Head of Ad Operations", location: "Singapore", tz: "SGT (UTC+8)" },
+        { name: "Marcus Lim", title: "SDK Engineer", location: "Singapore", tz: "SGT (UTC+8)" }
+      ],
+      tickets: [
+        { id: "GE-4756", title: "Alert noise — tuning thresholds for video campaigns", status: "Open", priority: "High", opened: "2026-07-08" },
+        { id: "GE-4788", title: "API rate limits hit during reporting pulls", status: "In progress", priority: "Medium", opened: "2026-07-27" }
+      ],
+      news: [
+        { date: "2026-07-05", title: "MobiReach expands into Indonesian market" }
+      ],
+      contractNotes: "Renews 28 Aug. Last cycle's 10% annual-prepay discount expires; champion expects the same terms again.",
+      recentActivity: "Escalation on alert noise in July; exec call scheduled this week. Renewal at watch until complaints are resolved."
+    },
+    "streamcast.rum": {
+      healthBreakdown: { "Usage & adoption": 40, "Engagement": 42, "Support health": 48, "Sentiment": 50 },
+      contacts: [
+        { name: "Kenji Watanabe", title: "Head of Digital Revenue", location: "Tokyo, Japan", tz: "JST (UTC+9)" },
+        { name: "Yuki Tanaka", title: "Ad Tech Manager", location: "Tokyo, Japan", tz: "JST (UTC+9)" }
+      ],
+      tickets: [
+        { id: "GE-4699", title: "Integration errors after player migration", status: "In progress", priority: "High", opened: "2026-06-14" },
+        { id: "GE-4771", title: "Latency reports on video verification", status: "Open", priority: "Medium", opened: "2026-07-19" }
+      ],
+      news: [
+        { date: "2026-07-28", title: "StreamCast TV announces streaming platform relaunch" }
+      ],
+      contractNotes: "Manual renewal 20 Oct — no auto-renew clause. SLA credits offered as save-play; discounts past 15% need VP sign-off.",
+      recentActivity: "Save plan active with weekly check-ins since June. Usage down 30% after player migration; exec sponsor engaged 1 Aug."
+    },
+    "pixelbridge.verif": {
+      healthBreakdown: { "Usage & adoption": 84, "Engagement": 78, "Support health": 76, "Sentiment": 82 },
+      contacts: [
+        { name: "David Alvarez", title: "Director of Ad Quality", location: "San Francisco, USA", tz: "PT (UTC-8)" },
+        { name: "Lauren Kim", title: "Procurement Specialist", location: "San Francisco, USA", tz: "PT (UTC-8)" }
+      ],
+      tickets: [],
+      news: [
+        { date: "2026-07-10", title: "PixelBridge launches in-app ad quality program" }
+      ],
+      contractNotes: "PO required — last year's PO arrived late and nearly lapsed service. Start the PO chase 4+ weeks early; procurement contact changed.",
+      recentActivity: "Steady usage; verifying the new procurement contact. AppHarbr SDK adoption ramping well."
+    },
+    "velocity.rum": {
+      healthBreakdown: { "Usage & adoption": 70, "Engagement": 52, "Support health": 66, "Sentiment": 68 },
+      contacts: [
+        { name: "Omer Shalev", title: "VP Ad Platform", location: "Tel Aviv, Israel", tz: "IST (UTC+2)" },
+        { name: "Dana Mizrahi", title: "Ad Ops Lead", location: "Tel Aviv, Israel", tz: "IST (UTC+2)" }
+      ],
+      tickets: [
+        { id: "GE-4805", title: "Question on video verification coverage", status: "Open", priority: "Low", opened: "2026-08-02" }
+      ],
+      news: [
+        { date: "2026-07-12", title: "Velocity Ads hires new CRO from major SSP" }
+      ],
+      contractNotes: "Auto-renew Mar 2027. Previous sponsor left the company — the new CRO has not yet engaged with us.",
+      recentActivity: "Engagement dropped since the sponsor change in March; video-verification pilot proposed to rebuild momentum."
+    },
+    "sunrise.rum": {
+      healthBreakdown: { "Usage & adoption": 85, "Engagement": 80, "Support health": 76, "Sentiment": 83 },
+      contacts: [
+        { name: "Grace Tan", title: "Head of Ad Operations", location: "Sydney, Australia", tz: "AEST (UTC+10)" },
+        { name: "Oliver Reed", title: "Programmatic Analyst", location: "Sydney, Australia", tz: "AEST (UTC+10)" }
+      ],
+      tickets: [],
+      news: [
+        { date: "2026-06-30", title: "Sunrise Media House reports record digital audience" }
+      ],
+      contractNotes: "Auto-renew May 2027. Overage discussions resolved — price the impression-tier upgrade into the renewal.",
+      recentActivity: "Healthy cadence with quarterly reviews. Tier-upgrade opportunity flagged for the renewal window."
+    },
+    "sparkmedia.verif": {
+      healthBreakdown: { "Usage & adoption": 65, "Engagement": 78, "Support health": 72, "Sentiment": 73 },
+      contacts: [
+        { name: "Liam O'Brien", title: "Ad Operations Director", location: "Dublin, Ireland", tz: "GMT (UTC+0)" },
+        { name: "Aoife Kelly", title: "Integration Engineer", location: "Dublin, Ireland", tz: "GMT (UTC+0)" }
+      ],
+      tickets: [
+        { id: "GE-4809", title: "Onboarding: tag configuration for secondary domain", status: "In progress", priority: "Medium", opened: "2026-08-05" }
+      ],
+      news: [
+        { date: "2026-07-18", title: "Spark Media Group merges EU sales houses" }
+      ],
+      contractNotes: "First term ends Jun 2027. Standard terms, no PO. Onboarding milestones are written into the order form.",
+      recentActivity: "Onboarding in setup stage, go-live 28 Aug on track. Monthly adoption reviews planned post-launch."
+    },
+    "quantumads.verif": {
+      healthBreakdown: { "Usage & adoption": 58, "Engagement": 70, "Support health": 62, "Sentiment": 74 },
+      contacts: [
+        { name: "Ji-woo Park", title: "Platform Operations Lead", location: "Seoul, South Korea", tz: "KST (UTC+9)" },
+        { name: "Min-seo Choi", title: "Ad Quality Engineer", location: "Seoul, South Korea", tz: "KST (UTC+9)" }
+      ],
+      tickets: [
+        { id: "GE-4795", title: "Tag deployment blocked by CSP policy", status: "Open", priority: "High", opened: "2026-07-22" }
+      ],
+      news: [
+        { date: "2026-06-25", title: "Quantum Ads Network raises Series B" }
+      ],
+      contractNotes: "First renewal Jul 2027. Success metrics to be agreed during onboarding; no commercial nuances yet.",
+      recentActivity: "Onboarding blocked on tag deployment (their CSP policy). Engineering call held 5 Aug; fix lands in their next release."
+    },
+    "playgrid.rum": {
+      healthBreakdown: { "Usage & adoption": 78, "Engagement": 72, "Support health": 80, "Sentiment": 78 },
+      contacts: [
+        { name: "Sofia Rossi", title: "Head of Ad Monetization", location: "Milan, Italy", tz: "CET (UTC+1)" }
+      ],
+      tickets: [],
+      news: [
+        { date: "2026-07-08", title: "PlayGrid Media adds three casual-gaming portals" }
+      ],
+      contractNotes: "Auto-renew Feb 2027. Low-touch tier; email-first support plan.",
+      recentActivity: "Quiet, stable account. Quarterly usage review completed in July — no changes."
+    },
+    "trafficlane.verif": {
+      healthBreakdown: { "Usage & adoption": 35, "Engagement": 30, "Support health": 40, "Sentiment": 47 },
+      contacts: [
+        { name: "Tomas Novak", title: "Ad Operations Manager", location: "Prague, Czechia", tz: "CET (UTC+1)" },
+        { name: "Petra Svobodova", title: "Finance Manager", location: "Prague, Czechia", tz: "CET (UTC+1)" }
+      ],
+      tickets: [
+        { id: "GE-4692", title: "Recurring false positives on native creatives", status: "Open", priority: "High", opened: "2026-06-10" },
+        { id: "GE-4760", title: "Portal login issues for sub-users", status: "In progress", priority: "Medium", opened: "2026-07-12" },
+        { id: "GE-4802", title: "Billing query — scan overage line item", status: "Open", priority: "Low", opened: "2026-07-31" }
+      ],
+      news: [
+        { date: "2026-07-20", title: "TrafficLane downsizes EU operations" }
+      ],
+      contractNotes: "Manual renewal 4 Sep — decision call 20 Aug. Downgraded from Gold last cycle. 15% save offer approved by management.",
+      recentActivity: "Support tickets doubled since spring; save proposal sent 28 Jul. Decision call booked for 20 Aug."
+    },
+    "metronews.rum": {
+      healthBreakdown: { "Usage & adoption": 66, "Engagement": 58, "Support health": 55, "Sentiment": 65 },
+      contacts: [
+        { name: "Claire Dubois", title: "Directrice Ad Ops", location: "Paris, France", tz: "CET (UTC+1)" },
+        { name: "Hugo Martin", title: "Ad Quality Analyst", location: "Paris, France", tz: "CET (UTC+1)" }
+      ],
+      tickets: [
+        { id: "GE-4778", title: "Block-rate spike investigation on sports section", status: "In progress", priority: "Medium", opened: "2026-07-21" }
+      ],
+      news: [
+        { date: "2026-07-25", title: "MetroNews Digital launches paid newsletter tier" }
+      ],
+      contractNotes: "Auto-renew 2 Oct. Two escalations since March on record; confirm the renewal stands at the Sep health check.",
+      recentActivity: "Block-rate complaints under investigation; Sep health check scheduled. Auto-renew expected to stand."
+    }
+  },
+
   kpi: {
     mrrGoal: 125000,
     arrGoal: 1500000,

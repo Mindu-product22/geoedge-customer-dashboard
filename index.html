@@ -303,6 +303,25 @@
   .chart-tooltip .tt-val { font-weight: 650; color: var(--text-primary); margin-left: auto; padding-left: 12px; font-variant-numeric: tabular-nums; }
   .chart-tooltip .tt-total { border-top: 1px solid var(--grid); margin-top: 5px; padding-top: 4px; }
 
+  /* ============ client detail page ============ */
+  .client-link { color: var(--accent); font-weight: 650; text-decoration: none; cursor: pointer; }
+  .client-link:hover { text-decoration: underline; }
+  .qa-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 16px; }
+  .client-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; align-items: start; }
+  .client-grid .card { margin-bottom: 0; }
+  .client-grid .card.span2 { grid-column: 1 / -1; }
+  .hb-overall { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+  .hb-overall .score { font-size: 30px; font-weight: 750; line-height: 1; }
+  .hb-overall .of { font-size: 12px; color: var(--text-muted); }
+  .hb-row { margin-top: 9px; }
+  .hb-row .hb-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
+  .hb-row .hb-label b { color: var(--text-primary); font-weight: 650; }
+  .kv-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--grid); font-size: 12.5px; }
+  .kv-row:last-child { border-bottom: none; }
+  .kv-row .k { color: var(--text-secondary); }
+  .kv-row .v { font-weight: 650; text-align: right; }
+  .detail-note { font-size: 12.5px; color: var(--text-secondary); line-height: 1.55; }
+
   #toast {
     position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
     background: var(--text-primary); color: var(--page);
@@ -326,7 +345,7 @@
   </div>
   <nav class="crumb" id="crumb"><a data-nav="home">Home</a> <span>›</span> <span id="crumbHere"></span></nav>
   <div class="top-actions">
-    <div class="search-slot">search accounts, tasks, contacts…</div>
+    <div class="search-slot">search clients, tasks, contacts…</div>
     <button class="btn" data-action="Notifications">🔔 <span id="notifCount">0</span></button>
     <button class="btn" id="themeToggle" title="Toggle light/dark">◐</button>
     <span id="topUser" style="font-size:12px;color:var(--text-secondary);"></span>
@@ -342,10 +361,10 @@
       <p>Here's what needs your attention today, <span id="heroDate"></span>.</p>
     </div>
 
-    <button class="portfolio-summary" data-nav="customers" title="View the full customer list">
+    <button class="portfolio-summary" data-nav="customers" title="View the full client list">
       <div class="ps-total">
         <span class="num" id="psTotal">—</span>
-        <span class="label">total customers</span>
+        <span class="label">total clients</span>
       </div>
       <div class="ps-tiers">
         <div class="ps-tier"><span class="dot" style="background:var(--status-critical)"></span><span class="num" data-tier-count="Strategic">—</span><span class="label">Strategic</span></div>
@@ -360,16 +379,16 @@
         <div class="nav-head">
           <div class="nav-icon">♥</div>
           <div>
-            <h3>Customer Health</h3>
-            <div class="desc">Portfolio health scores, at-risk accounts, drill into any customer</div>
+            <h3>Client Health</h3>
+            <div class="desc">Portfolio health scores, at-risk clients, drill into any client</div>
           </div>
         </div>
         <div class="nav-stats">
           <span class="mini"><b data-stat="healthy">—</b>healthy</span>
           <span class="mini"><b data-stat="needs-attention">—</b>needs attention</span>
-          <span class="mini mini-link" data-nav="health" data-filter="at-risk" role="link" tabindex="0" title="View only at-risk accounts"><b data-stat="at-risk">—</b>at risk</span>
+          <span class="mini mini-link" data-nav="health" data-filter="at-risk" role="link" tabindex="0" title="View only at-risk clients"><b data-stat="at-risk">—</b>at risk</span>
         </div>
-        <span class="nav-cta">Open Customer Health →</span>
+        <span class="nav-cta">Open Client Health →</span>
       </button>
 
       <button class="nav-card" data-nav="opportunities">
@@ -423,7 +442,7 @@
           <div class="nav-icon">➤</div>
           <div>
             <h3>Onboarding</h3>
-            <div class="desc">Accounts in onboarding, stage progress, blockers and go-live dates</div>
+            <div class="desc">Clients in onboarding, stage progress, blockers and go-live dates</div>
           </div>
         </div>
         <div class="nav-stats">
@@ -439,7 +458,7 @@
           <div class="nav-icon">☑</div>
           <div>
             <h3>Tasks</h3>
-            <div class="desc">Everything owed across accounts — by due date, owner and source</div>
+            <div class="desc">Everything owed across clients — by due date, owner and source</div>
           </div>
         </div>
         <div class="nav-stats">
@@ -457,10 +476,10 @@
   <section class="page" id="page-health">
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
-      <h2>Customer Health</h2>
-      <div class="desc">Portfolio view — each row drills into the customer dashboard (the deep-dive page already built).</div>
+      <h2>Client Health</h2>
+      <div class="desc">Portfolio view — click any client to open their full client page.</div>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" data-health-tile="healthy"><span class="label">Healthy</span><span class="value">—</span></div>
@@ -471,11 +490,11 @@
 
     <div class="card">
       <div class="card-head-row">
-        <h4 id="healthCardTitle">Accounts by health<span class="filter-chip" id="healthFilterChip" style="display:none;"></span></h4>
-        <a class="filter-clear" id="healthClearFilter" data-nav="health" style="display:none;">Show all accounts ✕</a>
+        <h4 id="healthCardTitle">Clients by health<span class="filter-chip" id="healthFilterChip" style="display:none;"></span></h4>
+        <a class="filter-clear" id="healthClearFilter" data-nav="health" style="display:none;">Show all clients ✕</a>
       </div>
       <div id="healthRows"></div>
-      <div class="empty-note" id="healthEmptyNote" style="display:none;">No accounts match this filter.</div>
+      <div class="empty-note" id="healthEmptyNote" style="display:none;">No clients match this filter.</div>
     </div>
     <div class="chart-slot" style="height:90px;">health-score distribution / trend chart</div>
   </section>
@@ -487,7 +506,7 @@
       <h2>Opportunities</h2>
       <div class="desc">All open opportunities — owner, stage, amount, probability, close date and next steps.</div>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" id="oppTileFlags"><span class="label">Open opportunities</span><span class="value">—</span></div>
@@ -516,7 +535,7 @@
             <tr>
               <th class="sortable" data-sort="owner">Opportunity Owner<span class="arrow"></span></th>
               <th class="sortable" data-sort="stage">Stage<span class="arrow"></span></th>
-              <th class="sortable" data-sort="account">Account Name<span class="arrow"></span></th>
+              <th class="sortable" data-sort="account">Client Name<span class="arrow"></span></th>
               <th class="sortable" data-sort="oppName">Opportunity Name<span class="arrow"></span></th>
               <th class="sortable" data-sort="monthly">Monthly Amount<span class="arrow"></span></th>
               <th class="sortable" data-sort="probability">Probability (%)<span class="arrow"></span></th>
@@ -546,7 +565,7 @@
       <h2>Renewals</h2>
       <div class="desc">Every renewal by window with readiness: auto-renew, PO required, churn risk.</div>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" data-renewal-tile="30" role="button" tabindex="0" title="Show only these renewals in the table"><span class="label">Next 30 days</span><span class="value">—</span><span class="delta">$— ARR</span></div>
@@ -643,7 +662,7 @@
         <div class="goal-meta"><span class="goal-txt">goal $—</span><span class="gap">$— to goal</span></div>
       </div>
       <div class="tile" id="kpiChurn"><span class="label">Logo churn</span><span class="value">— %</span><span class="delta">year to date</span></div>
-      <div class="tile" id="kpiChurned"><span class="label">Accounts churned this year</span><span class="value">—</span><span class="delta">count, YTD</span></div>
+      <div class="tile" id="kpiChurned"><span class="label">Clients churned this year</span><span class="value">—</span><span class="delta">count, YTD</span></div>
     </div>
   </section>
 
@@ -652,9 +671,9 @@
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
       <h2>Onboarding</h2>
-      <div class="desc">Accounts in onboarding with stage, progress, blockers and target go-live.</div>
+      <div class="desc">Clients in onboarding with stage, progress, blockers and target go-live.</div>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" id="obTileProgress"><span class="label">In progress</span><span class="value">—</span></div>
@@ -674,10 +693,10 @@
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
       <h2>Tasks</h2>
-      <div class="desc">Every open task across accounts — from signals, renewals, onboarding and manual entry.</div>
+      <div class="desc">Every open task across clients — from signals, renewals, onboarding and manual entry.</div>
       <button class="btn primary" data-action="Create task" style="margin-left:auto;">＋ Create task</button>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" id="tTileOverdue"><span class="label">Overdue</span><span class="value">—</span></div>
@@ -696,23 +715,23 @@
   <section class="page" id="page-customers">
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
-      <h2>Customers</h2>
-      <div class="desc">All paying customers with commercials, renewal timing and quick links.</div>
+      <h2>Clients</h2>
+      <div class="desc">All paying clients with commercials, renewal timing and quick links.</div>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all accounts and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
 
     <div class="card">
       <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Customer name</th>
+              <th>Client Name</th>
               <th>MRR</th>
               <th>CPM</th>
-              <th>Price per scan</th>
-              <th>Package size</th>
+              <th>Price Per Scan</th>
+              <th>Package Size</th>
               <th>Products</th>
-              <th>Renewal date</th>
+              <th>Renewal Date</th>
               <th>Contact</th>
               <th>Location</th>
             </tr>
@@ -723,8 +742,27 @@
     </div>
   </section>
 
+  <!-- ================= CLIENT DETAIL ================= -->
+  <section class="page" id="page-client">
+    <div class="page-head">
+      <button class="btn" data-nav="customers">← Clients</button>
+      <h2 id="clientTitle">Client</h2>
+      <div class="desc" id="clientSubtitle"></div>
+    </div>
+    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
+
+    <div class="qa-row">
+      <button class="btn primary" data-action="Make QBR">📊 Make QBR</button>
+      <button class="btn" data-action="Make PDF">📄 Make PDF</button>
+      <button class="btn" data-action="Log Call">📞 Log Call</button>
+      <button class="btn" data-action="Run Deep Dive">🔎 Run Deep Dive</button>
+    </div>
+
+    <div id="clientBody"></div>
+  </section>
+
   <footer>
-    Preview build — populated with fictional sample data (see data.js). No real customer information.
+    Preview build — populated with fictional sample data (see data.js). No real client information.
   </footer>
 
 </main>
@@ -738,13 +776,14 @@
 
   var pageNames = {
     home: "Home",
-    health: "Customer Health",
+    health: "Client Health",
     opportunities: "Opportunities",
     renewals: "Renewals",
     kpi: "KPI Tracker",
     onboarding: "Onboarding",
     tasks: "Tasks",
-    customers: "Customers"
+    customers: "Clients",
+    client: "Client"
   };
 
   var crumb = document.getElementById("crumb");
@@ -882,6 +921,17 @@
   function arr(a) { return a.mrr * 12; }
   function displayName(a) { return a.name + " (" + a.portal + ")"; }
 
+  /* client links — every client name opens the client detail page */
+  var byName = {};
+  A.forEach(function (a) { byName[a.name] = a; });
+  function clientLink(a, label) {
+    return '<a class="client-link" href="#client/' + encodeURIComponent(a.portal) + '">' + esc(label || displayName(a)) + '</a>';
+  }
+  function nameLink(name) {
+    var a = byName[name];
+    return a ? clientLink(a, name) : esc(name);
+  }
+
   /* ---- header / hero ---- */
   var hour = new Date().getHours();
   var greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
@@ -920,7 +970,7 @@
   document.getElementById("healthRows").innerHTML = sorted.map(function (a) {
     var h = HEALTH[a.health];
     return '<div class="row-slot" data-health-status="' + a.health + '">' +
-      '<span><b>' + esc(displayName(a)) + '</b> · ' + esc(a.tier) + ' · ' + esc(a.product) +
+      '<span>' + clientLink(a) + ' · ' + esc(a.tier) + ' · ' + esc(a.product) +
       ' · ARR ' + moneyK(arr(a)) + ' · CSM ' + esc(a.csm) + '</span>' +
       pill(h.label, h.color) + '</div>';
   }).join("");
@@ -983,7 +1033,7 @@
         return '<tr>' +
           '<td>' + esc(o.owner) + '</td>' +
           '<td><select class="stage-select" data-opp="' + i + '">' + stageOptions(o.stage) + '</select></td>' +
-          '<td><b>' + esc(o.account) + '</b></td>' +
+          '<td>' + nameLink(o.account) + '</td>' +
           '<td>' + esc(o.oppName) + '</td>' +
           '<td>' + money(o.monthly) + '</td>' +
           '<td>' + o.probability + '%</td>' +
@@ -1078,7 +1128,7 @@
     tbody.innerHTML = rows.map(function (a) {
       var r = RISK[a.churnRisk];
       return "<tr>" +
-        "<td><b>" + esc(displayName(a)) + "</b></td>" +
+        "<td>" + clientLink(a) + "</td>" +
         "<td>" + fmtDate(a.renewal) + "</td>" +
         "<td>" + (a.autoRenew ? "Auto" : "Manual") + "</td>" +
         "<td>" + (a.requirePO ? "Required" : "No") + "</td>" +
@@ -1237,7 +1287,7 @@
   document.getElementById("onboardingRows").innerHTML = D.onboarding.map(function (o) {
     var s = OB[o.status];
     return '<div class="row-slot">' +
-      '<span><b>' + esc(o.account) + '</b> · stage ' + esc(o.stage) + ' · go-live ' + fmtDateShort(o.goLive) +
+      '<span>' + nameLink(o.account) + ' · stage ' + esc(o.stage) + ' · go-live ' + fmtDateShort(o.goLive) +
       (o.blocker ? ' · blocker: ' + esc(o.blocker) : '') + '</span>' +
       pill(s.label, s.color) + '</div>';
   }).join("");
@@ -1257,7 +1307,7 @@
       dueTxt = 'due ' + fmtDateShort(t.due);
     }
     return '<div class="row-slot">' +
-      '<span>☐ <b>' + esc(t.title) + '</b> · ' + esc(t.account) + ' · owner ' + esc(t.owner) + ' · ' + dueTxt + '</span>' +
+      '<span>☐ <b>' + esc(t.title) + '</b> · ' + nameLink(t.account) + ' · owner ' + esc(t.owner) + ' · ' + dueTxt + '</span>' +
       '<button class="btn" data-action="Complete task">Done</button></div>';
   });
   document.getElementById("taskRows").innerHTML = taskRows.join("");
@@ -1485,7 +1535,7 @@
   if (customerRows) {
     customerRows.innerHTML = A.slice().sort(function (a, b) { return b.mrr - a.mrr; }).map(function (a) {
       return '<tr>' +
-        '<td><div class="name-cell"><b>' + esc(a.name) + '</b>' +
+        '<td><div class="name-cell">' + clientLink(a, a.name) +
           '<span class="row-icons">' +
             '<a class="icon-link" data-action="Open admin panel" title="Open admin panel" aria-label="Open admin panel">⚙</a>' +
             '<a class="icon-link sf" data-action="Open in Salesforce" title="Open in Salesforce" aria-label="Open in Salesforce">☁</a>' +
@@ -1501,6 +1551,103 @@
         '</tr>';
     }).join("");
   }
+
+  /* ---- client detail page ---- */
+  function statusColorFor(v) { return v >= 70 ? "status-good" : v >= 50 ? "status-warning" : "status-critical"; }
+  function renderClientPage(portal) {
+    var body = document.getElementById("clientBody");
+    if (!body) return;
+    var a = A.filter(function (x) { return x.portal === portal; })[0];
+    if (!a) {
+      document.getElementById("clientTitle").textContent = "Unknown client";
+      document.getElementById("clientSubtitle").textContent = "";
+      body.innerHTML = '<div class="empty-note">No client found for “' + esc(portal) + '”.</div>';
+      return;
+    }
+    var det = (D.clientDetails || {})[portal] || {};
+    document.getElementById("clientTitle").textContent = a.name;
+    document.getElementById("clientSubtitle").textContent =
+      a.portal + " · " + a.tier + " · " + a.product + " · CSM " + a.csm + " · " + a.region;
+    var crumbEl = document.getElementById("crumbHere");
+    if (crumbEl) crumbEl.textContent = "Client · " + a.name;
+
+    var h = HEALTH[a.health];
+
+    var summaryCard = '<div class="card span2"><h4>Recent activity summary</h4>' +
+      '<p class="detail-note">' + esc(det.recentActivity || "—") + '</p></div>';
+
+    var hbRows = Object.keys(det.healthBreakdown || {}).map(function (k) {
+      var v = det.healthBreakdown[k];
+      return '<div class="hb-row">' +
+        '<div class="hb-label"><span>' + esc(k) + '</span><b>' + v + '</b></div>' +
+        '<div class="goal-bar"><div class="goal-fill" style="width:' + v + '%;background:var(--' + statusColorFor(v) + ');"></div></div>' +
+        '</div>';
+    }).join("");
+    var healthCard = '<div class="card"><h4>Health score breakdown</h4>' +
+      '<div class="hb-overall"><span class="score">' + a.healthScore + '</span><span class="of">/ 100</span>' +
+      pill(h.label, h.color) + '</div>' + hbRows + '</div>';
+
+    var contactsCard = '<div class="card"><h4>Contacts</h4>' +
+      ((det.contacts || []).map(function (c) {
+        return '<div class="row-slot"><span><b>' + esc(c.name) + '</b> — ' + esc(c.title) + '</span>' +
+          '<span style="color:var(--text-muted);font-size:11.5px;">' + esc(c.location) + ' · ' + esc(c.tz) + '</span></div>';
+      }).join("") || '<div class="empty-note">No contacts on file.</div>') + '</div>';
+
+    var pkgCard = '<div class="card"><h4>Package info</h4>' +
+      '<div class="kv-row"><span class="k">Products</span><span class="v">' + esc(a.products || a.product) + '</span></div>' +
+      '<div class="kv-row"><span class="k">Package size</span><span class="v">' + esc(a.packageSize || "—") + '</span></div>' +
+      '<div class="kv-row"><span class="k">MRR</span><span class="v">' + money(a.mrr) + '</span></div>' +
+      '<div class="kv-row"><span class="k">ARR</span><span class="v">' + money(arr(a)) + '</span></div>' +
+      '<div class="kv-row"><span class="k">CPM</span><span class="v">' + (a.cpm != null ? "$" + a.cpm.toFixed(2) : "—") + '</span></div>' +
+      '<div class="kv-row"><span class="k">Price per scan</span><span class="v">' + (a.pricePerScan != null ? "$" + a.pricePerScan.toFixed(4) : "—") + '</span></div>' +
+      '<div class="kv-row"><span class="k">Tier</span><span class="v">' + esc(a.tier) + '</span></div>' +
+      '<div class="kv-row"><span class="k">Renewal</span><span class="v">' + fmtDate(a.renewal) + '</span></div>' +
+      '<div class="kv-row"><span class="k">Auto renew</span><span class="v">' + (a.autoRenew ? "Auto" : "Manual") + '</span></div>' +
+      '<div class="kv-row"><span class="k">PO</span><span class="v">' + (a.requirePO ? "Required" : "Not required") + '</span></div>' +
+      '</div>';
+
+    var contractCard = '<div class="card"><h4>Contract nuances</h4>' +
+      '<p class="detail-note">' + esc(det.contractNotes || "—") + '</p></div>';
+
+    var opps = D.opportunities.filter(function (o) { return o.account === a.name; });
+    var oppsCard = '<div class="card"><h4>Opportunities</h4>' +
+      (opps.map(function (o) {
+        return '<div class="row-slot"><span><b>' + esc(o.oppName) + '</b> · ' + esc(o.stage) + ' · ' + money(o.monthly) + '/mo</span>' +
+          '<span style="color:var(--text-muted);font-size:11.5px;">closes ' + fmtDateShort(o.closeDate) + ' · ' + o.probability + '%</span></div>';
+      }).join("") || '<div class="empty-note">No open opportunities.</div>') + '</div>';
+
+    var TICKET_COLOR = { "Open": "status-warning", "In progress": "status-good" };
+    var ticketsCard = '<div class="card"><h4>Open tickets</h4>' +
+      ((det.tickets || []).map(function (t) {
+        return '<div class="row-slot"><span><b>' + esc(t.id) + '</b> ' + esc(t.title) +
+          ' · ' + esc(t.priority) + ' · opened ' + fmtDateShort(t.opened) + '</span>' +
+          pill(t.status, TICKET_COLOR[t.status] || "status-warning") + '</div>';
+      }).join("") || '<div class="empty-note">No open tickets.</div>') + '</div>';
+
+    var tasks = D.tasks.filter(function (t) { return t.account === a.name; });
+    var tasksCard = '<div class="card"><h4>Tasks</h4>' +
+      (tasks.map(function (t) {
+        return '<div class="row-slot"><span>☐ <b>' + esc(t.title) + '</b> · owner ' + esc(t.owner) + ' · due ' + fmtDateShort(t.due) + '</span>' +
+          '<button class="btn" data-action="Complete task">Done</button></div>';
+      }).join("") || '<div class="empty-note">No open tasks.</div>') + '</div>';
+
+    var newsCard = '<div class="card"><h4>News</h4>' +
+      ((det.news || []).map(function (n) {
+        return '<div class="row-slot"><span>' + esc(n.title) + '</span>' +
+          '<span style="color:var(--text-muted);font-size:11.5px;">' + fmtDateShort(n.date) + '</span></div>';
+      }).join("") || '<div class="empty-note">No recent news.</div>') + '</div>';
+
+    body.innerHTML = '<div class="client-grid">' +
+      summaryCard + healthCard + contactsCard + pkgCard + contractCard +
+      oppsCard + ticketsCard + tasksCard + newsCard +
+      '</div>';
+  }
+  function handleClientRoute() {
+    var parts = location.hash.replace("#", "").split("/");
+    if (parts[0] === "client" && parts[1]) renderClientPage(decodeURIComponent(parts[1]));
+  }
+  window.addEventListener("hashchange", handleClientRoute);
+  handleClientRoute();
 
   /* re-apply any active health filter now that rows exist */
   window.dispatchEvent(new Event("hashchange"));
