@@ -46,12 +46,26 @@ window.DASHBOARD_DATA = {
     { account: "PlayGrid Media",      stage: "kickoff",  goLive: "2026-09-30", status: "delayed" }
   ],
 
+  /* percent: 0-100 complete; blockers: free text (empty = none); notes: newest last;
+     priority: High/Medium/Low; estimateMin: estimated effort in minutes; array order = manual sort order */
   tasks: [
-    { title: "Send renewal proposal",            account: "TrafficLane",         owner: "Dana Katz",  due: "2026-08-06" },
-    { title: "Prep QBR deck",                    account: "AdNexa",              owner: "Tom Rosen",  due: "2026-08-09" },
-    { title: "Chase blocked tag deployment",     account: "Quantum Ads Network", owner: "Noa Levi",   due: "2026-08-12" },
-    { title: "Health check call",                account: "MobiReach",           owner: "Maya Stern", due: "2026-08-13" },
-    { title: "Share July block-rate report",     account: "Nordpress Media",     owner: "Dana Katz",  due: "2026-08-14" }
+    { id: "T-101", priority: "High", estimateMin: 120, title: "Send renewal proposal",        account: "TrafficLane",         owner: "Dana Katz",  due: "2026-08-06", percent: 60, blockers: "",
+      description: "Send the renewal proposal with the approved 15% save offer ahead of the 20 Aug decision call.",
+      notes: [ { date: "2026-07-26", text: "Save offer approved by management, up to 15%." },
+               { date: "2026-07-28", text: "Draft proposal reviewed; waiting on final legal wording." } ] },
+    { id: "T-102", priority: "High", estimateMin: 240, title: "Prep QBR deck",                account: "AdNexa",              owner: "Tom Rosen",  due: "2026-08-09", percent: 40, blockers: "",
+      description: "Quarterly business review deck for the 8 Sep QBR — include APAC expansion pricing slide.",
+      notes: [ { date: "2026-08-03", text: "Usage data pulled; waiting on APAC pricing from sales." } ] },
+    { id: "T-103", priority: "Medium", estimateMin: 30, title: "Chase blocked tag deployment", account: "Quantum Ads Network", owner: "Noa Levi",   due: "2026-08-12", percent: 30,
+      blockers: "Client CSP policy blocks our tag domain — fix ships in their next release.",
+      description: "Follow up with client engineering on the CSP allowlist change so onboarding can resume.",
+      notes: [ { date: "2026-08-05", text: "Engineering call held — fix scheduled for their next release window." } ] },
+    { id: "T-104", priority: "Medium", estimateMin: 60, title: "Health check call",            account: "MobiReach",           owner: "Maya Stern", due: "2026-08-13", percent: 0, blockers: "",
+      description: "Pre-renewal health check — walk through alert-noise fixes and confirm renewal terms.",
+      notes: [] },
+    { id: "T-105", priority: "Low", estimateMin: 45, title: "Share July block-rate report", account: "Nordpress Media",     owner: "Dana Katz",  due: "2026-08-14", percent: 80, blockers: "",
+      description: "Send the July block-rate report; champion shares it upstream with their leadership.",
+      notes: [ { date: "2026-08-10", text: "Report generated; adding the SpecHub teaser slide before sending." } ] }
   ],
 
   /* per-client detail (keyed by portal) — health breakdown dims average to the
@@ -68,8 +82,8 @@ window.DASHBOARD_DATA = {
         { id: "GE-4812", title: "Discrepancy in blocked-impression counts vs internal logs", status: "Open", priority: "Medium", opened: "2026-07-29" }
       ],
       news: [
-        { date: "2026-08-01", title: "AdNexa Q2 revenue up 18% YoY" },
-        { date: "2026-07-15", title: "AdNexa launches CTV marketplace expansion in APAC" }
+        { date: "2026-08-01", title: "AdNexa Q2 revenue up 18% YoY", url: "https://www.example.com/news/adnexa-q2-revenue-up-18-yoy" },
+        { date: "2026-07-15", title: "AdNexa launches CTV marketplace expansion in APAC", url: "https://www.example.com/news/adnexa-launches-ctv-marketplace-expansion-in-apac" }
       ],
       contractNotes: "PO required each term — procurement lead time ~3 weeks. SLA addendum on discrepancy reporting signed last renewal. 60-day out clause.",
       recentActivity: "QBR prep underway for 8 Sep. Steady product usage; two pricing calls in July about APAC seats. Last exec touch 22 Jul."
@@ -82,7 +96,7 @@ window.DASHBOARD_DATA = {
       ],
       tickets: [],
       news: [
-        { date: "2026-06-20", title: "BidCore named among fastest-growing EU SSPs" }
+        { date: "2026-06-20", title: "BidCore named among fastest-growing EU SSPs", url: "https://www.example.com/news/bidcore-named-among-fastest-growing-eu-ssps" }
       ],
       contractNotes: "Auto-renews annually on 1 Apr. Multi-year discussion open — their legal prefers 1-year + auto. No PO.",
       recentActivity: "Healthy cadence with monthly syncs. Champion demoed our reporting to their exec team in July."
@@ -98,7 +112,7 @@ window.DASHBOARD_DATA = {
         { id: "GE-4790", title: "False-positive block on house creative", status: "Open", priority: "Low", opened: "2026-08-03" }
       ],
       news: [
-        { date: "2026-07-22", title: "Daily Chronicle Group acquires two regional news sites" }
+        { date: "2026-07-22", title: "Daily Chronicle Group acquires two regional news sites", url: "https://www.example.com/news/daily-chronicle-group-acquires-two-regional-news-sites" }
       ],
       contractNotes: "Auto-renew, no PO. Rate locked through Feb 2027; AppHarbr SDK upsell must go on a separate order form.",
       recentActivity: "Expanded RUM to two new sites in June; AppHarbr demo scheduled for the Dec bundle discussion."
@@ -113,7 +127,7 @@ window.DASHBOARD_DATA = {
         { id: "GE-4801", title: "Slow dashboard load on large date ranges", status: "Open", priority: "Low", opened: "2026-07-25" }
       ],
       news: [
-        { date: "2026-07-30", title: "AdVantage Exchange partners with major CTV platform" }
+        { date: "2026-07-30", title: "AdVantage Exchange partners with major CTV platform", url: "https://www.example.com/news/advantage-exchange-partners-with-major-ctv-platform" }
       ],
       contractNotes: "Auto-renew 1 Dec. Usage running ~20% above tier — upgrade conversation recommended before renewal.",
       recentActivity: "Usage growth continues; champion reconfirmed auto-renew at the Q2 check-in."
@@ -126,7 +140,7 @@ window.DASHBOARD_DATA = {
       ],
       tickets: [],
       news: [
-        { date: "2026-06-12", title: "Nordpress Media wins Nordic digital publishing award" }
+        { date: "2026-06-12", title: "Nordpress Media wins Nordic digital publishing award", url: "https://www.example.com/news/nordpress-media-wins-nordic-digital-publishing-award" }
       ],
       contractNotes: "Auto-renew 10 Jan. SpecHub to be quoted as an add-on module; champion wants a single combined invoice.",
       recentActivity: "Strong block-rate results shared with their leadership; SpecHub demo booked for Nov."
@@ -142,7 +156,7 @@ window.DASHBOARD_DATA = {
         { id: "GE-4788", title: "API rate limits hit during reporting pulls", status: "In progress", priority: "Medium", opened: "2026-07-27" }
       ],
       news: [
-        { date: "2026-07-05", title: "MobiReach expands into Indonesian market" }
+        { date: "2026-07-05", title: "MobiReach expands into Indonesian market", url: "https://www.example.com/news/mobireach-expands-into-indonesian-market" }
       ],
       contractNotes: "Renews 28 Aug. Last cycle's 10% annual-prepay discount expires; champion expects the same terms again.",
       recentActivity: "Escalation on alert noise in July; exec call scheduled this week. Renewal at watch until complaints are resolved."
@@ -158,7 +172,7 @@ window.DASHBOARD_DATA = {
         { id: "GE-4771", title: "Latency reports on video verification", status: "Open", priority: "Medium", opened: "2026-07-19" }
       ],
       news: [
-        { date: "2026-07-28", title: "StreamCast TV announces streaming platform relaunch" }
+        { date: "2026-07-28", title: "StreamCast TV announces streaming platform relaunch", url: "https://www.example.com/news/streamcast-tv-announces-streaming-platform-relaunch" }
       ],
       contractNotes: "Manual renewal 20 Oct — no auto-renew clause. SLA credits offered as save-play; discounts past 15% need VP sign-off.",
       recentActivity: "Save plan active with weekly check-ins since June. Usage down 30% after player migration; exec sponsor engaged 1 Aug."
@@ -171,7 +185,7 @@ window.DASHBOARD_DATA = {
       ],
       tickets: [],
       news: [
-        { date: "2026-07-10", title: "PixelBridge launches in-app ad quality program" }
+        { date: "2026-07-10", title: "PixelBridge launches in-app ad quality program", url: "https://www.example.com/news/pixelbridge-launches-in-app-ad-quality-program" }
       ],
       contractNotes: "PO required — last year's PO arrived late and nearly lapsed service. Start the PO chase 4+ weeks early; procurement contact changed.",
       recentActivity: "Steady usage; verifying the new procurement contact. AppHarbr SDK adoption ramping well."
@@ -186,7 +200,7 @@ window.DASHBOARD_DATA = {
         { id: "GE-4805", title: "Question on video verification coverage", status: "Open", priority: "Low", opened: "2026-08-02" }
       ],
       news: [
-        { date: "2026-07-12", title: "Velocity Ads hires new CRO from major SSP" }
+        { date: "2026-07-12", title: "Velocity Ads hires new CRO from major SSP", url: "https://www.example.com/news/velocity-ads-hires-new-cro-from-major-ssp" }
       ],
       contractNotes: "Auto-renew Mar 2027. Previous sponsor left the company — the new CRO has not yet engaged with us.",
       recentActivity: "Engagement dropped since the sponsor change in March; video-verification pilot proposed to rebuild momentum."
@@ -199,7 +213,7 @@ window.DASHBOARD_DATA = {
       ],
       tickets: [],
       news: [
-        { date: "2026-06-30", title: "Sunrise Media House reports record digital audience" }
+        { date: "2026-06-30", title: "Sunrise Media House reports record digital audience", url: "https://www.example.com/news/sunrise-media-house-reports-record-digital-audience" }
       ],
       contractNotes: "Auto-renew May 2027. Overage discussions resolved — price the impression-tier upgrade into the renewal.",
       recentActivity: "Healthy cadence with quarterly reviews. Tier-upgrade opportunity flagged for the renewal window."
@@ -214,7 +228,7 @@ window.DASHBOARD_DATA = {
         { id: "GE-4809", title: "Onboarding: tag configuration for secondary domain", status: "In progress", priority: "Medium", opened: "2026-08-05" }
       ],
       news: [
-        { date: "2026-07-18", title: "Spark Media Group merges EU sales houses" }
+        { date: "2026-07-18", title: "Spark Media Group merges EU sales houses", url: "https://www.example.com/news/spark-media-group-merges-eu-sales-houses" }
       ],
       contractNotes: "First term ends Jun 2027. Standard terms, no PO. Onboarding milestones are written into the order form.",
       recentActivity: "Onboarding in setup stage, go-live 28 Aug on track. Monthly adoption reviews planned post-launch."
@@ -229,7 +243,7 @@ window.DASHBOARD_DATA = {
         { id: "GE-4795", title: "Tag deployment blocked by CSP policy", status: "Open", priority: "High", opened: "2026-07-22" }
       ],
       news: [
-        { date: "2026-06-25", title: "Quantum Ads Network raises Series B" }
+        { date: "2026-06-25", title: "Quantum Ads Network raises Series B", url: "https://www.example.com/news/quantum-ads-network-raises-series-b" }
       ],
       contractNotes: "First renewal Jul 2027. Success metrics to be agreed during onboarding; no commercial nuances yet.",
       recentActivity: "Onboarding blocked on tag deployment (their CSP policy). Engineering call held 5 Aug; fix lands in their next release."
@@ -241,7 +255,7 @@ window.DASHBOARD_DATA = {
       ],
       tickets: [],
       news: [
-        { date: "2026-07-08", title: "PlayGrid Media adds three casual-gaming portals" }
+        { date: "2026-07-08", title: "PlayGrid Media adds three casual-gaming portals", url: "https://www.example.com/news/playgrid-media-adds-three-casual-gaming-portals" }
       ],
       contractNotes: "Auto-renew Feb 2027. Low-touch tier; email-first support plan.",
       recentActivity: "Quiet, stable account. Quarterly usage review completed in July — no changes."
@@ -258,7 +272,7 @@ window.DASHBOARD_DATA = {
         { id: "GE-4802", title: "Billing query — scan overage line item", status: "Open", priority: "Low", opened: "2026-07-31" }
       ],
       news: [
-        { date: "2026-07-20", title: "TrafficLane downsizes EU operations" }
+        { date: "2026-07-20", title: "TrafficLane downsizes EU operations", url: "https://www.example.com/news/trafficlane-downsizes-eu-operations" }
       ],
       contractNotes: "Manual renewal 4 Sep — decision call 20 Aug. Downgraded from Gold last cycle. 15% save offer approved by management.",
       recentActivity: "Support tickets doubled since spring; save proposal sent 28 Jul. Decision call booked for 20 Aug."
@@ -273,7 +287,7 @@ window.DASHBOARD_DATA = {
         { id: "GE-4778", title: "Block-rate spike investigation on sports section", status: "In progress", priority: "Medium", opened: "2026-07-21" }
       ],
       news: [
-        { date: "2026-07-25", title: "MetroNews Digital launches paid newsletter tier" }
+        { date: "2026-07-25", title: "MetroNews Digital launches paid newsletter tier", url: "https://www.example.com/news/metronews-digital-launches-paid-newsletter-tier" }
       ],
       contractNotes: "Auto-renew 2 Oct. Two escalations since March on record; confirm the renewal stands at the Sep health check.",
       recentActivity: "Block-rate complaints under investigation; Sep health check scheduled. Auto-renew expected to stand."

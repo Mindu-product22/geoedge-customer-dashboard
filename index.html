@@ -375,6 +375,50 @@
   .kv-row .v { font-weight: 650; text-align: right; }
   .detail-note { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
 
+  /* card headers that link to their page */
+  #page-client .card h4 a.hlink { color: inherit; text-decoration: none; }
+  #page-client .card h4 a.hlink:hover { color: var(--accent); }
+  .news-link { color: var(--accent); text-decoration: none; }
+  .news-link:hover { text-decoration: underline; }
+  [data-task-open] { cursor: pointer; }
+  [data-task-open]:hover { background: var(--slot-bg); }
+  .drag-handle { cursor: grab; color: var(--text-muted); user-select: none; letter-spacing: -2px; margin-right: 4px; }
+  .row-slot.dragging { opacity: .45; }
+  .row-slot.drag-over { box-shadow: inset 0 2px 0 var(--accent); }
+
+  /* ============ task modal ============ */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(11,11,11,.45); z-index: 90;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .modal-head h3 { font-size: 16px; font-weight: 700; line-height: 1.3; }
+  .modal-meta { font-size: 12px; color: var(--text-secondary); margin: 4px 0 2px; }
+  .modal-desc { font-size: 12.5px; color: var(--text-secondary); margin-top: 8px; line-height: 1.55; }
+  .tm-label { display: block; font-size: 11px; font-weight: 650; color: var(--text-secondary); margin: 14px 0 5px; text-transform: uppercase; letter-spacing: .04em; }
+  .modal textarea {
+    width: 100%; font: inherit; font-size: 12.5px; padding: 8px 10px;
+    border: 1px solid var(--border); border-radius: 7px;
+    background: var(--page); color: var(--text-primary); resize: vertical;
+  }
+  .modal input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .modal select {
+    width: 100%; font: inherit; font-size: 12.5px; padding: 7px 10px;
+    border: 1px solid var(--border); border-radius: 7px;
+    background: var(--page); color: var(--text-primary);
+  }
+  .tm-pair { display: flex; gap: 14px; flex-wrap: wrap; }
+  .tm-pair > div { flex: 1; min-width: 140px; }
+  .tm-note { font-size: 12.5px; padding: 7px 0; border-bottom: 1px solid var(--grid); }
+  .tm-note:last-child { border-bottom: none; }
+  .tm-note .d { color: var(--text-muted); font-size: 11px; margin-right: 6px; }
+  .modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+  .modal-foot .left { margin-right: auto; }
+
   #toast {
     position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
     background: var(--text-primary); color: var(--page);
@@ -759,8 +803,43 @@
     </div>
 
     <div class="card">
-      <h4>Open tasks</h4>
+      <div class="card-head-row">
+        <h4>Open tasks</h4>
+        <div class="filter-row">
+          <label>Sort
+            <select id="tkSort">
+              <option value="manual">My order</option>
+              <option value="due">Due date</option>
+              <option value="priority">Priority</option>
+              <option value="estimate">Estimate</option>
+              <option value="percent">% complete</option>
+              <option value="account">Client</option>
+            </select>
+          </label>
+          <label>Priority
+            <select id="tkPriority">
+              <option value="all">All</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </label>
+          <label>Owner
+            <select id="tkOwner"><option value="all">All</option></select>
+          </label>
+          <label>Show
+            <select id="tkShow">
+              <option value="all">All</option>
+              <option value="overdue">Overdue</option>
+              <option value="blocked">Blocked</option>
+              <option value="escalated">Escalated</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="stub-note" id="tkDragHint" style="margin:0 0 6px;">Drag ⋮⋮ to rearrange — your order is kept while “Sort: My order” is selected.</div>
       <div id="taskRows"></div>
+      <div class="empty-note" id="taskRowsEmpty" style="display:none;">No tasks match these filters.</div>
     </div>
   </section>
 
@@ -774,24 +853,55 @@
     <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
 
     <div class="card">
+      <div class="card-head-row">
+        <h4>All clients</h4>
+        <div class="filter-row">
+          <label>Product
+            <select id="ctProduct">
+              <option value="all">All</option>
+              <option value="RUM">RUM</option>
+              <option value="Verification">Verification</option>
+            </select>
+          </label>
+          <label>Tier
+            <select id="ctTier">
+              <option value="all">All</option>
+              <option value="Strategic">Strategic</option>
+              <option value="Gold">Gold</option>
+              <option value="Silver">Silver</option>
+            </select>
+          </label>
+          <label>Region
+            <select id="ctRegion">
+              <option value="all">All</option>
+              <option value="USA">USA</option>
+              <option value="EU">EU</option>
+              <option value="APAC">APAC</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+        </div>
+      </div>
       <div class="table-wrap">
-        <table class="data-table">
+        <table class="data-table" id="clientsTable">
           <thead>
             <tr>
-              <th>Client Name</th>
-              <th>MRR</th>
-              <th>CPM</th>
-              <th>Price Per Scan</th>
-              <th>Package Size</th>
-              <th>Products</th>
-              <th>Renewal Date</th>
-              <th>Contact</th>
-              <th>Location</th>
+              <th class="sortable" data-sort="name">Client Name<span class="arrow"></span></th>
+              <th class="sortable" data-sort="tier">Tier<span class="arrow"></span></th>
+              <th class="sortable" data-sort="mrr">MRR<span class="arrow"></span></th>
+              <th class="sortable" data-sort="cpm">CPM<span class="arrow"></span></th>
+              <th class="sortable" data-sort="pricePerScan">Price Per Scan<span class="arrow"></span></th>
+              <th class="sortable" data-sort="packageSize">Package Size<span class="arrow"></span></th>
+              <th class="sortable" data-sort="products">Products<span class="arrow"></span></th>
+              <th class="sortable" data-sort="renewal">Renewal Date<span class="arrow"></span></th>
+              <th class="sortable" data-sort="contact">Contact<span class="arrow"></span></th>
+              <th class="sortable" data-sort="location">Location<span class="arrow"></span></th>
             </tr>
           </thead>
           <tbody id="customerRows"></tbody>
         </table>
       </div>
+      <div class="empty-note" id="clientsTableEmpty" style="display:none;">No clients match these filters.</div>
     </div>
   </section>
 
@@ -812,6 +922,57 @@
 </main>
 
 <div id="toast"></div>
+
+<!-- ================= TASK MODAL ================= -->
+<div id="taskModal" class="modal-overlay" style="display:none;">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tmTitle">
+    <div class="modal-head">
+      <h3 id="tmTitle"></h3>
+      <button class="btn" id="tmClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-meta" id="tmMeta"></div>
+    <p class="modal-desc" id="tmDesc"></p>
+    <div class="tm-pair">
+      <div>
+        <label class="tm-label" for="tmPriority">Priority</label>
+        <select id="tmPriority">
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+      </div>
+      <div>
+        <label class="tm-label" for="tmEstimate">Estimated time</label>
+        <select id="tmEstimate">
+          <option value="15">15m</option>
+          <option value="30">30m</option>
+          <option value="45">45m</option>
+          <option value="60">1h</option>
+          <option value="90">1.5h</option>
+          <option value="120">2h</option>
+          <option value="180">3h</option>
+          <option value="240">4h</option>
+          <option value="480">1 day</option>
+        </select>
+      </div>
+    </div>
+    <label class="tm-label" for="tmPct">% complete — <span id="tmPctVal">0%</span></label>
+    <input type="range" id="tmPct" min="0" max="100" step="5">
+    <label class="tm-label" for="tmBlockers">Blockers</label>
+    <textarea id="tmBlockers" rows="2" placeholder="What's blocking this task? Leave empty if nothing."></textarea>
+    <div class="tm-label">Notes</div>
+    <div id="tmNotes"></div>
+    <textarea id="tmNewNote" rows="2" placeholder="Add a note…" style="margin-top:8px;"></textarea>
+    <div class="modal-foot">
+      <span style="display:flex;gap:8px;margin-right:auto;">
+        <button class="btn" id="tmEscalate">🚨 Escalate</button>
+        <button class="btn" id="tmAddNote">＋ Add note</button>
+      </span>
+      <button class="btn" id="tmCancel">Cancel</button>
+      <button class="btn primary" id="tmSave">Save</button>
+    </div>
+  </div>
+</div>
 
 <script src="data.js"></script>
 <script>
@@ -964,6 +1125,15 @@
   }
   function arr(a) { return a.mrr * 12; }
   function displayName(a) { return a.name + " (" + a.portal + ")"; }
+
+  var TIER_DOT = { "Strategic": "status-critical", "Gold": "status-warning", "Silver": "baseline" };
+  var PRIO_DOT = { "High": "status-critical", "Medium": "status-warning", "Low": "baseline" };
+  function fmtEstimate(min) {
+    if (!min) return "";
+    if (min < 60) return min + "m";
+    var h = min / 60;
+    return (h % 1 ? h.toFixed(1) : h) + "h";
+  }
 
   /* client links — every client name opens the client detail page */
   var byName = {};
@@ -1337,24 +1507,123 @@
   }).join("");
 
   /* ---- tasks ---- */
-  var tOverdue = 0, tToday = 0, tWeek = 0;
-  var taskRows = D.tasks.map(function (t) {
-    var d = daysUntil(t.due), dueTxt;
-    if (d < 0) {
-      tOverdue++;
-      dueTxt = '<span style="color:var(--status-critical);font-weight:650;">overdue</span> ' + fmtDateShort(t.due);
-    } else if (d === 0) {
-      tToday++;
-      dueTxt = 'due <b>today</b>';
-    } else {
-      if (d <= 7) tWeek++;
-      dueTxt = 'due ' + fmtDateShort(t.due);
+  function taskDueText(t) {
+    var d = daysUntil(t.due);
+    if (d < 0) return '<span style="color:var(--status-critical);font-weight:650;">overdue</span> ' + fmtDateShort(t.due);
+    if (d === 0) return 'due <b>today</b>';
+    return 'due ' + fmtDateShort(t.due);
+  }
+  var tkState = { sort: "manual", priority: "all", owner: "all", show: "all" };
+  var PRIO_ORDER = { "High": 0, "Medium": 1, "Low": 2 };
+  function renderTaskRows() {
+    var box = document.getElementById("taskRows");
+    if (!box) return;
+    var list = D.tasks.map(function (t, i) { return { t: t, i: i }; }).filter(function (x) {
+      var t = x.t;
+      if (tkState.priority !== "all" && t.priority !== tkState.priority) return false;
+      if (tkState.owner !== "all" && t.owner !== tkState.owner) return false;
+      if (tkState.show === "overdue" && daysUntil(t.due) >= 0) return false;
+      if (tkState.show === "blocked" && !t.blockers) return false;
+      if (tkState.show === "escalated" && !t.escalated) return false;
+      return true;
+    });
+    if (tkState.sort !== "manual") {
+      list.sort(function (a, b) {
+        var k = tkState.sort, va, vb;
+        if (k === "due") { va = a.t.due; vb = b.t.due; }
+        else if (k === "priority") { va = PRIO_ORDER[a.t.priority]; vb = PRIO_ORDER[b.t.priority]; }
+        else if (k === "estimate") { va = a.t.estimateMin || 0; vb = b.t.estimateMin || 0; }
+        else if (k === "percent") { va = a.t.percent || 0; vb = b.t.percent || 0; }
+        else { va = a.t.account.toLowerCase(); vb = b.t.account.toLowerCase(); }
+        return va < vb ? -1 : va > vb ? 1 : 0;
+      });
     }
-    return '<div class="row-slot">' +
-      '<span>☐ <b>' + esc(t.title) + '</b> · ' + nameLink(t.account) + ' · owner ' + esc(t.owner) + ' · ' + dueTxt + '</span>' +
-      '<button class="btn" data-action="Complete task">Done</button></div>';
+    var manual = tkState.sort === "manual";
+    var hint = document.getElementById("tkDragHint");
+    if (hint) hint.style.display = manual ? "" : "none";
+    box.innerHTML = list.map(function (x) {
+      var t = x.t, i = x.i;
+      var extra = (t.estimateMin ? ' · ~' + fmtEstimate(t.estimateMin) : '') +
+        (t.percent ? ' · <b>' + t.percent + '%</b>' : '') +
+        (t.blockers ? ' · <span style="color:var(--status-serious);font-weight:650;">blocked</span>' : '') +
+        (t.escalated ? ' · <span style="color:var(--status-critical);font-weight:650;">🚨 escalated</span>' : '');
+      return '<div class="row-slot" data-task-open="' + i + '" data-task-pos="' + i + '"' +
+        (manual ? ' draggable="true"' : '') + ' title="Open task">' +
+        '<span>' + (manual ? '<span class="drag-handle" title="Drag to reorder">⋮⋮</span>' : '') +
+        '<span class="prio" style="background:var(--' + (PRIO_DOT[t.priority] || "baseline") + ')" title="' + esc(t.priority || "") + ' priority"></span> ' +
+        '☐ <b>' + esc(t.title) + '</b> · ' + nameLink(t.account) + ' · owner ' + esc(t.owner) + ' · ' + taskDueText(t) + extra + '</span>' +
+        '<button class="btn" data-action="Complete task">Done</button></div>';
+    }).join("");
+    var empty = document.getElementById("taskRowsEmpty");
+    if (empty) empty.style.display = list.length ? "none" : "";
+  }
+  /* task toolbar: owner options + filter/sort listeners */
+  (function initTaskToolbar() {
+    var ownerSel = document.getElementById("tkOwner");
+    if (ownerSel) {
+      var owners = [];
+      D.tasks.forEach(function (t) { if (owners.indexOf(t.owner) === -1) owners.push(t.owner); });
+      ownerSel.innerHTML = '<option value="all">All</option>' + owners.sort().map(function (o) {
+        return '<option value="' + esc(o) + '">' + esc(o) + '</option>';
+      }).join("");
+    }
+    [["tkSort", "sort"], ["tkPriority", "priority"], ["tkOwner", "owner"], ["tkShow", "show"]].forEach(function (pair) {
+      var sel = document.getElementById(pair[0]);
+      if (sel) sel.addEventListener("change", function () {
+        tkState[pair[1]] = sel.value;
+        renderTaskRows();
+      });
+    });
+  })();
+  /* drag to reorder — active only in "My order" mode */
+  (function initTaskDrag() {
+    var box = document.getElementById("taskRows");
+    if (!box) return;
+    var dragIndex = null;
+    box.addEventListener("dragstart", function (e) {
+      var row = e.target.closest("[data-task-pos]");
+      if (!row) return;
+      dragIndex = parseInt(row.getAttribute("data-task-pos"), 10);
+      row.classList.add("dragging");
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = "move";
+        try { e.dataTransfer.setData("text/plain", String(dragIndex)); } catch (err) {}
+      }
+    });
+    box.addEventListener("dragend", function () {
+      dragIndex = null;
+      box.querySelectorAll(".dragging, .drag-over").forEach(function (r) { r.classList.remove("dragging", "drag-over"); });
+    });
+    box.addEventListener("dragover", function (e) {
+      if (dragIndex === null) return;
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+      var row = e.target.closest("[data-task-pos]");
+      box.querySelectorAll(".drag-over").forEach(function (r) { r.classList.remove("drag-over"); });
+      if (row && parseInt(row.getAttribute("data-task-pos"), 10) !== dragIndex) row.classList.add("drag-over");
+    });
+    box.addEventListener("drop", function (e) {
+      e.preventDefault();
+      var row = e.target.closest("[data-task-pos]");
+      if (!row || dragIndex === null) return;
+      var to = parseInt(row.getAttribute("data-task-pos"), 10);
+      if (to !== dragIndex) {
+        var moved = D.tasks.splice(dragIndex, 1)[0];
+        D.tasks.splice(to, 0, moved);
+        renderTaskRows();
+        handleClientRoute();
+      }
+      dragIndex = null;
+    });
+  })();
+  var tOverdue = 0, tToday = 0, tWeek = 0;
+  D.tasks.forEach(function (t) {
+    var d = daysUntil(t.due);
+    if (d < 0) tOverdue++;
+    else if (d === 0) tToday++;
+    else if (d <= 7) tWeek++;
   });
-  document.getElementById("taskRows").innerHTML = taskRows.join("");
+  renderTaskRows();
   setStat("tOverdue", tOverdue);
   setStat("tToday", tToday);
   setStat("tWeek", tWeek);
@@ -1574,16 +1843,35 @@
   });
   renderRenewalChart();
 
-  /* ---- customers table ---- */
-  var customerRows = document.getElementById("customerRows");
-  if (customerRows) {
-    customerRows.innerHTML = A.slice().sort(function (a, b) { return b.mrr - a.mrr; }).map(function (a) {
+  /* ---- clients table: sortable columns + filters ---- */
+  var ctState = { sortKey: "mrr", sortDir: -1, product: "all", tier: "all", region: "all" };
+  var TIER_ORDER = { "Strategic": 0, "Gold": 1, "Silver": 2 };
+  function renderClientsTable() {
+    var tbody = document.getElementById("customerRows");
+    if (!tbody) return;
+    var rows = A.filter(function (a) {
+      if (ctState.product !== "all" && a.product !== ctState.product) return false;
+      if (ctState.tier !== "all" && a.tier !== ctState.tier) return false;
+      if (ctState.region !== "all" && a.region !== ctState.region) return false;
+      return true;
+    });
+    rows.sort(function (a, b) {
+      var k = ctState.sortKey, va, vb;
+      if (k === "tier") { va = TIER_ORDER[a.tier]; vb = TIER_ORDER[b.tier]; }
+      else if (k === "packageSize") { va = parseFloat(a.packageSize) || 0; vb = parseFloat(b.packageSize) || 0; }
+      else if (k === "mrr" || k === "cpm" || k === "pricePerScan") { va = a[k]; vb = b[k]; }
+      else if (k === "renewal") { va = a.renewal; vb = b.renewal; }
+      else { va = String(a[k] || "").toLowerCase(); vb = String(b[k] || "").toLowerCase(); }
+      return (va < vb ? -1 : va > vb ? 1 : 0) * ctState.sortDir;
+    });
+    tbody.innerHTML = rows.map(function (a) {
       return '<tr>' +
         '<td><div class="name-cell">' + clientLink(a, a.name) +
           '<span class="row-icons">' +
             '<a class="icon-link" data-action="Open admin panel" title="Open admin panel" aria-label="Open admin panel">⚙</a>' +
             '<a class="icon-link sf" data-action="Open in Salesforce" title="Open in Salesforce" aria-label="Open in Salesforce">☁</a>' +
           '</span></div></td>' +
+        '<td>' + pill(a.tier, TIER_DOT[a.tier] || "baseline") + '</td>' +
         '<td>' + money(a.mrr) + '</td>' +
         '<td>$' + a.cpm.toFixed(2) + '</td>' +
         '<td>$' + a.pricePerScan.toFixed(4) + '</td>' +
@@ -1594,11 +1882,149 @@
         '<td>' + esc(a.location) + '</td>' +
         '</tr>';
     }).join("");
+    var empty = document.getElementById("clientsTableEmpty");
+    if (empty) empty.style.display = rows.length ? "none" : "";
+    document.querySelectorAll("#clientsTable th.sortable").forEach(function (th) {
+      th.querySelector(".arrow").textContent =
+        th.getAttribute("data-sort") === ctState.sortKey ? (ctState.sortDir === 1 ? "▲" : "▼") : "";
+    });
   }
+  document.querySelectorAll("#clientsTable th.sortable").forEach(function (th) {
+    th.addEventListener("click", function () {
+      var k = th.getAttribute("data-sort");
+      if (ctState.sortKey === k) ctState.sortDir = -ctState.sortDir;
+      else { ctState.sortKey = k; ctState.sortDir = (k === "mrr" || k === "cpm" || k === "pricePerScan" || k === "packageSize") ? -1 : 1; }
+      renderClientsTable();
+    });
+  });
+  [["ctProduct", "product"], ["ctTier", "tier"], ["ctRegion", "region"]].forEach(function (pair) {
+    var sel = document.getElementById(pair[0]);
+    if (sel) sel.addEventListener("change", function () {
+      ctState[pair[1]] = sel.value;
+      renderClientsTable();
+    });
+  });
+  renderClientsTable();
+
+  /* ---- task modal: open a task, add notes, update % complete and blockers ---- */
+  var tmEl = document.getElementById("taskModal");
+  var tmTaskIndex = null;
+  function tmRenderNotes(t) {
+    var box = document.getElementById("tmNotes");
+    box.textContent = "";
+    if (!t.notes || !t.notes.length) {
+      var none = document.createElement("div");
+      none.className = "empty-note";
+      none.textContent = "No notes yet.";
+      box.appendChild(none);
+      return;
+    }
+    t.notes.forEach(function (n) {
+      var row = document.createElement("div");
+      row.className = "tm-note";
+      var d = document.createElement("span");
+      d.className = "d";
+      d.textContent = fmtDateShort(n.date);
+      row.appendChild(d);
+      row.appendChild(document.createTextNode(n.text));
+      box.appendChild(row);
+    });
+  }
+  function openTaskModal(i) {
+    var t = D.tasks[i];
+    if (!t || !tmEl) return;
+    tmTaskIndex = i;
+    document.getElementById("tmTitle").textContent = (t.id ? t.id + " — " : "") + t.title;
+    document.getElementById("tmMeta").textContent =
+      t.account + " · owner " + t.owner + " · due " + fmtDate(t.due) +
+      (t.escalated ? " · 🚨 escalated" : "");
+    var escBtn = document.getElementById("tmEscalate");
+    escBtn.textContent = t.escalated ? "✓ De-escalate" : "🚨 Escalate";
+    escBtn.style.borderColor = t.escalated ? "var(--status-critical)" : "";
+    escBtn.style.color = t.escalated ? "var(--status-critical)" : "";
+    document.getElementById("tmDesc").textContent = t.description || "";
+    document.getElementById("tmPriority").value = t.priority || "Medium";
+    var estSel = document.getElementById("tmEstimate");
+    estSel.value = String(t.estimateMin || 60);
+    if (estSel.value !== String(t.estimateMin || 60)) estSel.value = "60"; /* value not in list */
+    var pct = document.getElementById("tmPct");
+    pct.value = t.percent || 0;
+    document.getElementById("tmPctVal").textContent = (t.percent || 0) + "%";
+    document.getElementById("tmBlockers").value = t.blockers || "";
+    document.getElementById("tmNewNote").value = "";
+    tmRenderNotes(t);
+    tmEl.style.display = "flex";
+    document.getElementById("tmClose").focus();
+  }
+  function closeTaskModal() {
+    if (tmEl) tmEl.style.display = "none";
+    tmTaskIndex = null;
+  }
+  if (tmEl) {
+    document.getElementById("tmPct").addEventListener("input", function () {
+      document.getElementById("tmPctVal").textContent = this.value + "%";
+    });
+    document.getElementById("tmEscalate").addEventListener("click", function () {
+      var t = D.tasks[tmTaskIndex];
+      if (!t) return;
+      t.escalated = !t.escalated;
+      t.notes = t.notes || [];
+      t.notes.push({
+        date: new Date().toISOString().slice(0, 10),
+        text: t.escalated ? "🚨 Escalated — flagged to management." : "Escalation cleared."
+      });
+      tmRenderNotes(t);
+      /* refresh meta + button without resetting unsaved %/blocker edits */
+      document.getElementById("tmMeta").textContent =
+        t.account + " · owner " + t.owner + " · due " + fmtDate(t.due) +
+        (t.escalated ? " · 🚨 escalated" : "");
+      var escBtn = document.getElementById("tmEscalate");
+      escBtn.textContent = t.escalated ? "✓ De-escalate" : "🚨 Escalate";
+      escBtn.style.borderColor = t.escalated ? "var(--status-critical)" : "";
+      escBtn.style.color = t.escalated ? "var(--status-critical)" : "";
+      renderTaskRows();
+      handleClientRoute();
+    });
+    document.getElementById("tmAddNote").addEventListener("click", function () {
+      var t = D.tasks[tmTaskIndex];
+      var txt = document.getElementById("tmNewNote").value.trim();
+      if (!t || !txt) return;
+      t.notes = t.notes || [];
+      t.notes.push({ date: new Date().toISOString().slice(0, 10), text: txt });
+      document.getElementById("tmNewNote").value = "";
+      tmRenderNotes(t);
+    });
+    document.getElementById("tmSave").addEventListener("click", function () {
+      var t = D.tasks[tmTaskIndex];
+      if (t) {
+        t.percent = parseInt(document.getElementById("tmPct").value, 10);
+        t.blockers = document.getElementById("tmBlockers").value.trim();
+        t.priority = document.getElementById("tmPriority").value;
+        t.estimateMin = parseInt(document.getElementById("tmEstimate").value, 10);
+        /* pending note text counts as a note on save too */
+        var txt = document.getElementById("tmNewNote").value.trim();
+        if (txt) t.notes.push({ date: new Date().toISOString().slice(0, 10), text: txt });
+        renderTaskRows();
+        handleClientRoute(); /* refresh client page task list if we're on one */
+      }
+      closeTaskModal();
+    });
+    document.getElementById("tmClose").addEventListener("click", closeTaskModal);
+    document.getElementById("tmCancel").addEventListener("click", closeTaskModal);
+    tmEl.addEventListener("click", function (e) { if (e.target === tmEl) closeTaskModal(); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && tmEl.style.display !== "none") closeTaskModal();
+    });
+  }
+  /* any task row (tasks page or client page) opens the modal — but not its buttons/links */
+  document.addEventListener("click", function (e) {
+    if (e.target.closest("[data-action]") || e.target.closest("a")) return;
+    var row = e.target.closest("[data-task-open]");
+    if (row) openTaskModal(parseInt(row.getAttribute("data-task-open"), 10));
+  });
 
   /* ---- client detail page ---- */
   function statusColorFor(v) { return v >= 70 ? "status-good" : v >= 50 ? "status-warning" : "status-critical"; }
-  var TIER_DOT = { "Strategic": "status-critical", "Gold": "status-warning", "Silver": "baseline" };
   function initials(name) {
     var parts = name.trim().split(/\s+/);
     return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
@@ -1642,9 +2068,7 @@
     var chips =
       '<div class="chip"><span class="v">' + money(arr(a)) + '</span><span class="k">ARR</span></div>' +
       '<div class="chip"><span class="v">' + money(a.mrr) + '</span><span class="k">MRR</span></div>' +
-      '<div class="chip"><span class="v">' + fmtDate(a.renewal) + renewalChipExtra + '</span><span class="k">Renewal</span></div>' +
-      '<div class="chip"><span class="v">' + (a.autoRenew ? "Auto" : "Manual") + '</span><span class="k">Auto renew</span></div>' +
-      '<div class="chip"><span class="v">' + (a.requirePO ? "Required" : "No") + '</span><span class="k">PO</span></div>';
+      '<div class="chip"><span class="v">' + fmtDate(a.renewal) + renewalChipExtra + '</span><span class="k">Renewal</span></div>';
 
     /* renewal countdown bar — progress through the (assumed annual) term */
     var progress = "";
@@ -1659,7 +2083,11 @@
 
     var hero = '<div class="client-hero">' + ring +
       '<div class="hero-main">' +
-      '<div class="hero-title"><h2>' + esc(a.name) + '</h2>' + badges + '</div>' +
+      '<div class="hero-title"><h2>' + esc(a.name) + '</h2>' + badges +
+      '<span class="row-icons">' +
+      '<a class="icon-link" data-action="Open admin panel" title="Open admin panel" aria-label="Open admin panel">⚙</a>' +
+      '<a class="icon-link sf" data-action="Open in Salesforce" title="Open in Salesforce" aria-label="Open in Salesforce">☁</a>' +
+      '</span></div>' +
       '<div class="hero-meta">' + esc(a.portal) + ' · CSM ' + esc(a.csm) + ' · ' + esc(a.location || "") + ' · ' + esc(a.region) + '</div>' +
       '<div class="hero-chips">' + chips + '</div>' + progress + '</div>' +
       '<div class="hero-actions">' +
@@ -1696,7 +2124,6 @@
     }).join("");
     var healthCard = '<div class="card"><h4>Health breakdown</h4>' + (hbRows || '<div class="empty-note">No breakdown available.</div>') + '</div>';
 
-    var PRIO_DOT = { "High": "status-critical", "Medium": "status-warning", "Low": "baseline" };
     var tickets = det.tickets || [];
     var ticketsCard = '<div class="card"><h4>Open tickets' + (tickets.length ? ' · ' + tickets.length : '') + '</h4>' +
       (tickets.map(function (t) {
@@ -1706,18 +2133,24 @@
       }).join("") || '<div class="empty-note">No open tickets.</div>') + '</div>';
 
     var tasks = D.tasks.filter(function (t) { return t.account === a.name; });
-    var tasksCard = '<div class="card"><h4>Tasks' + (tasks.length ? ' · ' + tasks.length : '') + '</h4>' +
+    var tasksCard = '<div class="card"><h4><a class="hlink" href="#tasks" title="Open the Tasks page">Tasks' + (tasks.length ? ' · ' + tasks.length : '') + ' →</a></h4>' +
       (tasks.map(function (t) {
         var d = daysUntil(t.due);
         var due = d < 0
           ? '<span style="color:var(--status-critical);font-weight:650;">overdue · ' + fmtDateShort(t.due) + '</span>'
           : (d === 0 ? 'due today' : 'due ' + fmtDateShort(t.due));
-        return '<div class="lrow"><span>☐ <b>' + esc(t.title) + '</b> · owner ' + esc(t.owner) + '</span>' +
+        var extra = (t.estimateMin ? ' · ~' + fmtEstimate(t.estimateMin) : '') +
+          (t.percent ? ' · ' + t.percent + '%' : '') +
+          (t.blockers ? ' · <span style="color:var(--status-serious);font-weight:650;">blocked</span>' : '') +
+          (t.escalated ? ' · <span style="color:var(--status-critical);font-weight:650;">🚨</span>' : '');
+        return '<div class="lrow" data-task-open="' + D.tasks.indexOf(t) + '" title="Open task">' +
+          '<span><span class="prio" style="background:var(--' + (PRIO_DOT[t.priority] || "baseline") + ')" title="' + esc(t.priority || "") + ' priority"></span> ' +
+          '☐ <b>' + esc(t.title) + '</b> · owner ' + esc(t.owner) + extra + '</span>' +
           '<span class="right">' + due + '</span></div>';
       }).join("") || '<div class="empty-note">No open tasks.</div>') + '</div>';
 
     var opps = D.opportunities.filter(function (o) { return o.account === a.name; });
-    var oppsCard = '<div class="card"><h4>Opportunities' + (opps.length ? ' · ' + opps.length : '') + '</h4>' +
+    var oppsCard = '<div class="card"><h4><a class="hlink" href="#opportunities" title="Open the Opportunities page">Opportunities' + (opps.length ? ' · ' + opps.length : '') + ' →</a></h4>' +
       (opps.map(function (o) {
         return '<div class="lrow"><span><b>' + esc(o.oppName) + '</b> · ' + esc(o.stage) + ' · ' + money(o.monthly) + '/mo</span>' +
           '<span class="right">closes ' + fmtDateShort(o.closeDate) + ' · ' + o.probability + '%</span></div>';
@@ -1736,6 +2169,8 @@
       '<div class="kv-row"><span class="k">Package size</span><span class="v">' + esc(a.packageSize || "—") + '</span></div>' +
       '<div class="kv-row"><span class="k">CPM</span><span class="v">' + (a.cpm != null ? "$" + a.cpm.toFixed(2) : "—") + '</span></div>' +
       '<div class="kv-row"><span class="k">Price per scan</span><span class="v">' + (a.pricePerScan != null ? "$" + a.pricePerScan.toFixed(4) : "—") + '</span></div>' +
+      '<div class="kv-row"><span class="k">Auto renew</span><span class="v">' + (a.autoRenew ? "Auto" : "Manual") + '</span></div>' +
+      '<div class="kv-row"><span class="k">PO</span><span class="v">' + (a.requirePO ? "Required" : "Not required") + '</span></div>' +
       '</div>';
 
     var contractCard = '<div class="card"><h4>Contract nuances</h4>' +
@@ -1743,14 +2178,17 @@
 
     var newsCard = '<div class="card"><h4>News</h4>' +
       ((det.news || []).map(function (n) {
-        return '<div class="lrow"><span>' + esc(n.title) + '</span>' +
+        var title = n.url
+          ? '<a class="news-link" href="' + esc(n.url) + '" target="_blank" rel="noopener">' + esc(n.title) + ' ↗</a>'
+          : esc(n.title);
+        return '<div class="lrow"><span>' + title + '</span>' +
           '<span class="right">' + fmtDateShort(n.date) + '</span></div>';
       }).join("") || '<div class="empty-note">No recent news.</div>') + '</div>';
 
     body.innerHTML = hero + alert +
       '<div class="client-cols">' +
       '<div class="col-stack">' + activityCard + healthCard + ticketsCard + tasksCard + oppsCard + '</div>' +
-      '<div class="col-stack">' + contactsCard + pkgCard + contractCard + newsCard + '</div>' +
+      '<div class="col-stack">' + pkgCard + contactsCard + contractCard + newsCard + '</div>' +
       '</div>';
   }
   function handleClientRoute() {
