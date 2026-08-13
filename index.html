@@ -288,6 +288,10 @@
   #page-renewals .tile[data-renewal-tile]:hover { border-color: var(--accent); transform: translateY(-1px); }
   #page-renewals .tile[data-renewal-tile].active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
   #page-renewals .tile[data-renewal-tile]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #page-opportunities .tile.clickable { cursor: pointer; transition: border-color .12s ease, transform .12s ease; }
+  #page-opportunities .tile.clickable:hover { border-color: var(--accent); transform: translateY(-1px); }
+  #page-opportunities .tile.clickable.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  #page-opportunities .tile.clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ============ charts ============ */
   .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-secondary); }
@@ -607,15 +611,15 @@
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
       <h2>Opportunities</h2>
-      <div class="desc">All open opportunities — owner, stage, amount, probability, close date and next steps.</div>
+      <div class="desc">Open opportunities by default — client, amount, probability, stage, contact and timing. Click Won / Lost to switch the table.</div>
     </div>
     <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" id="oppTileFlags"><span class="label">Open opportunities</span><span class="value">—</span></div>
       <div class="tile" id="oppTileValue"><span class="label">Est. pipeline value</span><span class="value">$—</span></div>
-      <div class="tile" id="oppTileConverted"><span class="label">Won this quarter</span><span class="value">—</span></div>
-      <div class="tile" id="oppTileLost"><span class="label">Lost this quarter</span><span class="value">—</span></div>
+      <div class="tile clickable" id="oppTileConverted" data-oppview="won" role="button" tabindex="0" title="Show won opportunities in the table"><span class="label">Won this quarter</span><span class="value">—</span><span class="delta">$— won</span></div>
+      <div class="tile clickable" id="oppTileLost" data-oppview="lost" role="button" tabindex="0" title="Show lost opportunities in the table"><span class="label">Lost this quarter</span><span class="value">—</span><span class="delta">$— lost</span></div>
     </div>
 
     <div class="filter-bar">
@@ -636,14 +640,16 @@
         <table class="data-table" id="oppTable">
           <thead>
             <tr>
-              <th class="sortable" data-sort="owner">Opportunity Owner<span class="arrow"></span></th>
-              <th class="sortable" data-sort="stage">Stage<span class="arrow"></span></th>
               <th class="sortable" data-sort="account">Client Name<span class="arrow"></span></th>
               <th class="sortable" data-sort="oppName">Opportunity Name<span class="arrow"></span></th>
               <th class="sortable" data-sort="monthly">Monthly Amount<span class="arrow"></span></th>
               <th class="sortable" data-sort="probability">Probability (%)<span class="arrow"></span></th>
+              <th class="sortable" data-sort="stage">Stage<span class="arrow"></span></th>
+              <th class="sortable" data-sort="contact">Opp Contact<span class="arrow"></span></th>
+              <th class="sortable" data-sort="openDate">Open Date<span class="arrow"></span></th>
               <th class="sortable" data-sort="closeDate">Close Date<span class="arrow"></span></th>
-              <th class="sortable" data-sort="createdDate">Created Date<span class="arrow"></span></th>
+              <th class="sortable" data-sort="daysOpen">Days Open<span class="arrow"></span></th>
+              <th>SF</th>
               <th class="sortable" data-sort="nextStep">Next Step<span class="arrow"></span></th>
               <th class="sortable" data-sort="nextStepUpdate">Next Step Update<span class="arrow"></span></th>
             </tr>
@@ -651,13 +657,21 @@
           <tbody id="oppRows"></tbody>
           <tfoot>
             <tr class="table-total">
-              <td colspan="4">Total (monthly)</td>
+              <td colspan="2">Total (monthly)</td>
               <td id="oppTotal">$—</td>
-              <td colspan="5"></td>
+              <td colspan="9"></td>
             </tr>
           </tfoot>
         </table>
       </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head-row">
+        <h4>Pipeline by close month — open opportunities, stacked by win probability</h4>
+        <div class="chart-legend" id="oppLegend"></div>
+      </div>
+      <div class="chart-box" id="oppChart"></div>
     </div>
   </section>
 
@@ -1198,40 +1212,59 @@
   /* ---- opportunities ---- */
   var OPP_STAGES = ["Discovery", "Demo", "Trial", "Commercial Discussion",
     "Negotiation/Review", "Closed Won", "Closed Lost", "Nurture", "Not Qualified"];
-  var pipeline = D.opportunities.reduce(function (s, o) { return s + o.est; }, 0);
-  setStat("oppFlags", D.opportunities.length);
+  var OPP_SF_ICON = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="#00A1E0" d="M10.6 5.1a3.6 3.6 0 0 1 6 1.1 3.2 3.2 0 0 1 4.2 3 3.2 3.2 0 0 1-3.2 3.2H8.1A3 3 0 0 1 7.5 6.4a3.8 3.8 0 0 1 3.1-1.3z"/></svg>';
+
+  function oppIsClosed(o) { return o.stage === "Closed Won" || o.stage === "Closed Lost"; }
+  function oppDaysOpen(o) {
+    var start = new Date(o.openDate + "T00:00:00");
+    var end = oppIsClosed(o) ? new Date(o.closeDate + "T00:00:00") : today;
+    return Math.max(0, Math.round((end - start) / 86400000));
+  }
+  var openOpps = D.opportunities.filter(function (o) { return !oppIsClosed(o); });
+  var wonOpps  = D.opportunities.filter(function (o) { return o.stage === "Closed Won"; });
+  var lostOpps = D.opportunities.filter(function (o) { return o.stage === "Closed Lost"; });
+  var pipeline    = openOpps.reduce(function (s, o) { return s + o.est; }, 0);
+  var wonMonthly  = wonOpps.reduce(function (s, o) { return s + o.monthly; }, 0);
+  var lostMonthly = lostOpps.reduce(function (s, o) { return s + o.monthly; }, 0);
+
+  setStat("oppFlags", openOpps.length);
   setStat("oppValue", moneyK(pipeline));
-  setText("#oppTileFlags .value", D.opportunities.length);
+  setText("#oppTileFlags .value", openOpps.length);
   setText("#oppTileValue .value", money(pipeline));
-  setText("#oppTileConverted .value", K.convertedThisQuarter);
-  setText("#oppTileLost .value", K.lostThisQuarter);
+  setText("#oppTileConverted .value", wonOpps.length);
+  setText("#oppTileConverted .delta", money(wonMonthly) + "/mo won");
+  setText("#oppTileLost .value", lostOpps.length);
+  setText("#oppTileLost .delta", money(lostMonthly) + "/mo lost");
 
   var oppStageFilter = document.getElementById("oppFilterStage");
   var oppFromFilter  = document.getElementById("oppFilterFrom");
   var oppToFilter    = document.getElementById("oppFilterTo");
   var oppClearBtn    = document.getElementById("oppFilterClear");
   var oppBody        = document.getElementById("oppRows");
+  var oppView = "open"; /* open | won | lost — default shows only open */
 
   if (oppStageFilter) {
     oppStageFilter.innerHTML = '<option value="">All stages</option>' +
       OPP_STAGES.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join("");
   }
-  function stageOptions(current) {
-    return OPP_STAGES.map(function (s) {
-      return '<option value="' + esc(s) + '"' + (s === current ? ' selected' : '') + '>' + esc(s) + '</option>';
-    }).join("");
-  }
   var oppSort = { key: null, dir: 1 };
   function oppVal(o, k) {
     if (k === "monthly" || k === "probability") return o[k];
+    if (k === "daysOpen") return oppDaysOpen(o);
     if (k === "stage") return OPP_STAGES.indexOf(o.stage);
     return String(o[k]).toLowerCase();
+  }
+  function oppInView(o) {
+    if (oppView === "won") return o.stage === "Closed Won";
+    if (oppView === "lost") return o.stage === "Closed Lost";
+    return !oppIsClosed(o);
   }
   function renderOpps() {
     var stage = oppStageFilter ? oppStageFilter.value : "";
     var from  = oppFromFilter ? oppFromFilter.value : "";
     var to    = oppToFilter ? oppToFilter.value : "";
     var rows = D.opportunities.filter(function (o) {
+      if (!oppInView(o)) return false;
       if (stage && o.stage !== stage) return false;
       if (from && o.closeDate < from) return false;
       if (to && o.closeDate > to) return false;
@@ -1246,19 +1279,20 @@
     var monthlyTotal = rows.reduce(function (s, o) { return s + o.monthly; }, 0);
     setText("#oppTotal", money(monthlyTotal));
     if (!rows.length) {
-      oppBody.innerHTML = '<tr><td colspan="10" class="empty-note">No opportunities match these filters.</td></tr>';
+      oppBody.innerHTML = '<tr><td colspan="12" class="empty-note">No opportunities match these filters.</td></tr>';
     } else {
       oppBody.innerHTML = rows.map(function (o) {
-        var i = D.opportunities.indexOf(o);
         return '<tr>' +
-          '<td>' + esc(o.owner) + '</td>' +
-          '<td><select class="stage-select" data-opp="' + i + '">' + stageOptions(o.stage) + '</select></td>' +
           '<td>' + nameLink(o.account) + '</td>' +
           '<td>' + esc(o.oppName) + '</td>' +
           '<td>' + money(o.monthly) + '</td>' +
           '<td>' + o.probability + '%</td>' +
+          '<td>' + esc(o.stage) + '</td>' +
+          '<td>' + esc(o.contact) + '</td>' +
+          '<td>' + fmtDate(o.openDate) + '</td>' +
           '<td>' + fmtDate(o.closeDate) + '</td>' +
-          '<td>' + fmtDate(o.createdDate) + '</td>' +
+          '<td>' + oppDaysOpen(o) + ' days</td>' +
+          '<td><a class="icon-link sf" data-action="Open in Salesforce" title="Open opportunity in Salesforce" aria-label="Open opportunity in Salesforce">' + OPP_SF_ICON + '</a></td>' +
           '<td class="wrap">' + esc(o.nextStep) + '</td>' +
           '<td>' + fmtDate(o.nextStepUpdate) + '</td>' +
           '</tr>';
@@ -1268,6 +1302,10 @@
       th.querySelector(".arrow").textContent =
         th.getAttribute("data-sort") === oppSort.key ? (oppSort.dir === 1 ? "▲" : "▼") : "";
     });
+    var convTile = document.getElementById("oppTileConverted");
+    var lostTile = document.getElementById("oppTileLost");
+    if (convTile) convTile.classList.toggle("active", oppView === "won");
+    if (lostTile) lostTile.classList.toggle("active", oppView === "lost");
   }
 
   document.querySelectorAll("#oppTable th.sortable").forEach(function (th) {
@@ -1279,13 +1317,23 @@
     });
   });
 
+  function setOppView(v) {
+    oppView = (oppView === v) ? "open" : v;
+    if (oppStageFilter) oppStageFilter.value = "";
+    renderOpps();
+  }
+  ["oppTileConverted", "oppTileLost"].forEach(function (id) {
+    var tile = document.getElementById(id);
+    if (!tile) return;
+    var v = tile.getAttribute("data-oppview");
+    tile.addEventListener("click", function () { setOppView(v); });
+    tile.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOppView(v); }
+    });
+  });
+
   document.addEventListener("change", function (e) {
     var t = e.target;
-    if (t && t.classList && t.classList.contains("stage-select")) {
-      var i = +t.getAttribute("data-opp");
-      if (D.opportunities[i]) { D.opportunities[i].stage = t.value; renderOpps(); }
-      return;
-    }
     if (t === oppStageFilter || t === oppFromFilter || t === oppToFilter) renderOpps();
   });
   if (oppClearBtn) {
@@ -1293,10 +1341,143 @@
       if (oppStageFilter) oppStageFilter.value = "";
       if (oppFromFilter) oppFromFilter.value = "";
       if (oppToFilter) oppToFilter.value = "";
+      oppView = "open";
       renderOpps();
     });
   }
   renderOpps();
+
+  /* ---- opportunities pipeline chart: $ by close month, stacked by win probability ---- */
+  var OPP_PROB_SERIES = [
+    { key: "high", label: "High (≥70%)",     color: "var(--status-good)" },
+    { key: "med",  label: "Medium (40–69%)", color: "var(--status-warning)" },
+    { key: "low",  label: "Low (<40%)",      color: "var(--status-critical)" }
+  ];
+  function oppBand(p) { return p >= 70 ? "high" : p >= 40 ? "med" : "low"; }
+  (function buildOppLegend() {
+    var legend = document.getElementById("oppLegend");
+    if (!legend) return;
+    OPP_PROB_SERIES.forEach(function (s) {
+      var key = document.createElement("span"); key.className = "key";
+      var sw = document.createElement("span"); sw.className = "swatch"; sw.style.background = s.color;
+      key.appendChild(sw); key.appendChild(document.createTextNode(s.label)); legend.appendChild(key);
+    });
+  })();
+  function oppMonths() {
+    var months = [];
+    for (var i = 0; i < 12; i++) {
+      var d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+      months.push({ y: d.getFullYear(), m: d.getMonth(), high: 0, med: 0, low: 0, total: 0, opps: [] });
+    }
+    openOpps.forEach(function (o) {
+      var d = new Date(o.closeDate + "T00:00:00");
+      months.forEach(function (mo) {
+        if (d.getFullYear() === mo.y && d.getMonth() === mo.m) {
+          mo[oppBand(o.probability)] += o.monthly;
+          mo.total += o.monthly;
+          mo.opps.push(o);
+        }
+      });
+    });
+    return months;
+  }
+  var oppTip = null;
+  function showOppTip(box, mo, px) {
+    if (!oppTip) { oppTip = document.createElement("div"); oppTip.className = "chart-tooltip"; box.appendChild(oppTip); }
+    oppTip.textContent = "";
+    var title = document.createElement("div"); title.className = "tt-title";
+    title.textContent = new Date(mo.y, mo.m, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    oppTip.appendChild(title);
+    if (!mo.opps.length) {
+      var none = document.createElement("div"); none.className = "tt-row"; none.textContent = "No opportunities"; oppTip.appendChild(none);
+    } else {
+      mo.opps.slice().sort(function (a, b) { return b.monthly - a.monthly; }).forEach(function (o) {
+        var row = document.createElement("div"); row.className = "tt-row";
+        var key = document.createElement("span"); key.className = "tt-key";
+        key.style.background = OPP_PROB_SERIES.filter(function (s) { return s.key === oppBand(o.probability); })[0].color;
+        var nm = document.createElement("span"); nm.textContent = o.account + " · " + o.probability + "%";
+        var val = document.createElement("span"); val.className = "tt-val"; val.textContent = money(o.monthly);
+        row.appendChild(key); row.appendChild(nm); row.appendChild(val); oppTip.appendChild(row);
+      });
+      if (mo.opps.length > 1) {
+        var tr = document.createElement("div"); tr.className = "tt-row tt-total";
+        var l = document.createElement("span"); l.textContent = "Total";
+        var vv = document.createElement("span"); vv.className = "tt-val"; vv.textContent = money(mo.total);
+        tr.appendChild(l); tr.appendChild(vv); oppTip.appendChild(tr);
+      }
+    }
+    oppTip.style.display = "block";
+    var boxW = box.clientWidth, ttW = oppTip.offsetWidth, left = px + 12;
+    if (left + ttW > boxW - 4) left = px - ttW - 12;
+    oppTip.style.left = Math.max(4, left) + "px"; oppTip.style.top = "8px";
+  }
+  function hideOppTip() { if (oppTip) oppTip.style.display = "none"; }
+
+  function renderOppChart() {
+    var box = document.getElementById("oppChart");
+    if (!box || box.clientWidth < 80) return;
+    oppTip = null;
+    box.textContent = "";
+    var months = oppMonths();
+    var W = box.clientWidth, H = 230, mL = 46, mR = 6, mT = 20, mB = 24;
+    var innerW = W - mL - mR, innerH = H - mT - mB, GAP = 2, RADIUS = 4;
+    var max = Math.max.apply(null, months.map(function (m) { return m.total; }));
+    if (max <= 0) max = 1;
+    var step = [1000, 2000, 2500, 5000, 10000, 20000, 50000].filter(function (s) { return Math.ceil(max / s) <= 4; })[0] || 50000;
+    var yMax = step * Math.ceil(max / step);
+    function yPos(v) { return mT + innerH - (v / yMax) * innerH; }
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "Stacked column chart of open pipeline monthly value by close month, split by win probability");
+    function el(tag, attrs, parent) {
+      var node = document.createElementNS(svgNS, tag);
+      for (var k in attrs) node.setAttribute(k, attrs[k]);
+      (parent || svg).appendChild(node); return node;
+    }
+    for (var v = 0; v <= yMax; v += step) {
+      var gy = yPos(v);
+      el("line", { x1: mL, y1: gy, x2: W - mR, y2: gy, stroke: "var(--grid)", "stroke-width": 1 });
+      var tick = el("text", { x: mL - 7, y: gy + 3.5, "text-anchor": "end", "font-size": 10.5, fill: "var(--text-muted)" });
+      tick.textContent = v === 0 ? "$0" : moneyK(v);
+    }
+    var bandW = innerW / 12, barW = Math.min(24, Math.round(bandW * 0.5));
+    var maxIdx = months.reduce(function (best, m, i) { return m.total > months[best].total ? i : best; }, 0);
+    months.forEach(function (mo, i) {
+      var bandX = mL + i * bandW, cx = bandX + bandW / 2;
+      var g = el("g", { "class": "band", tabindex: 0 });
+      var xl = el("text", { x: cx, y: H - 7, "text-anchor": "middle", "font-size": 10.5, fill: "var(--text-muted)" }, g);
+      var monthName = new Date(mo.y, mo.m, 1).toLocaleDateString("en-US", { month: "short" });
+      xl.textContent = (i === 0 || mo.m === 0) ? monthName + " ’" + String(mo.y).slice(2) : monthName;
+      /* stacked baseline→top: high (bottom) → med → low */
+      var yCursor = mT + innerH;
+      var segs = ["high", "med", "low"].map(function (key) { return { key: key, val: mo[key] }; }).filter(function (s) { return s.val > 0; });
+      segs.forEach(function (s, si) {
+        var hPx = (s.val / yMax) * innerH;
+        if (si > 0) yCursor -= GAP;
+        var yTop = yCursor - hPx;
+        var color = OPP_PROB_SERIES.filter(function (r) { return r.key === s.key; })[0].color;
+        if (si === segs.length - 1) el("path", { d: roundedTopRect(cx - barW / 2, yTop, barW, hPx, RADIUS), fill: color, "class": "seg" }, g);
+        else el("rect", { x: cx - barW / 2, y: yTop, width: barW, height: hPx, fill: color, "class": "seg" }, g);
+        yCursor = yTop;
+      });
+      if (i === maxIdx && mo.total > 0) {
+        var cap = el("text", { x: cx, y: yCursor - 6, "text-anchor": "middle", "font-size": 10.5, "font-weight": 650, fill: "var(--text-secondary)" }, g);
+        cap.textContent = moneyK(mo.total);
+      }
+      el("rect", { x: bandX, y: mT, width: bandW, height: innerH, fill: "transparent" }, g);
+      g.addEventListener("pointermove", function () { showOppTip(box, mo, cx); });
+      g.addEventListener("pointerleave", hideOppTip);
+      g.addEventListener("focus", function () { showOppTip(box, mo, cx); });
+      g.addEventListener("blur", hideOppTip);
+      svg.appendChild(g);
+    });
+    box.appendChild(svg);
+  }
+  var oppChartTimer = null;
+  window.addEventListener("resize", function () { clearTimeout(oppChartTimer); oppChartTimer = setTimeout(renderOppChart, 150); });
+  window.addEventListener("hashchange", function () { setTimeout(renderOppChart, 0); });
+  renderOppChart();
 
   /* ---- renewals ---- */
   var RISK = {
