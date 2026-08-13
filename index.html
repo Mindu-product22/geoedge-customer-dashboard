@@ -306,21 +306,74 @@
   /* ============ client detail page ============ */
   .client-link { color: var(--accent); font-weight: 650; text-decoration: none; cursor: pointer; }
   .client-link:hover { text-decoration: underline; }
-  .qa-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 16px; }
-  .client-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; align-items: start; }
-  .client-grid .card { margin-bottom: 0; }
-  .client-grid .card.span2 { grid-column: 1 / -1; }
-  .hb-overall { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
-  .hb-overall .score { font-size: 30px; font-weight: 750; line-height: 1; }
-  .hb-overall .of { font-size: 12px; color: var(--text-muted); }
-  .hb-row { margin-top: 9px; }
-  .hb-row .hb-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
-  .hb-row .hb-label b { color: var(--text-primary); font-weight: 650; }
-  .kv-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--grid); font-size: 12.5px; }
+
+  .client-hero {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px; margin-bottom: 14px;
+    display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+  }
+  .score-ring { position: relative; width: 84px; height: 84px; flex: none; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring .num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-ring .num b { font-size: 24px; font-weight: 750; line-height: 1; }
+  .score-ring .num span { font-size: 9.5px; color: var(--text-muted); margin-top: 2px; }
+  .hero-main { flex: 1; min-width: 260px; }
+  .hero-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .hero-title h2 { font-size: 22px; font-weight: 750; }
+  .hero-meta { color: var(--text-secondary); font-size: 12.5px; margin-top: 3px; }
+  .hero-chips { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 12px; }
+  .chip { display: flex; flex-direction: column; }
+  .chip .v { font-size: 15px; font-weight: 700; line-height: 1.2; display: flex; align-items: center; gap: 6px; }
+  .chip .k { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 1px; }
+  .hero-actions { display: flex; flex-direction: column; gap: 7px; align-items: stretch; }
+  .hero-actions .btn { justify-content: flex-start; }
+  @media (max-width: 720px) { .hero-actions { flex-direction: row; flex-wrap: wrap; width: 100%; } }
+  .renewal-progress { width: 100%; margin-top: 14px; }
+  .renewal-progress .rp-label { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-secondary); margin-bottom: 4px; }
+  .renewal-progress .rp-label b { color: var(--text-primary); }
+  .renewal-progress .goal-bar { margin-top: 0; }
+
+  .client-alert {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    border: 1px solid rgba(208,59,59,.35); background: rgba(208,59,59,.07);
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 12.5px;
+  }
+  .client-alert.watch { border-color: rgba(250,178,25,.45); background: rgba(250,178,25,.09); }
+  .client-alert b { font-weight: 700; }
+  .client-alert .spacer { margin-left: auto; }
+
+  .client-cols { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 14px; align-items: start; }
+  @media (max-width: 860px) { .client-cols { grid-template-columns: 1fr; } }
+  .col-stack { display: flex; flex-direction: column; gap: 14px; }
+  .col-stack .card { margin-bottom: 0; }
+  #page-client .card h4 {
+    font-size: 11.5px; font-weight: 650; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: .04em; margin-bottom: 10px;
+  }
+
+  .hb-row { margin-top: 10px; }
+  .hb-row:first-of-type { margin-top: 2px; }
+  .hb-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+  .hb-label b { color: var(--text-primary); font-weight: 650; }
+  .hb-row .goal-bar { margin-top: 0; }
+
+  .lrow { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--grid); font-size: 12.5px; align-items: baseline; }
+  .lrow:last-child { border-bottom: none; padding-bottom: 2px; }
+  .lrow .right { margin-left: auto; color: var(--text-muted); font-size: 11.5px; white-space: nowrap; padding-left: 10px; }
+  .prio { width: 7px; height: 7px; border-radius: 50%; flex: none; display: inline-block; margin-right: 2px; position: relative; top: -1px; }
+
+  .contact { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--grid); align-items: center; }
+  .contact:last-child { border-bottom: none; padding-bottom: 2px; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; flex: none; background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .contact .c-name { font-weight: 650; font-size: 12.5px; }
+  .contact .c-sub { font-size: 11.5px; color: var(--text-muted); }
+
+  .kv-row { display: flex; justify-content: space-between; gap: 12px; padding: 5.5px 0; border-bottom: 1px solid var(--grid); font-size: 12.5px; }
   .kv-row:last-child { border-bottom: none; }
   .kv-row .k { color: var(--text-secondary); }
   .kv-row .v { font-weight: 650; text-align: right; }
-  .detail-note { font-size: 12.5px; color: var(--text-secondary); line-height: 1.55; }
+  .detail-note { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
 
   #toast {
     position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
@@ -746,18 +799,9 @@
   <section class="page" id="page-client">
     <div class="page-head">
       <button class="btn" data-nav="customers">← Clients</button>
-      <h2 id="clientTitle">Client</h2>
-      <div class="desc" id="clientSubtitle"></div>
+      <div class="stub-note" style="margin:0;">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
-
-    <div class="qa-row">
-      <button class="btn primary" data-action="Make QBR">📊 Make QBR</button>
-      <button class="btn" data-action="Make PDF">📄 Make PDF</button>
-      <button class="btn" data-action="Log Call">📞 Log Call</button>
-      <button class="btn" data-action="Run Deep Dive">🔎 Run Deep Dive</button>
-    </div>
-
+    <div style="height:10px;"></div>
     <div id="clientBody"></div>
   </section>
 
@@ -1554,26 +1598,93 @@
 
   /* ---- client detail page ---- */
   function statusColorFor(v) { return v >= 70 ? "status-good" : v >= 50 ? "status-warning" : "status-critical"; }
+  var TIER_DOT = { "Strategic": "status-critical", "Gold": "status-warning", "Silver": "baseline" };
+  function initials(name) {
+    var parts = name.trim().split(/\s+/);
+    return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
+  }
   function renderClientPage(portal) {
     var body = document.getElementById("clientBody");
     if (!body) return;
     var a = A.filter(function (x) { return x.portal === portal; })[0];
+    var crumbEl = document.getElementById("crumbHere");
     if (!a) {
-      document.getElementById("clientTitle").textContent = "Unknown client";
-      document.getElementById("clientSubtitle").textContent = "";
+      if (crumbEl) crumbEl.textContent = "Client";
       body.innerHTML = '<div class="empty-note">No client found for “' + esc(portal) + '”.</div>';
       return;
     }
     var det = (D.clientDetails || {})[portal] || {};
-    document.getElementById("clientTitle").textContent = a.name;
-    document.getElementById("clientSubtitle").textContent =
-      a.portal + " · " + a.tier + " · " + a.product + " · CSM " + a.csm + " · " + a.region;
-    var crumbEl = document.getElementById("crumbHere");
     if (crumbEl) crumbEl.textContent = "Client · " + a.name;
 
     var h = HEALTH[a.health];
+    var r = RISK[a.churnRisk];
+    var daysLeft = daysUntil(a.renewal);
 
-    var summaryCard = '<div class="card span2"><h4>Recent activity summary</h4>' +
+    /* ---- hero ---- */
+    var CIRC = 226.2; /* 2πr for r=36 */
+    var ringColor = statusColorFor(a.healthScore);
+    var ring = '<div class="score-ring">' +
+      '<svg width="84" height="84" viewBox="0 0 84 84" role="img" aria-label="Health score ' + a.healthScore + ' out of 100">' +
+      '<circle cx="42" cy="42" r="36" fill="none" stroke="var(--slot-bg)" stroke-width="7"/>' +
+      '<circle cx="42" cy="42" r="36" fill="none" stroke="var(--' + ringColor + ')" stroke-width="7" stroke-linecap="round" ' +
+      'stroke-dasharray="' + (a.healthScore / 100 * CIRC).toFixed(1) + ' ' + CIRC + '"/></svg>' +
+      '<div class="num"><b>' + a.healthScore + '</b><span>health</span></div></div>';
+
+    var badges =
+      pill(a.tier, TIER_DOT[a.tier] || "baseline") + " " +
+      '<span class="pill">' + esc(a.product) + '</span> ' +
+      pill(r.label, r.color);
+
+    var renewalChipExtra = "";
+    if (daysLeft >= 0 && daysLeft <= 90) {
+      renewalChipExtra = ' <span style="color:var(--' + (daysLeft <= 30 ? "status-critical" : "warning-ink") + ');font-size:12px;">· in ' + daysLeft + ' days</span>';
+    }
+    var chips =
+      '<div class="chip"><span class="v">' + money(arr(a)) + '</span><span class="k">ARR</span></div>' +
+      '<div class="chip"><span class="v">' + money(a.mrr) + '</span><span class="k">MRR</span></div>' +
+      '<div class="chip"><span class="v">' + fmtDate(a.renewal) + renewalChipExtra + '</span><span class="k">Renewal</span></div>' +
+      '<div class="chip"><span class="v">' + (a.autoRenew ? "Auto" : "Manual") + '</span><span class="k">Auto renew</span></div>' +
+      '<div class="chip"><span class="v">' + (a.requirePO ? "Required" : "No") + '</span><span class="k">PO</span></div>';
+
+    /* renewal countdown bar — progress through the (assumed annual) term */
+    var progress = "";
+    if (daysLeft >= 0 && daysLeft <= 365) {
+      var pct = Math.min(100, Math.max(2, Math.round((365 - daysLeft) / 365 * 100)));
+      var barColor = daysLeft <= 30 ? "status-critical" : daysLeft <= 90 ? "status-warning" : "accent";
+      progress = '<div class="renewal-progress">' +
+        '<div class="rp-label"><span>Contract period</span><b>' + daysLeft + ' days to renewal</b></div>' +
+        '<div class="goal-bar"><div class="goal-fill" style="width:' + pct + '%;background:var(--' + barColor + ');"></div></div>' +
+        '</div>';
+    }
+
+    var hero = '<div class="client-hero">' + ring +
+      '<div class="hero-main">' +
+      '<div class="hero-title"><h2>' + esc(a.name) + '</h2>' + badges + '</div>' +
+      '<div class="hero-meta">' + esc(a.portal) + ' · CSM ' + esc(a.csm) + ' · ' + esc(a.location || "") + ' · ' + esc(a.region) + '</div>' +
+      '<div class="hero-chips">' + chips + '</div>' + progress + '</div>' +
+      '<div class="hero-actions">' +
+      '<button class="btn primary" data-action="Make QBR">📊 Make QBR</button>' +
+      '<button class="btn" data-action="Make PDF">📄 Make PDF</button>' +
+      '<button class="btn" data-action="Log Call">📞 Log Call</button>' +
+      '<button class="btn" data-action="Run Deep Dive">🔎 Run Deep Dive</button>' +
+      '</div></div>';
+
+    /* ---- alert banner: only when something needs attention ---- */
+    var alert = "";
+    if (a.churnRisk === "high") {
+      alert = '<div class="client-alert">⚠️ <b>High churn risk' +
+        (daysLeft >= 0 && daysLeft <= 90 ? ", renews in " + daysLeft + " days" : "") +
+        '</b> — ' + esc(a.plan || "") +
+        ' <span class="spacer"></span><button class="btn" data-action="View save plan" style="padding:4px 10px;">View plan</button></div>';
+    } else if (a.churnRisk === "watch" || (daysLeft >= 0 && daysLeft <= 30)) {
+      alert = '<div class="client-alert watch">⚠️ <b>' +
+        (a.churnRisk === "watch" ? "On watch" : "Renews soon") +
+        (daysLeft >= 0 && daysLeft <= 90 ? ", renews in " + daysLeft + " days" : "") +
+        '</b> — ' + esc(a.plan || "") + '</div>';
+    }
+
+    /* ---- main column ---- */
+    var activityCard = '<div class="card"><h4>Recent activity</h4>' +
       '<p class="detail-note">' + esc(det.recentActivity || "—") + '</p></div>';
 
     var hbRows = Object.keys(det.healthBreakdown || {}).map(function (k) {
@@ -1583,63 +1694,63 @@
         '<div class="goal-bar"><div class="goal-fill" style="width:' + v + '%;background:var(--' + statusColorFor(v) + ');"></div></div>' +
         '</div>';
     }).join("");
-    var healthCard = '<div class="card"><h4>Health score breakdown</h4>' +
-      '<div class="hb-overall"><span class="score">' + a.healthScore + '</span><span class="of">/ 100</span>' +
-      pill(h.label, h.color) + '</div>' + hbRows + '</div>';
+    var healthCard = '<div class="card"><h4>Health breakdown</h4>' + (hbRows || '<div class="empty-note">No breakdown available.</div>') + '</div>';
 
+    var PRIO_DOT = { "High": "status-critical", "Medium": "status-warning", "Low": "baseline" };
+    var tickets = det.tickets || [];
+    var ticketsCard = '<div class="card"><h4>Open tickets' + (tickets.length ? ' · ' + tickets.length : '') + '</h4>' +
+      (tickets.map(function (t) {
+        return '<div class="lrow"><span><span class="prio" style="background:var(--' + (PRIO_DOT[t.priority] || "baseline") + ')"></span> ' +
+          '<b>' + esc(t.id) + '</b> ' + esc(t.title) + '</span>' +
+          '<span class="right">' + esc(t.status) + ' · ' + fmtDateShort(t.opened) + '</span></div>';
+      }).join("") || '<div class="empty-note">No open tickets.</div>') + '</div>';
+
+    var tasks = D.tasks.filter(function (t) { return t.account === a.name; });
+    var tasksCard = '<div class="card"><h4>Tasks' + (tasks.length ? ' · ' + tasks.length : '') + '</h4>' +
+      (tasks.map(function (t) {
+        var d = daysUntil(t.due);
+        var due = d < 0
+          ? '<span style="color:var(--status-critical);font-weight:650;">overdue · ' + fmtDateShort(t.due) + '</span>'
+          : (d === 0 ? 'due today' : 'due ' + fmtDateShort(t.due));
+        return '<div class="lrow"><span>☐ <b>' + esc(t.title) + '</b> · owner ' + esc(t.owner) + '</span>' +
+          '<span class="right">' + due + '</span></div>';
+      }).join("") || '<div class="empty-note">No open tasks.</div>') + '</div>';
+
+    var opps = D.opportunities.filter(function (o) { return o.account === a.name; });
+    var oppsCard = '<div class="card"><h4>Opportunities' + (opps.length ? ' · ' + opps.length : '') + '</h4>' +
+      (opps.map(function (o) {
+        return '<div class="lrow"><span><b>' + esc(o.oppName) + '</b> · ' + esc(o.stage) + ' · ' + money(o.monthly) + '/mo</span>' +
+          '<span class="right">closes ' + fmtDateShort(o.closeDate) + ' · ' + o.probability + '%</span></div>';
+      }).join("") || '<div class="empty-note">No open opportunities.</div>') + '</div>';
+
+    /* ---- sidebar ---- */
     var contactsCard = '<div class="card"><h4>Contacts</h4>' +
       ((det.contacts || []).map(function (c) {
-        return '<div class="row-slot"><span><b>' + esc(c.name) + '</b> — ' + esc(c.title) + '</span>' +
-          '<span style="color:var(--text-muted);font-size:11.5px;">' + esc(c.location) + ' · ' + esc(c.tz) + '</span></div>';
+        return '<div class="contact"><span class="avatar">' + esc(initials(c.name)) + '</span>' +
+          '<div><div class="c-name">' + esc(c.name) + '</div>' +
+          '<div class="c-sub">' + esc(c.title) + ' · ' + esc(c.location) + ' · ' + esc(c.tz) + '</div></div></div>';
       }).join("") || '<div class="empty-note">No contacts on file.</div>') + '</div>';
 
-    var pkgCard = '<div class="card"><h4>Package info</h4>' +
+    var pkgCard = '<div class="card"><h4>Package</h4>' +
       '<div class="kv-row"><span class="k">Products</span><span class="v">' + esc(a.products || a.product) + '</span></div>' +
       '<div class="kv-row"><span class="k">Package size</span><span class="v">' + esc(a.packageSize || "—") + '</span></div>' +
-      '<div class="kv-row"><span class="k">MRR</span><span class="v">' + money(a.mrr) + '</span></div>' +
-      '<div class="kv-row"><span class="k">ARR</span><span class="v">' + money(arr(a)) + '</span></div>' +
       '<div class="kv-row"><span class="k">CPM</span><span class="v">' + (a.cpm != null ? "$" + a.cpm.toFixed(2) : "—") + '</span></div>' +
       '<div class="kv-row"><span class="k">Price per scan</span><span class="v">' + (a.pricePerScan != null ? "$" + a.pricePerScan.toFixed(4) : "—") + '</span></div>' +
-      '<div class="kv-row"><span class="k">Tier</span><span class="v">' + esc(a.tier) + '</span></div>' +
-      '<div class="kv-row"><span class="k">Renewal</span><span class="v">' + fmtDate(a.renewal) + '</span></div>' +
-      '<div class="kv-row"><span class="k">Auto renew</span><span class="v">' + (a.autoRenew ? "Auto" : "Manual") + '</span></div>' +
-      '<div class="kv-row"><span class="k">PO</span><span class="v">' + (a.requirePO ? "Required" : "Not required") + '</span></div>' +
       '</div>';
 
     var contractCard = '<div class="card"><h4>Contract nuances</h4>' +
       '<p class="detail-note">' + esc(det.contractNotes || "—") + '</p></div>';
 
-    var opps = D.opportunities.filter(function (o) { return o.account === a.name; });
-    var oppsCard = '<div class="card"><h4>Opportunities</h4>' +
-      (opps.map(function (o) {
-        return '<div class="row-slot"><span><b>' + esc(o.oppName) + '</b> · ' + esc(o.stage) + ' · ' + money(o.monthly) + '/mo</span>' +
-          '<span style="color:var(--text-muted);font-size:11.5px;">closes ' + fmtDateShort(o.closeDate) + ' · ' + o.probability + '%</span></div>';
-      }).join("") || '<div class="empty-note">No open opportunities.</div>') + '</div>';
-
-    var TICKET_COLOR = { "Open": "status-warning", "In progress": "status-good" };
-    var ticketsCard = '<div class="card"><h4>Open tickets</h4>' +
-      ((det.tickets || []).map(function (t) {
-        return '<div class="row-slot"><span><b>' + esc(t.id) + '</b> ' + esc(t.title) +
-          ' · ' + esc(t.priority) + ' · opened ' + fmtDateShort(t.opened) + '</span>' +
-          pill(t.status, TICKET_COLOR[t.status] || "status-warning") + '</div>';
-      }).join("") || '<div class="empty-note">No open tickets.</div>') + '</div>';
-
-    var tasks = D.tasks.filter(function (t) { return t.account === a.name; });
-    var tasksCard = '<div class="card"><h4>Tasks</h4>' +
-      (tasks.map(function (t) {
-        return '<div class="row-slot"><span>☐ <b>' + esc(t.title) + '</b> · owner ' + esc(t.owner) + ' · due ' + fmtDateShort(t.due) + '</span>' +
-          '<button class="btn" data-action="Complete task">Done</button></div>';
-      }).join("") || '<div class="empty-note">No open tasks.</div>') + '</div>';
-
     var newsCard = '<div class="card"><h4>News</h4>' +
       ((det.news || []).map(function (n) {
-        return '<div class="row-slot"><span>' + esc(n.title) + '</span>' +
-          '<span style="color:var(--text-muted);font-size:11.5px;">' + fmtDateShort(n.date) + '</span></div>';
+        return '<div class="lrow"><span>' + esc(n.title) + '</span>' +
+          '<span class="right">' + fmtDateShort(n.date) + '</span></div>';
       }).join("") || '<div class="empty-note">No recent news.</div>') + '</div>';
 
-    body.innerHTML = '<div class="client-grid">' +
-      summaryCard + healthCard + contactsCard + pkgCard + contractCard +
-      oppsCard + ticketsCard + tasksCard + newsCard +
+    body.innerHTML = hero + alert +
+      '<div class="client-cols">' +
+      '<div class="col-stack">' + activityCard + healthCard + ticketsCard + tasksCard + oppsCard + '</div>' +
+      '<div class="col-stack">' + contactsCard + pkgCard + contractCard + newsCard + '</div>' +
       '</div>';
   }
   function handleClientRoute() {
