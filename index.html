@@ -211,6 +211,7 @@
   }
   .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--grid); vertical-align: middle; white-space: nowrap; }
   .data-table td.wrap { white-space: normal; min-width: 150px; }
+  .data-table .price-unit { color: var(--text-muted); font-size: 10px; margin-left: 4px; }
   .data-table tr:last-child td { border-bottom: none; }
   .admin-link { color: var(--accent); font-weight: 600; text-decoration: none; cursor: pointer; }
   .admin-link:hover { text-decoration: underline; }
@@ -909,8 +910,7 @@
               <th class="sortable" data-sort="name">Client Name<span class="arrow"></span></th>
               <th class="sortable" data-sort="tier">Tier<span class="arrow"></span></th>
               <th class="sortable" data-sort="mrr">MRR<span class="arrow"></span></th>
-              <th class="sortable" data-sort="cpm">CPM<span class="arrow"></span></th>
-              <th class="sortable" data-sort="pricePerScan">Price Per Scan<span class="arrow"></span></th>
+              <th class="sortable" data-sort="unitPrice">CPM / Price per scan<span class="arrow"></span></th>
               <th class="sortable" data-sort="packageSize">Package Size<span class="arrow"></span></th>
               <th class="sortable" data-sort="products">Products<span class="arrow"></span></th>
               <th class="sortable" data-sort="renewal">Renewal Date<span class="arrow"></span></th>
@@ -2056,7 +2056,8 @@
       var k = ctState.sortKey, va, vb;
       if (k === "tier") { va = TIER_ORDER[a.tier]; vb = TIER_ORDER[b.tier]; }
       else if (k === "packageSize") { va = parseFloat(a.packageSize) || 0; vb = parseFloat(b.packageSize) || 0; }
-      else if (k === "mrr" || k === "cpm" || k === "pricePerScan") { va = a[k]; vb = b[k]; }
+      else if (k === "mrr") { va = a.mrr; vb = b.mrr; }
+      else if (k === "unitPrice") { va = a.product === "RUM" ? a.cpm : a.pricePerScan; vb = b.product === "RUM" ? b.cpm : b.pricePerScan; }
       else if (k === "renewal") { va = a.renewal; vb = b.renewal; }
       else { va = String(a[k] || "").toLowerCase(); vb = String(b[k] || "").toLowerCase(); }
       return (va < vb ? -1 : va > vb ? 1 : 0) * ctState.sortDir;
@@ -2070,8 +2071,9 @@
         '</div></td>' +
         '<td>' + pill(a.tier, TIER_DOT[a.tier] || "baseline") + '</td>' +
         '<td>' + money(a.mrr) + '</td>' +
-        '<td>$' + a.cpm.toFixed(2) + '</td>' +
-        '<td>$' + a.pricePerScan.toFixed(4) + '</td>' +
+        '<td>' + (a.product === "RUM"
+          ? '$' + a.cpm.toFixed(2) + '<span class="price-unit">CPM</span>'
+          : '$' + a.pricePerScan.toFixed(4) + '<span class="price-unit">/scan</span>') + '</td>' +
         '<td>' + esc(a.packageSize) + '</td>' +
         '<td>' + esc(a.products) + '</td>' +
         '<td>' + fmtDate(a.renewal) + '</td>' +
@@ -2090,7 +2092,7 @@
     th.addEventListener("click", function () {
       var k = th.getAttribute("data-sort");
       if (ctState.sortKey === k) ctState.sortDir = -ctState.sortDir;
-      else { ctState.sortKey = k; ctState.sortDir = (k === "mrr" || k === "cpm" || k === "pricePerScan" || k === "packageSize") ? -1 : 1; }
+      else { ctState.sortKey = k; ctState.sortDir = (k === "mrr" || k === "unitPrice" || k === "packageSize") ? -1 : 1; }
       renderClientsTable();
     });
   });
