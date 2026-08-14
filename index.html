@@ -901,6 +901,9 @@
               <option value="Other">Other</option>
             </select>
           </label>
+          <label>Customer Success Manager
+            <select id="ctCsm"></select>
+          </label>
           <button class="btn" id="ctClear" type="button">Clear filters</button>
         </div>
       </div>
@@ -916,6 +919,7 @@
               <th class="sortable" data-sort="products">Products<span class="arrow"></span></th>
               <th class="sortable" data-sort="renewal">Renewal Date<span class="arrow"></span></th>
               <th class="sortable" data-sort="contact">Contact<span class="arrow"></span></th>
+              <th class="sortable" data-sort="csm">CSM<span class="arrow"></span></th>
               <th class="sortable" data-sort="location">Location<span class="arrow"></span></th>
             </tr>
           </thead>
@@ -2033,7 +2037,9 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   renderRenewalChart();
 
   /* ---- clients table: sortable columns + filters ---- */
-  var ctState = { sortKey: "mrr", sortDir: -1, product: "all", tier: "all", region: "all" };
+  /* currentCsm simulates the logged-in user — default view is "my customers". Replace with real auth later. */
+  var currentCsm = (D.user && D.user.displayName) || "all";
+  var ctState = { sortKey: "mrr", sortDir: -1, product: "all", tier: "all", region: "all", csm: currentCsm };
   var TIER_ORDER = { "Strategic": 0, "Gold": 1, "Silver": 2 };
   var COUNTRY_FLAGS = { "USA": "🇺🇸", "Germany": "🇩🇪", "Sweden": "🇸🇪", "Singapore": "🇸🇬",
     "Japan": "🇯🇵", "Israel": "🇮🇱", "Australia": "🇦🇺", "Ireland": "🇮🇪", "South Korea": "🇰🇷",
@@ -2052,6 +2058,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       if (ctState.product !== "all" && a.product !== ctState.product) return false;
       if (ctState.tier !== "all" && a.tier !== ctState.tier) return false;
       if (ctState.region !== "all" && a.region !== ctState.region) return false;
+      if (ctState.csm !== "all" && a.csm !== ctState.csm) return false;
       return true;
     });
     rows.sort(function (a, b) {
@@ -2080,6 +2087,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         '<td>' + esc(a.products) + '</td>' +
         '<td>' + fmtDate(a.renewal) + '</td>' +
         '<td>' + esc(a.contact) + '</td>' +
+        '<td>' + esc(a.csm) + '</td>' +
         '<td>' + esc(a.location) + '</td>' +
         '</tr>';
     }).join("");
@@ -2098,7 +2106,19 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       renderClientsTable();
     });
   });
-  [["ctProduct", "product"], ["ctTier", "tier"], ["ctRegion", "region"]].forEach(function (pair) {
+  /* build the CSM dropdown: "My customers" (logged-in user) → All customers → each teammate */
+  var ctCsm = document.getElementById("ctCsm");
+  if (ctCsm) {
+    var csmNames = A.map(function (a) { return a.csm; })
+      .filter(function (v, i, arr) { return v && arr.indexOf(v) === i; }).sort();
+    var opts = '';
+    if (currentCsm !== "all") opts += '<option value="' + esc(currentCsm) + '">My customers (' + esc(currentCsm) + ')</option>';
+    opts += '<option value="all">All customers</option>';
+    csmNames.forEach(function (c) { if (c !== currentCsm) opts += '<option value="' + esc(c) + '">' + esc(c) + '</option>'; });
+    ctCsm.innerHTML = opts;
+    ctCsm.value = ctState.csm;
+  }
+  [["ctProduct", "product"], ["ctTier", "tier"], ["ctRegion", "region"], ["ctCsm", "csm"]].forEach(function (pair) {
     var sel = document.getElementById(pair[0]);
     if (sel) sel.addEventListener("change", function () {
       ctState[pair[1]] = sel.value;
@@ -2107,8 +2127,9 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   });
   var ctClearBtn = document.getElementById("ctClear");
   if (ctClearBtn) ctClearBtn.addEventListener("click", function () {
-    ctState.product = "all"; ctState.tier = "all"; ctState.region = "all";
+    ctState.product = "all"; ctState.tier = "all"; ctState.region = "all"; ctState.csm = currentCsm;
     ["ctProduct", "ctTier", "ctRegion"].forEach(function (id) { var s = document.getElementById(id); if (s) s.value = "all"; });
+    if (ctCsm) ctCsm.value = currentCsm;
     renderClientsTable();
   });
   renderClientsTable();
