@@ -453,7 +453,7 @@
   </div>
   <nav class="crumb" id="crumb"><a data-nav="home">Home</a> <span>›</span> <span id="crumbHere"></span></nav>
   <div class="top-actions">
-    <div class="search-slot">search clients, tasks, contacts…</div>
+    <div class="search-slot">search customers, tasks, contacts…</div>
     <button class="btn" data-action="Notifications">🔔 <span id="notifCount">0</span></button>
     <button class="btn" id="themeToggle" title="Toggle light/dark">◐</button>
     <span id="topUser" style="font-size:12px;color:var(--text-secondary);"></span>
@@ -469,10 +469,10 @@
       <p>Here's what needs your attention today, <span id="heroDate"></span>.</p>
     </div>
 
-    <button class="portfolio-summary" data-nav="customers" title="View the full client list">
+    <button class="portfolio-summary" data-nav="customers" title="View the full customer list">
       <div class="ps-total">
         <span class="num" id="psTotal">—</span>
-        <span class="label">total clients</span>
+        <span class="label">total customers</span>
       </div>
       <div class="ps-tiers">
         <div class="ps-tier"><span class="dot" style="background:var(--status-critical)"></span><span class="num" data-tier-count="Strategic">—</span><span class="label">Strategic</span></div>
@@ -487,16 +487,16 @@
         <div class="nav-head">
           <div class="nav-icon">♥</div>
           <div>
-            <h3>Client Health</h3>
-            <div class="desc">Portfolio health scores, at-risk clients, drill into any client</div>
+            <h3>Customer Health</h3>
+            <div class="desc">Portfolio health scores, at-risk customers, drill into any customer</div>
           </div>
         </div>
         <div class="nav-stats">
           <span class="mini"><b data-stat="healthy">—</b>healthy</span>
           <span class="mini"><b data-stat="needs-attention">—</b>needs attention</span>
-          <span class="mini mini-link" data-nav="health" data-filter="at-risk" role="link" tabindex="0" title="View only at-risk clients"><b data-stat="at-risk">—</b>at risk</span>
+          <span class="mini mini-link" data-nav="health" data-filter="at-risk" role="link" tabindex="0" title="View only at-risk customers"><b data-stat="at-risk">—</b>at risk</span>
         </div>
-        <span class="nav-cta">Open Client Health →</span>
+        <span class="nav-cta">Open Customer Health →</span>
       </button>
 
       <button class="nav-card" data-nav="opportunities">
@@ -550,7 +550,7 @@
           <div class="nav-icon">➤</div>
           <div>
             <h3>Onboarding</h3>
-            <div class="desc">Clients in onboarding, stage progress, blockers and go-live dates</div>
+            <div class="desc">Customers in onboarding, stage progress, blockers and go-live dates</div>
           </div>
         </div>
         <div class="nav-stats">
@@ -566,7 +566,7 @@
           <div class="nav-icon">☑</div>
           <div>
             <h3>Tasks</h3>
-            <div class="desc">Everything owed across clients — by due date, owner and source</div>
+            <div class="desc">Everything owed across customers — by due date, owner and source</div>
           </div>
         </div>
         <div class="nav-stats">
@@ -584,10 +584,10 @@
   <section class="page" id="page-health">
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
-      <h2>Client Health</h2>
-      <div class="desc">Portfolio view — click any client to open their full client page.</div>
+      <h2>Customer Health</h2>
+      <div class="desc">Portfolio view — click any customer to open their full customer page.</div>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" data-health-tile="healthy"><span class="label">Healthy</span><span class="value">—</span></div>
@@ -598,11 +598,11 @@
 
     <div class="card">
       <div class="card-head-row">
-        <h4 id="healthCardTitle">Clients by health<span class="filter-chip" id="healthFilterChip" style="display:none;"></span></h4>
-        <a class="filter-clear" id="healthClearFilter" data-nav="health" style="display:none;">Show all clients ✕</a>
+        <h4 id="healthCardTitle">Customers by health<span class="filter-chip" id="healthFilterChip" style="display:none;"></span></h4>
+        <a class="filter-clear" id="healthClearFilter" data-nav="health" style="display:none;">Show all customers ✕</a>
       </div>
       <div id="healthRows"></div>
-      <div class="empty-note" id="healthEmptyNote" style="display:none;">No clients match this filter.</div>
+      <div class="empty-note" id="healthEmptyNote" style="display:none;">No customers match this filter.</div>
     </div>
     <div class="chart-slot" style="height:90px;">health-score distribution / trend chart</div>
   </section>
@@ -612,9 +612,9 @@
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
       <h2>Opportunities</h2>
-      <div class="desc">Open opportunities by default — client, amount, probability, stage, contact and timing. Click Won / Lost to switch the table.</div>
+      <div class="desc">Open opportunities by default — customer, amount, probability, stage, contact and timing. Click Won / Lost to switch the table.</div>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" id="oppTileFlags"><span class="label">Open opportunities</span><span class="value">—</span></div>
@@ -641,7 +641,7 @@
         <table class="data-table" id="oppTable">
           <thead>
             <tr>
-              <th class="sortable" data-sort="account">Client Name<span class="arrow"></span></th>
+              <th class="sortable" data-sort="account">Customer Name<span class="arrow"></span></th>
               <th class="sortable" data-sort="oppName">Opportunity Name<span class="arrow"></span></th>
               <th class="sortable" data-sort="monthly">Monthly Amount<span class="arrow"></span></th>
               <th class="sortable" data-sort="probability">Probability (%)<span class="arrow"></span></th>
@@ -683,7 +683,7 @@
       <h2>Renewals</h2>
       <div class="desc">Every renewal by window with readiness: auto-renew, PO required, churn risk.</div>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" data-renewal-tile="30" role="button" tabindex="0" title="Show only these renewals in the table"><span class="label">Next 30 days</span><span class="value">—</span><span class="delta">$— ARR</span></div>
@@ -733,7 +733,7 @@
         <table class="data-table" id="renewalTable">
           <thead>
             <tr>
-              <th class="sortable" data-sort="name">Client Name<span class="arrow"></span></th>
+              <th class="sortable" data-sort="name">Customer Name<span class="arrow"></span></th>
               <th class="sortable" data-sort="renewal">Renewal Date<span class="arrow"></span></th>
               <th class="sortable" data-sort="autoRenew">Auto Renew<span class="arrow"></span></th>
               <th class="sortable" data-sort="requirePO">PO<span class="arrow"></span></th>
@@ -780,7 +780,7 @@
         <div class="goal-meta"><span class="goal-txt">goal $—</span><span class="gap">$— to goal</span></div>
       </div>
       <div class="tile" id="kpiChurn"><span class="label">Logo churn</span><span class="value">— %</span><span class="delta">year to date</span></div>
-      <div class="tile" id="kpiChurned"><span class="label">Clients churned this year</span><span class="value">—</span><span class="delta">count, YTD</span></div>
+      <div class="tile" id="kpiChurned"><span class="label">Customers churned this year</span><span class="value">—</span><span class="delta">count, YTD</span></div>
     </div>
   </section>
 
@@ -789,9 +789,9 @@
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
       <h2>Onboarding</h2>
-      <div class="desc">Clients in onboarding with stage, progress, blockers and target go-live.</div>
+      <div class="desc">Customers in onboarding with stage, progress, blockers and target go-live.</div>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" id="obTileProgress"><span class="label">In progress</span><span class="value">—</span></div>
@@ -811,10 +811,10 @@
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
       <h2>Tasks</h2>
-      <div class="desc">Every open task across clients — from signals, renewals, onboarding and manual entry.</div>
+      <div class="desc">Every open task across customers — from signals, renewals, onboarding and manual entry.</div>
       <button class="btn primary" data-action="Create task" style="margin-left:auto;">＋ Create task</button>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
 
     <div class="tile-row">
       <div class="tile" id="tTileOverdue"><span class="label">Overdue</span><span class="value">—</span></div>
@@ -834,7 +834,7 @@
               <option value="priority">Priority</option>
               <option value="estimate">Estimate</option>
               <option value="percent">% complete</option>
-              <option value="account">Client</option>
+              <option value="account">Customer</option>
             </select>
           </label>
           <label>Priority
@@ -868,14 +868,14 @@
   <section class="page" id="page-customers">
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
-      <h2>Clients</h2>
-      <div class="desc">All paying clients with commercials, renewal timing and quick links.</div>
+      <h2>Customers</h2>
+      <div class="desc">All paying customers with commercials, renewal timing and quick links.</div>
     </div>
-    <div class="stub-note">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
+    <div class="stub-note">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
 
     <div class="card">
       <div class="card-head-row">
-        <h4>All clients</h4>
+        <h4>All customers</h4>
         <div class="filter-row">
           <label>Product
             <select id="ctProduct">
@@ -901,13 +901,14 @@
               <option value="Other">Other</option>
             </select>
           </label>
+          <button class="btn" id="ctClear" type="button">Clear filters</button>
         </div>
       </div>
       <div class="table-wrap">
         <table class="data-table" id="clientsTable">
           <thead>
             <tr>
-              <th class="sortable" data-sort="name">Client Name<span class="arrow"></span></th>
+              <th class="sortable" data-sort="name">Customer Name<span class="arrow"></span></th>
               <th class="sortable" data-sort="tier">Tier<span class="arrow"></span></th>
               <th class="sortable" data-sort="mrr">MRR<span class="arrow"></span></th>
               <th class="sortable" data-sort="unitPrice">CPM / Price per scan<span class="arrow"></span></th>
@@ -921,22 +922,22 @@
           <tbody id="customerRows"></tbody>
         </table>
       </div>
-      <div class="empty-note" id="clientsTableEmpty" style="display:none;">No clients match these filters.</div>
+      <div class="empty-note" id="clientsTableEmpty" style="display:none;">No customers match these filters.</div>
     </div>
   </section>
 
   <!-- ================= CLIENT DETAIL ================= -->
   <section class="page" id="page-client">
     <div class="page-head">
-      <button class="btn" data-nav="customers">← Clients</button>
-      <div class="stub-note" style="margin:0;">Populated with sample (dummy) data — all clients and numbers are fictional.</div>
+      <button class="btn" data-nav="customers">← Customers</button>
+      <div class="stub-note" style="margin:0;">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
     </div>
     <div style="height:10px;"></div>
     <div id="clientBody"></div>
   </section>
 
   <footer>
-    Preview build — populated with fictional sample data (see data.js). No real client information.
+    Preview build — populated with fictional sample data (see data.js). No real customer information.
   </footer>
 
 </main>
@@ -1001,14 +1002,14 @@
 
   var pageNames = {
     home: "Home",
-    health: "Client Health",
+    health: "Customer Health",
     opportunities: "Opportunities",
     renewals: "Renewals",
     kpi: "KPI Tracker",
     onboarding: "Onboarding",
     tasks: "Tasks",
-    customers: "Clients",
-    client: "Client"
+    customers: "Customers",
+    client: "Customer"
   };
 
   var crumb = document.getElementById("crumb");
@@ -2103,6 +2104,12 @@
       renderClientsTable();
     });
   });
+  var ctClearBtn = document.getElementById("ctClear");
+  if (ctClearBtn) ctClearBtn.addEventListener("click", function () {
+    ctState.product = "all"; ctState.tier = "all"; ctState.region = "all";
+    ["ctProduct", "ctTier", "ctRegion"].forEach(function (id) { var s = document.getElementById(id); if (s) s.value = "all"; });
+    renderClientsTable();
+  });
   renderClientsTable();
 
   /* ---- task modal: open a task, add notes, update % complete and blockers ---- */
@@ -2234,12 +2241,12 @@
     var a = A.filter(function (x) { return x.portal === portal; })[0];
     var crumbEl = document.getElementById("crumbHere");
     if (!a) {
-      if (crumbEl) crumbEl.textContent = "Client";
-      body.innerHTML = '<div class="empty-note">No client found for “' + esc(portal) + '”.</div>';
+      if (crumbEl) crumbEl.textContent = "Customer";
+      body.innerHTML = '<div class="empty-note">No customer found for “' + esc(portal) + '”.</div>';
       return;
     }
     var det = (D.clientDetails || {})[portal] || {};
-    if (crumbEl) crumbEl.textContent = "Client · " + a.name;
+    if (crumbEl) crumbEl.textContent = "Customer · " + a.name;
 
     var h = HEALTH[a.health];
     var r = RISK[a.churnRisk];
