@@ -995,7 +995,8 @@
   </div>
 </div>
 
-<script src="data.js"></script>
+<script>/* cache-bust data.js so sample-data edits show up immediately (no stale cache) */
+document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function () {
   "use strict";
