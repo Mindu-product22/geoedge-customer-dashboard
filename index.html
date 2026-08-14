@@ -612,7 +612,7 @@
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
       <h2>Opportunities</h2>
-      <div class="desc">Open opportunities by default — customer, amount, probability, stage, contact and timing. Click Won / Lost to switch the table.</div>
+      <div class="desc">Open opportunities by default — customer, amount, probability, stage, owner and timing. Click Won / Lost to switch the table.</div>
     </div>
     <div class="stub-note">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
 
@@ -646,7 +646,7 @@
               <th class="sortable" data-sort="monthly">Monthly Amount<span class="arrow"></span></th>
               <th class="sortable" data-sort="probability">Probability (%)<span class="arrow"></span></th>
               <th class="sortable" data-sort="stage">Stage<span class="arrow"></span></th>
-              <th class="sortable" data-sort="contact">Opp Contact<span class="arrow"></span></th>
+              <th class="sortable" data-sort="owner">Opportunity Owner<span class="arrow"></span></th>
               <th class="sortable" data-sort="openDate">Open Date<span class="arrow"></span></th>
               <th class="sortable" data-sort="closeDate">Close Date<span class="arrow"></span></th>
               <th class="sortable" data-sort="daysOpen">Days Open<span class="arrow"></span></th>
@@ -1289,7 +1289,7 @@
           '<td>' + money(o.monthly) + '</td>' +
           '<td>' + o.probability + '%</td>' +
           '<td>' + esc(o.stage) + '</td>' +
-          '<td>' + esc(o.contact) + '</td>' +
+          '<td>' + esc(o.owner) + '</td>' +
           '<td>' + fmtDate(o.openDate) + '</td>' +
           '<td>' + fmtDate(o.closeDate) + '</td>' +
           '<td>' + oppDaysOpen(o) + ' days</td>' +
