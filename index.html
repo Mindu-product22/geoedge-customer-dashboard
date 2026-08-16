@@ -412,6 +412,26 @@
   .nd-link.active { background: var(--accent-soft); font-weight: 650; }
   .nd-icon { width: 20px; text-align: center; flex: none; color: var(--text-secondary); }
 
+  /* clickable brand/logo → home */
+  .brand { cursor: pointer; border-radius: 8px; }
+  .brand:hover h1 { color: var(--accent); }
+  .brand:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* insights page */
+  #page-insights .card h4 {
+    font-size: 11.5px; font-weight: 650; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: .04em; margin-bottom: 10px;
+  }
+  :root { --cat-purple: #7a5fd0; }
+  :root[data-theme="dark"] { --cat-purple: #9b84e0; }
+  .pie-wrap { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+  .pie-wrap svg { flex: none; }
+  .pie-legend { flex: 1; min-width: 160px; }
+  .pie-row { display: flex; align-items: center; gap: 8px; padding: 5.5px 0; font-size: 12.5px; border-bottom: 1px solid var(--grid); }
+  .pie-row:last-child { border-bottom: none; }
+  .pie-row .dot { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+  .pie-row .v { margin-left: auto; font-weight: 650; text-align: right; font-variant-numeric: tabular-nums; padding-left: 10px; }
+
   /* reach-out modal options */
   .ro-options { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
   .ro-option {
@@ -523,7 +543,7 @@
 
 <header class="top">
   <button class="btn" id="hamburgerBtn" title="Menu" aria-label="Open navigation menu" aria-controls="navDrawer">☰</button>
-  <div class="brand">
+  <div class="brand" data-nav="home" role="link" tabindex="0" title="Back to Home">
     <img class="brand-logo" src="https://www.geoedge.com/wp-content/uploads/2023/01/Logo-Geoedge-1-1-1-1.png"
          alt="GeoEdge" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
     <div class="brand-mark">G</div>
@@ -553,6 +573,7 @@
   <a class="nd-link" data-nav="opportunities"><span class="nd-icon">↗</span>Opportunities</a>
   <a class="nd-link" data-nav="renewals"><span class="nd-icon">⟳</span>Renewals</a>
   <a class="nd-link" data-nav="kpi"><span class="nd-icon">▦</span>KPI Tracker</a>
+  <a class="nd-link" data-nav="insights"><span class="nd-icon">📈</span>Insights</a>
   <a class="nd-link" data-nav="onboarding"><span class="nd-icon">➤</span>Onboarding</a>
   <a class="nd-link" data-nav="tickets"><span class="nd-icon">🎫</span>Open Tickets</a>
   <a class="nd-link" data-nav="tasks"><span class="nd-icon">☑</span>Tasks</a>
@@ -1005,6 +1026,25 @@
     </div>
   </section>
 
+  <!-- ================= INSIGHTS ================= -->
+  <section class="page" id="page-insights">
+    <div class="page-head">
+      <button class="btn" data-nav="home">← Home</button>
+      <h2>Insights</h2>
+      <div class="desc">Portfolio breakdowns — where the revenue, risk and customers concentrate.</div>
+    </div>
+    <div class="stub-note">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
+
+    <div class="tile-row">
+      <div class="tile"><span class="label">Total customers</span><span class="value" id="inTileCustomers">—</span></div>
+      <div class="tile"><span class="label">Total MRR</span><span class="value" id="inTileMrr">—</span></div>
+      <div class="tile"><span class="label">Avg health score</span><span class="value" id="inTileHealth">—</span></div>
+      <div class="tile"><span class="label">Avg MRR per customer</span><span class="value" id="inTileAvgMrr">—</span></div>
+    </div>
+
+    <div class="client-grid" id="insightsGrid"></div>
+  </section>
+
   <!-- ================= CUSTOMERS ================= -->
   <section class="page" id="page-customers">
     <div class="page-head">
@@ -1193,6 +1233,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     onboarding: "Onboarding",
     tickets: "Open Tickets",
     tasks: "Tasks",
+    insights: "Insights",
     customers: "Customers",
     client: "Customer"
   };
@@ -2683,6 +2724,11 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     window.addEventListener("hashchange", updateDrawerActive);
     updateDrawerActive();
   }
+  /* brand/logo keyboard access (click is handled by the data-nav delegate) */
+  var brandEl = document.querySelector("header .brand");
+  if (brandEl) brandEl.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); location.hash = "home"; }
+  });
 
   /* ---- reach-out modal (Customers page) ---- */
   var roEl = document.getElementById("reachOutModal");
@@ -2875,6 +2921,115 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   }
   window.addEventListener("hashchange", handleClientRoute);
   handleClientRoute();
+
+  /* ---- insights page ---- */
+  (function renderInsights() {
+    var grid = document.getElementById("insightsGrid");
+    if (!grid) return;
+    setText("#inTileCustomers", A.length);
+    setText("#inTileMrr", money(mrr) + "/mo");
+    setText("#inTileHealth", avgScore);
+    setText("#inTileAvgMrr", money(Math.round(mrr / A.length)) + "/mo");
+
+    function mrrOf(list) { return list.reduce(function (s, a) { return s + a.mrr; }, 0); }
+    function pctOfTotal(part) { return Math.round(part / mrr * 100) + "%"; }
+    function donutCard(title, slices, centerTop, centerSub) {
+      var total = slices.reduce(function (s, x) { return s + x.amount; }, 0) || 1;
+      var C = 276.5; /* 2πr for r=44 */
+      var start = 0;
+      var segs = slices.filter(function (x) { return x.amount > 0; }).map(function (x) {
+        var frac = x.amount / total;
+        var len = Math.max(0.5, frac * C - 2); /* 2px surface gap between slices */
+        var seg = '<circle cx="60" cy="60" r="44" fill="none" stroke="var(--' + x.color + ')" stroke-width="24" ' +
+          'stroke-dasharray="' + len.toFixed(1) + ' ' + C.toFixed(1) + '" stroke-dashoffset="' + (-start * C).toFixed(1) + '"></circle>';
+        start += frac;
+        return seg;
+      }).join("");
+      var legend = slices.map(function (x) {
+        return '<div class="pie-row"><span class="dot" style="background:var(--' + x.color + ')"></span>' +
+          x.label + '<span class="v">' + x.value + '</span></div>';
+      }).join("");
+      return '<div class="card"><h4>' + esc(title) + '</h4><div class="pie-wrap">' +
+        '<svg width="132" height="132" viewBox="0 0 120 120" role="img" aria-label="' + esc(title) + '">' +
+        '<g transform="rotate(-90 60 60)">' + segs + '</g>' +
+        '<text x="60" y="58" text-anchor="middle" font-size="14" font-weight="700" fill="var(--text-primary)">' + esc(centerTop) + '</text>' +
+        '<text x="60" y="72" text-anchor="middle" font-size="8.5" fill="var(--text-muted)">' + esc(centerSub) + '</text>' +
+        '</svg>' +
+        '<div class="pie-legend">' + legend + '</div></div></div>';
+    }
+    function barCard(title, rows, footer) {
+      var max = Math.max.apply(null, rows.map(function (r) { return r.amount; }).concat([1]));
+      return '<div class="card"><h4>' + esc(title) + '</h4>' +
+        rows.map(function (r) {
+          return '<div class="ub-row">' +
+            '<div class="ub-label">' + r.label + '</div>' +
+            '<div><div class="ub-bar" style="width:' + Math.max(3, Math.round(r.amount / max * 100)) + '%;' +
+            (r.color ? 'background:var(--' + r.color + ');' : '') + '"></div></div>' +
+            '<div class="ub-val">' + r.value + '</div></div>';
+        }).join("") +
+        (footer ? '<p class="detail-note" style="margin-top:8px;">' + footer + '</p>' : '') +
+        '</div>';
+    }
+
+    var tierSlices = ["Strategic", "Gold", "Silver"].map(function (t) {
+      var list = A.filter(function (a) { return a.tier === t; });
+      var m = mrrOf(list);
+      return {
+        label: '<b>' + t + '</b> · ' + list.length,
+        amount: m, color: TIER_DOT[t],
+        value: money(m) + '/mo · ' + pctOfTotal(m)
+      };
+    });
+
+    var PRODUCT_COLOR = { "RUM": "accent", "Verification": "cat-purple" };
+    var productSlices = ["RUM", "Verification"].map(function (p) {
+      var list = A.filter(function (a) { return a.product === p; });
+      var m = mrrOf(list);
+      return {
+        label: '<b>' + p + '</b> · ' + list.length,
+        amount: m, color: PRODUCT_COLOR[p],
+        value: money(m) + '/mo · ' + pctOfTotal(m)
+      };
+    });
+
+    var regionRows = ["USA", "EU", "APAC", "Other"].map(function (rg) {
+      var list = A.filter(function (a) { return a.region === rg; });
+      var m = mrrOf(list);
+      return { label: '<b>' + rg + '</b> · ' + list.length + ' customers', amount: m, value: money(m) + '/mo · ' + pctOfTotal(m) };
+    });
+
+    var healthSlices = ["healthy", "needs-attention", "at-risk"].map(function (hk) {
+      var list = A.filter(function (a) { return a.health === hk; });
+      return {
+        label: '<b>' + HEALTH[hk].label + '</b>',
+        amount: list.length, color: HEALTH[hk].color,
+        value: list.length + ' · ' + money(mrrOf(list)) + '/mo'
+      };
+    });
+
+    var csms = [];
+    A.forEach(function (a) { if (csms.indexOf(a.csm) === -1) csms.push(a.csm); });
+    var csmRows = csms.map(function (c) {
+      var list = A.filter(function (a) { return a.csm === c; });
+      return { label: '<b>' + esc(c) + '</b> · ' + list.length + ' customers', amount: mrrOf(list), value: money(mrrOf(list)) + '/mo' };
+    }).sort(function (a, b) { return b.amount - a.amount; });
+
+    var top5 = A.slice().sort(function (a, b) { return b.mrr - a.mrr; }).slice(0, 5);
+    var top5Rows = top5.map(function (a) {
+      return { label: clientLink(a, a.name), amount: a.mrr, value: money(a.mrr) + '/mo' };
+    });
+    var top5Sum = mrrOf(top5);
+
+    grid.innerHTML =
+      donutCard("MRR by tier", tierSlices, moneyK(mrr) + "/mo", "total MRR") +
+      donutCard("MRR by product", productSlices, moneyK(mrr) + "/mo", "total MRR") +
+      barCard("MRR by region", regionRows) +
+      donutCard("Health distribution", healthSlices, String(A.length), "customers") +
+      barCard("Book of business by CSM", csmRows) +
+      barCard("MRR concentration — top 5 customers", top5Rows,
+        "The top 5 customers hold <b>" + pctOfTotal(top5Sum) + "</b> of total MRR (" +
+        money(top5Sum) + "/mo of " + money(mrr) + "/mo). Concentration = renewal risk worth watching.");
+  })();
 
   /* re-apply any active health filter now that rows exist */
   window.dispatchEvent(new Event("hashchange"));
