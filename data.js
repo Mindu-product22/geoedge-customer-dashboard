@@ -324,13 +324,27 @@ window.DASHBOARD_DATA = {
     }
   },
 
+  /* MRR losses this year — upgrades come from Closed-Won opportunities above.
+     Together these drive the KPI page: MRR %, logo churn % and the movement chart. */
+  downgrades: [
+    { account: "MetroNews Digital", desc: "Dropped second site from RUM package",  monthly: 400, date: "2026-04-02" },
+    { account: "Velocity Ads",      desc: "Reduced impression tier",               monthly: 800, date: "2026-05-14" }
+  ],
+  churns: [
+    { account: "AdPulse Media", desc: "Moved to in-house tooling",         monthly: 2100, date: "2026-02-27" },
+    { account: "StreamVault",   desc: "Acquired; contract not renewed",    monthly: 1300, date: "2026-03-31" },
+    { account: "ClickHaven",    desc: "Budget cuts",                       monthly: 900,  date: "2026-06-15" }
+  ],
+
   kpi: {
-    mrrGoal: 125000,
+    /* start-of-year baselines: current 15 customers + 3 churned = 18;
+       current MRR $113,650 = start - upgrades(+4,700) + downgrades(1,200) + churn(4,300) */
+    startOfYearMrr: 114450,
+    startOfYearCustomers: 18,
+    mrrGoalPct: 101,          /* end the year at 101% of start-of-year MRR */
+    logoRetentionGoalPct: 85, /* 100% = nobody churned */
     arrGoal: 1500000,
-    logoChurnYtd: 6.7,        /* %  — target: 8% or lower  */
-    logoChurnTarget: 8,
-    churnedYtd: 3,            /* count — target: 5 or fewer */
-    churnedTarget: 5,
+    churnedTarget: 5,         /* count — target: 5 or fewer */
     convertedThisQuarter: 2,
     lostThisQuarter: 1,
     completedTasksThisWeek: 4,
