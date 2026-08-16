@@ -79,21 +79,21 @@ window.DASHBOARD_DATA = {
   /* percent: 0-100 complete; blockers: free text (empty = none); notes: newest last;
      priority: High/Medium/Low; estimateMin: estimated effort in minutes; array order = manual sort order */
   tasks: [
-    { id: "T-101", priority: "High", estimateMin: 120, title: "Send renewal proposal",        account: "TrafficLane",         owner: "Dana Katz",  due: "2026-08-06", percent: 60, blockers: "",
+    { id: "T-101", priority: "High", estimateMin: 120, title: "Send renewal proposal",        account: "TrafficLane",         owner: "Dana Katz",  due: "2026-08-14", percent: 60, blockers: "",
       description: "Send the renewal proposal with the approved 15% save offer ahead of the 20 Aug decision call.",
       notes: [ { date: "2026-07-26", text: "Save offer approved by management, up to 15%." },
                { date: "2026-07-28", text: "Draft proposal reviewed; waiting on final legal wording." } ] },
-    { id: "T-102", priority: "High", estimateMin: 240, title: "Prep QBR deck",                account: "AdNexa",              owner: "Tom Rosen",  due: "2026-08-09", percent: 40, blockers: "",
+    { id: "T-102", priority: "High", estimateMin: 240, title: "Prep QBR deck",                account: "AdNexa",              owner: "Tom Rosen",  due: "2026-08-16", percent: 40, blockers: "",
       description: "Quarterly business review deck for the 8 Sep QBR — include APAC expansion pricing slide.",
       notes: [ { date: "2026-08-03", text: "Usage data pulled; waiting on APAC pricing from sales." } ] },
-    { id: "T-103", priority: "Medium", estimateMin: 30, title: "Chase blocked tag deployment", account: "Quantum Ads Network", owner: "Noa Levi",   due: "2026-08-12", percent: 30,
+    { id: "T-103", priority: "Medium", estimateMin: 30, title: "Chase blocked tag deployment", account: "Quantum Ads Network", owner: "Noa Levi",   due: "2026-08-19", percent: 30,
       blockers: "Customer CSP policy blocks our tag domain — fix ships in their next release.",
       description: "Follow up with customer engineering on the CSP allowlist change so onboarding can resume.",
       notes: [ { date: "2026-08-05", text: "Engineering call held — fix scheduled for their next release window." } ] },
-    { id: "T-104", priority: "Medium", estimateMin: 60, title: "Health check call",            account: "MobiReach",           owner: "Maya Stern", due: "2026-08-13", percent: 0, blockers: "",
+    { id: "T-104", priority: "Medium", estimateMin: 60, title: "Health check call",            account: "MobiReach",           owner: "Maya Stern", due: "2026-08-24", percent: 0, blockers: "",
       description: "Pre-renewal health check — walk through alert-noise fixes and confirm renewal terms.",
       notes: [] },
-    { id: "T-105", priority: "Low", estimateMin: 45, title: "Share July block-rate report", account: "Nordpress Media",     owner: "Dana Katz",  due: "2026-08-14", percent: 80, blockers: "",
+    { id: "T-105", priority: "Low", estimateMin: 45, title: "Share July block-rate report", account: "Nordpress Media",     owner: "Dana Katz",  due: "2026-08-28", percent: 80, blockers: "",
       description: "Send the July block-rate report; champion shares it upstream with their leadership.",
       notes: [ { date: "2026-08-10", text: "Report generated; adding the SpecHub teaser slide before sending." } ] }
   ],
