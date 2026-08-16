@@ -187,6 +187,7 @@
   .task-badge.overdue { background: var(--status-critical); color: #fff; }
   .task-badge.today { background: var(--status-warning); color: #3a2b00; }
   .task-badge.high { background: var(--accent-soft); color: var(--accent); }
+  .task-more { margin-top: 12px; font-size: 12px; font-weight: 600; color: var(--accent); }
   .task-row {
     display: grid; grid-template-columns: 10px 1fr auto; gap: 12px; align-items: center;
     padding: 10px 0; border-bottom: 1px solid var(--grid); font-size: 12.5px;
@@ -2171,14 +2172,23 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       .sort(function (a, b) { return daysUntil(a.t.due) - daysUntil(b.t.due); });
     var other = classified.filter(function (x) { return !x.u.urgent; })
       .sort(function (a, b) { return a.t.due < b.t.due ? -1 : a.t.due > b.t.due ? 1 : 0; });
+    /* show only the 5 most urgent on the home page; the rest live on the Tasks page */
+    var LIMIT = 5;
+    var shown = urgent.concat(other).slice(0, LIMIT);
+    var shownUrgent = shown.filter(function (x) { return x.u.urgent; });
+    var shownOther = shown.filter(function (x) { return !x.u.urgent; });
     var html = "";
-    if (urgent.length) {
-      html += '<div class="task-group-head urgent">⚠ Needs action now · ' + urgent.length + '</div>' +
-        '<div class="task-urgent-box">' + urgent.map(function (x) { return taskRow(x.t, x.u); }).join("") + '</div>';
+    if (shownUrgent.length) {
+      html += '<div class="task-group-head urgent">⚠ Needs action now · ' + shownUrgent.length + '</div>' +
+        '<div class="task-urgent-box">' + shownUrgent.map(function (x) { return taskRow(x.t, x.u); }).join("") + '</div>';
     }
-    if (other.length) {
+    if (shownOther.length) {
       html += '<div class="task-group-head other">Other tasks</div>' +
-        other.map(function (x) { return taskRow(x.t, null); }).join("");
+        shownOther.map(function (x) { return taskRow(x.t, null); }).join("");
+    }
+    var moreCount = D.tasks.length - shown.length;
+    if (moreCount > 0) {
+      html += '<div class="task-more">+ ' + moreCount + ' more on the Tasks page →</div>';
     }
     homeTaskList.innerHTML = html;
   }
