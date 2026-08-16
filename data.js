@@ -95,7 +95,22 @@ window.DASHBOARD_DATA = {
       notes: [] },
     { id: "T-105", priority: "Low", estimateMin: 45, title: "Share July block-rate report", account: "Nordpress Media",     owner: "Dana Katz",  due: "2026-08-28", percent: 80, blockers: "",
       description: "Send the July block-rate report; champion shares it upstream with their leadership.",
-      notes: [ { date: "2026-08-10", text: "Report generated; adding the SpecHub teaser slide before sending." } ] }
+      notes: [ { date: "2026-08-10", text: "Report generated; adding the SpecHub teaser slide before sending." } ] },
+    { id: "T-106", priority: "Medium", estimateMin: 45, title: "Escalate billing discrepancy", account: "MetroNews Digital", owner: "Noa Levi", due: "2026-08-11", percent: 20, blockers: "",
+      description: "Chase finance on the duplicate scan-overage charge the customer flagged last week.",
+      notes: [] },
+    { id: "T-107", priority: "High", estimateMin: 90, title: "Return contract redlines", account: "BidCore Technologies", owner: "Dana Katz", due: "2026-08-13", percent: 50, blockers: "",
+      description: "Send the reviewed MSA redlines back to procurement so the multi-year renewal can close.",
+      notes: [] },
+    { id: "T-108", priority: "Medium", estimateMin: 20, title: "Send weekly usage summary", account: "AdVantage Exchange", owner: "Tom Rosen", due: "2026-08-16", percent: 50, blockers: "",
+      description: "Weekly block-rate and usage summary for the champion ahead of their Monday standup.",
+      notes: [] },
+    { id: "T-109", priority: "High", estimateMin: 120, title: "Prepare renewal quote", account: "StreamCast TV", owner: "Maya Stern", due: "2026-08-22", percent: 10, blockers: "",
+      description: "Draft the renewal quote with SLA-credit options for the at-risk StreamCast account.",
+      notes: [] },
+    { id: "T-110", priority: "High", estimateMin: 150, title: "Build expansion business case", account: "Daily Chronicle Group", owner: "Dana Katz", due: "2026-08-27", percent: 0, blockers: "",
+      description: "Put together the AppHarbr SDK expansion business case for the December renewal conversation.",
+      notes: [] }
   ],
 
   /* per-client detail (keyed by portal) — health breakdown dims average to the
