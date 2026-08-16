@@ -170,6 +170,23 @@
     font-size: 12.5px; font-weight: 600; color: var(--accent);
   }
 
+  /* home: top-tasks widget */
+  .task-widget { margin-top: 14px; }
+  .task-widget-title { font-size: 14px; font-weight: 700; color: var(--accent); cursor: pointer; }
+  .task-widget-title:hover { text-decoration: underline; }
+  .task-widget-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .task-widget-sub { font-size: 11.5px; color: var(--text-muted); }
+  .task-row {
+    display: grid; grid-template-columns: 10px 1fr auto; gap: 12px; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid var(--grid); font-size: 12.5px;
+  }
+  .task-row:last-child { border-bottom: none; }
+  .task-row .pdot { width: 9px; height: 9px; border-radius: 50%; }
+  .task-row .t-sub { color: var(--text-secondary); font-size: 11.5px; }
+  .task-row .t-right { text-align: right; white-space: nowrap; }
+  .task-prog { width: 120px; max-width: 40vw; height: 6px; border-radius: 999px; background: var(--slot-bg); border: 1px solid var(--border); overflow: hidden; margin-top: 5px; }
+  .task-prog-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+
   /* ============ sub pages ============ */
   .page { display: none; }
   .page.active { display: block; }
@@ -525,6 +542,7 @@
   <a class="nd-link" data-nav="renewals"><span class="nd-icon">⟳</span>Renewals</a>
   <a class="nd-link" data-nav="kpi"><span class="nd-icon">▦</span>KPI Tracker</a>
   <a class="nd-link" data-nav="onboarding"><span class="nd-icon">➤</span>Onboarding</a>
+  <a class="nd-link" data-nav="tickets"><span class="nd-icon">🎫</span>Open Tickets</a>
   <a class="nd-link" data-nav="tasks"><span class="nd-icon">☑</span>Tasks</a>
 </nav>
 
@@ -629,22 +647,29 @@
         <span class="nav-cta">Open Onboarding →</span>
       </button>
 
-      <button class="nav-card" data-nav="tasks">
+      <button class="nav-card" data-nav="tickets">
         <div class="nav-head">
-          <div class="nav-icon">☑</div>
+          <div class="nav-icon">🎫</div>
           <div>
-            <h3>Tasks</h3>
-            <div class="desc">Everything owed across customers — by due date, owner and source</div>
+            <h3>Open Tickets</h3>
+            <div class="desc">Support tickets across your customers — status, priority and age</div>
           </div>
         </div>
         <div class="nav-stats">
-          <span class="mini"><b data-stat="tOverdue">—</b>overdue</span>
-          <span class="mini"><b data-stat="tToday">—</b>due today</span>
-          <span class="mini"><b data-stat="tWeek">—</b>this week</span>
+          <span class="mini"><b data-stat="tkOpen">—</b>open</span>
+          <span class="mini"><b data-stat="tkHigh">—</b>high priority</span>
         </div>
-        <span class="nav-cta">Open Tasks →</span>
+        <span class="nav-cta">Open Tickets →</span>
       </button>
 
+    </div>
+
+    <div class="card task-widget">
+      <div class="card-head-row">
+        <h4 class="task-widget-title" data-nav="tasks" role="link" tabindex="0" title="Open the Tasks page">Today's top tasks →</h4>
+        <span class="task-widget-sub">top 5 by due date</span>
+      </div>
+      <div id="homeTaskList"></div>
     </div>
   </section>
 
@@ -939,6 +964,35 @@
     </div>
   </section>
 
+  <!-- ================= OPEN TICKETS ================= -->
+  <section class="page" id="page-tickets">
+    <div class="page-head">
+      <button class="btn" data-nav="home">← Home</button>
+      <h2>Open Tickets</h2>
+      <div class="desc">Support tickets across your customers — newest first.</div>
+    </div>
+    <div class="stub-note">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table class="data-table" id="ticketsTable">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Customer</th>
+              <th>Subject</th>
+              <th>Priority</th>
+              <th>Opened</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="ticketRows"></tbody>
+        </table>
+      </div>
+      <div class="empty-note" id="ticketsEmpty" style="display:none;">No open tickets.</div>
+    </div>
+  </section>
+
   <!-- ================= CUSTOMERS ================= -->
   <section class="page" id="page-customers">
     <div class="page-head">
@@ -1125,6 +1179,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     renewals: "Renewals",
     kpi: "KPI Tracker",
     onboarding: "Onboarding",
+    tickets: "Open Tickets",
     tasks: "Tasks",
     customers: "Customers",
     client: "Customer"
@@ -2075,6 +2130,59 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   setText("#tTileWeek .value", tWeek);
   setText("#tTileDone .value", K.completedTasksThisWeek);
   setText("#notifCount", tOverdue + tToday);
+
+  /* ---- home: today's top 5 tasks widget ---- */
+  var TASK_PRIO = { High: "status-critical", Medium: "status-warning", Low: "status-good" };
+  var homeTaskList = document.getElementById("homeTaskList");
+  if (homeTaskList) {
+    var topTasks = D.tasks.slice().sort(function (a, b) {
+      return a.due < b.due ? -1 : a.due > b.due ? 1 : 0;
+    }).slice(0, 5);
+    homeTaskList.innerHTML = topTasks.map(function (t) {
+      return '<div class="task-row">' +
+        '<span class="pdot" style="background:var(--' + (TASK_PRIO[t.priority] || "baseline") + ')"></span>' +
+        '<span class="t-main"><b>' + esc(t.title) + '</b>' +
+          '<span class="t-sub"> · ' + esc(t.account) + '</span>' +
+          '<div class="task-prog"><div class="task-prog-fill" style="width:' + (t.percent || 0) + '%"></div></div></span>' +
+        '<span class="t-right">' + fmtDate(t.due) + '<div class="t-sub">' + esc(t.priority) + ' · ' + (t.percent || 0) + '%</div></span>' +
+        '</div>';
+    }).join("");
+  }
+
+  /* ---- open tickets (aggregated from every customer's detail record) ---- */
+  var allTickets = [];
+  A.forEach(function (a) {
+    var det = (D.clientDetails || {})[a.portal] || {};
+    (det.tickets || []).forEach(function (t) {
+      allTickets.push({ id: t.id, title: t.title, status: t.status || "Open",
+        priority: t.priority || "—", opened: t.opened || "", account: a.name });
+    });
+  });
+  var openTickets = allTickets.filter(function (t) {
+    var s = String(t.status).toLowerCase();
+    return s !== "closed" && s !== "resolved";
+  });
+  setStat("tkOpen", openTickets.length);
+  setStat("tkHigh", openTickets.filter(function (t) { return t.priority === "High"; }).length);
+  (function renderTickets() {
+    var tbody = document.getElementById("ticketRows");
+    if (!tbody) return;
+    var rows = openTickets.slice().sort(function (a, b) {
+      return a.opened < b.opened ? 1 : a.opened > b.opened ? -1 : 0; /* newest first */
+    });
+    tbody.innerHTML = rows.map(function (t) {
+      return '<tr>' +
+        '<td>' + esc(t.id) + '</td>' +
+        '<td><b>' + esc(t.account) + '</b></td>' +
+        '<td class="wrap">' + esc(t.title) + '</td>' +
+        '<td>' + pill(t.priority, TASK_PRIO[t.priority] || "baseline") + '</td>' +
+        '<td>' + (t.opened ? fmtDate(t.opened) : "—") + '</td>' +
+        '<td>' + esc(t.status) + '</td>' +
+        '</tr>';
+    }).join("");
+    var empty = document.getElementById("ticketsEmpty");
+    if (empty) empty.style.display = rows.length ? "none" : "";
+  })();
 
   /* ---- renewal timeline chart ---- */
   var RISK_SERIES = [
