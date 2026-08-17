@@ -422,8 +422,28 @@
     font-size: 11.5px; font-weight: 650; color: var(--text-secondary);
     text-transform: uppercase; letter-spacing: .04em; margin-bottom: 10px;
   }
-  :root { --cat-purple: #7a5fd0; }
-  :root[data-theme="dark"] { --cat-purple: #9b84e0; }
+  :root { --cat-purple: #7a5fd0; --cat-teal: #0e8a7e; --cat-rose: #c2588f; }
+  :root[data-theme="dark"] { --cat-purple: #9b84e0; --cat-teal: #3aa79b; --cat-rose: #d47fae; }
+  #insightsGrid { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+  .ins-card { margin-bottom: 0; min-width: 230px; display: flex; flex-direction: column; }
+  .ins-card .ins-body { flex: 1; overflow: auto; min-height: 0; }
+  @media (max-width: 900px) {
+    .ins-card { width: 100% !important; height: auto !important; }
+    .ins-resize { display: none; }
+  }
+  .ins-controls { display: inline-flex; gap: 5px; flex: none; }
+  .ins-controls .icon-link { font-size: 11px; }
+  .ins-drag { cursor: grab; }
+  .ins-card { position: relative; }
+  .ins-card.dragging { opacity: .4; border-style: dashed; border-color: var(--accent); }
+  .ins-resize {
+    position: absolute; right: 3px; bottom: 1px; padding: 2px 5px;
+    cursor: nwse-resize; color: var(--text-muted); font-size: 10px; user-select: none; line-height: 1;
+  }
+  .ins-resize:hover { color: var(--accent); }
+  .ins-card.resizing { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  #cbPreview .pie-wrap svg { width: 110px; height: 110px; }
+  #chartFocusModal .pie-wrap svg { width: 190px; height: 190px; }
   .pie-wrap { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
   .pie-wrap svg { flex: none; }
   .pie-legend { flex: 1; min-width: 160px; }
@@ -555,6 +575,7 @@
   <nav class="crumb" id="crumb"><a data-nav="home">Home</a> <span>›</span> <span id="crumbHere"></span></nav>
   <div class="top-actions">
     <div class="search-slot">search customers, tasks, contacts…</div>
+    <button class="btn" data-nav="insights" title="Open Insights" aria-label="Open Insights">📈</button>
     <button class="btn" data-action="Notifications">🔔 <span id="notifCount">0</span></button>
     <button class="btn" id="themeToggle" title="Toggle light/dark">◐</button>
     <span id="topUser" style="font-size:12px;color:var(--text-secondary);"></span>
@@ -1031,7 +1052,8 @@
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
       <h2>Insights</h2>
-      <div class="desc">Portfolio breakdowns — where the revenue, risk and customers concentrate.</div>
+      <button class="btn primary" id="addChartBtn" style="margin-left:auto;">＋ Add chart</button>
+      <div class="desc">Portfolio breakdowns — build your own charts, drag to reorder, resize. Your layout auto-saves in this browser.</div>
     </div>
     <div class="stub-note">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
 
@@ -1042,7 +1064,7 @@
       <div class="tile"><span class="label">Avg MRR per customer</span><span class="value" id="inTileAvgMrr">—</span></div>
     </div>
 
-    <div class="client-grid" id="insightsGrid"></div>
+    <div id="insightsGrid"></div>
   </section>
 
   <!-- ================= CUSTOMERS ================= -->
@@ -1129,6 +1151,49 @@
 </main>
 
 <div id="toast"></div>
+
+<!-- ================= CHART FOCUS MODAL ================= -->
+<div id="chartFocusModal" class="modal-overlay" style="display:none;">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cfTitle" style="max-width:780px;">
+    <div class="modal-head">
+      <h3 id="cfTitle"></h3>
+      <button class="btn" id="cfClose" aria-label="Close">✕</button>
+    </div>
+    <div id="cfChart" style="margin-top:12px;"></div>
+    <div class="tm-label">Data</div>
+    <div id="cfTable"></div>
+  </div>
+</div>
+
+<!-- ================= CHART BUILDER MODAL ================= -->
+<div id="chartBuilderModal" class="modal-overlay" style="display:none;">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cbTitle" style="max-width:560px;">
+    <div class="modal-head">
+      <h3 id="cbTitle">Build a chart</h3>
+      <button class="btn" id="cbClose" aria-label="Close">✕</button>
+    </div>
+    <div class="filter-row" style="margin-top:12px;">
+      <label>Measure
+        <select id="cbMeasure"></select>
+      </label>
+      <label>Group by
+        <select id="cbGroup"></select>
+      </label>
+      <label>Chart type
+        <select id="cbType">
+          <option value="bars">Bars</option>
+          <option value="donut">Pie</option>
+        </select>
+      </label>
+    </div>
+    <div class="tm-label">Preview — <span id="cbPreviewTitle"></span></div>
+    <div id="cbPreview"></div>
+    <div class="modal-foot">
+      <button class="btn" id="cbCancel">Cancel</button>
+      <button class="btn primary" id="cbAdd">＋ Add chart</button>
+    </div>
+  </div>
+</div>
 
 <!-- ================= REACH OUT MODAL ================= -->
 <div id="reachOutModal" class="modal-overlay" style="display:none;">
@@ -2922,8 +2987,8 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   window.addEventListener("hashchange", handleClientRoute);
   handleClientRoute();
 
-  /* ---- insights page ---- */
-  (function renderInsights() {
+  /* ---- insights page: build-your-own charts, drag/resize, auto-saved ---- */
+  (function () {
     var grid = document.getElementById("insightsGrid");
     if (!grid) return;
     setText("#inTileCustomers", A.length);
@@ -2931,13 +2996,76 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     setText("#inTileHealth", avgScore);
     setText("#inTileAvgMrr", money(Math.round(mrr / A.length)) + "/mo");
 
-    function mrrOf(list) { return list.reduce(function (s, a) { return s + a.mrr; }, 0); }
-    function pctOfTotal(part) { return Math.round(part / mrr * 100) + "%"; }
-    function donutCard(title, slices, centerTop, centerSub) {
-      var total = slices.reduce(function (s, x) { return s + x.amount; }, 0) || 1;
+    var CAT_COLORS = ["accent", "cat-purple", "cat-teal", "cat-rose", "baseline"];
+    var csmList = [];
+    A.forEach(function (a) { if (csmList.indexOf(a.csm) === -1) csmList.push(a.csm); });
+
+    var MEASURES = {
+      mrr:     { label: "MRR",
+                 agg: function (list) { return list.reduce(function (s, a) { return s + a.mrr; }, 0); },
+                 fmt: function (v) { return money(v) + "/mo"; }, share: true },
+      clients: { label: "Customers",
+                 agg: function (list) { return list.length; },
+                 fmt: function (v) { return v + (v === 1 ? " customer" : " customers"); }, share: true },
+      health:  { label: "Avg health score",
+                 agg: function (list) {
+                   if (!list.length) return 0;
+                   return Math.round(list.reduce(function (s, a) { return s + a.healthScore; }, 0) / list.length);
+                 },
+                 fmt: function (v) { return String(v); }, share: false }
+    };
+    var DIMENSIONS = {
+      tier:         { label: "Tier", values: function () { return ["Strategic", "Gold", "Silver"]; },
+                      of: function (a) { return a.tier; },
+                      color: function (v, i) { return TIER_DOT[v] || "baseline"; } },
+      product:      { label: "Product", values: function () { return ["RUM", "Verification"]; },
+                      of: function (a) { return a.product; },
+                      color: function (v, i) { return v === "RUM" ? "accent" : "cat-purple"; } },
+      region:       { label: "Region", values: function () { return ["USA", "EU", "APAC", "Other"]; },
+                      of: function (a) { return a.region; },
+                      color: function (v, i) { return CAT_COLORS[i % CAT_COLORS.length]; } },
+      csm:          { label: "CSM", values: function () { return csmList.slice(); },
+                      of: function (a) { return a.csm; },
+                      color: function (v, i) { return CAT_COLORS[i % CAT_COLORS.length]; } },
+      healthStatus: { label: "Health status", values: function () { return ["healthy", "needs-attention", "at-risk"]; },
+                      of: function (a) { return a.health; },
+                      display: function (v) { return HEALTH[v].label; },
+                      color: function (v, i) { return HEALTH[v].color; } },
+      customer:     { label: "Customer (top 10)", top: 10,
+                      of: function (a) { return a.name; },
+                      color: function (v, i) { return "accent"; } }
+    };
+
+    function computeRows(cfg) {
+      var M = MEASURES[cfg.m], G = DIMENSIONS[cfg.g];
+      var values;
+      if (cfg.g === "customer") {
+        values = A.slice().sort(function (a, b) { return M.agg([b]) - M.agg([a]); })
+          .slice(0, G.top).map(function (a) { return a.name; });
+      } else {
+        values = G.values();
+      }
+      var total = M.agg(A);
+      return values.map(function (v, i) {
+        var list = A.filter(function (a) { return G.of(a) === v; });
+        var amount = M.agg(list);
+        var display = G.display ? G.display(v) : v;
+        var label;
+        if (cfg.g === "customer") label = nameLink(v);
+        else label = '<b>' + esc(display) + '</b>' + (cfg.m !== "clients" ? ' · ' + list.length : '');
+        var pct = (M.share && total) ? Math.round(amount / total * 100) : null;
+        var value = M.fmt(amount) + (pct !== null ? ' · ' + pct + '%' : '');
+        return { label: label, legendLabel: '<b>' + esc(display) + '</b>', amount: amount,
+                 color: G.color(v, i), value: value, display: display, count: list.length, pct: pct };
+      });
+    }
+    function chartTitle(cfg) { return MEASURES[cfg.m].label + " by " + DIMENSIONS[cfg.g].label; }
+
+    function donutBody(rows, centerTop, centerSub) {
+      var total = rows.reduce(function (s, x) { return s + x.amount; }, 0) || 1;
       var C = 276.5; /* 2πr for r=44 */
       var start = 0;
-      var segs = slices.filter(function (x) { return x.amount > 0; }).map(function (x) {
+      var segs = rows.filter(function (x) { return x.amount > 0; }).map(function (x) {
         var frac = x.amount / total;
         var len = Math.max(0.5, frac * C - 2); /* 2px surface gap between slices */
         var seg = '<circle cx="60" cy="60" r="44" fill="none" stroke="var(--' + x.color + ')" stroke-width="24" ' +
@@ -2945,90 +3073,293 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         start += frac;
         return seg;
       }).join("");
-      var legend = slices.map(function (x) {
+      var legend = rows.map(function (x) {
         return '<div class="pie-row"><span class="dot" style="background:var(--' + x.color + ')"></span>' +
-          x.label + '<span class="v">' + x.value + '</span></div>';
+          x.legendLabel + '<span class="v">' + x.value + '</span></div>';
       }).join("");
-      return '<div class="card"><h4>' + esc(title) + '</h4><div class="pie-wrap">' +
-        '<svg width="132" height="132" viewBox="0 0 120 120" role="img" aria-label="' + esc(title) + '">' +
+      return '<div class="pie-wrap">' +
+        '<svg width="132" height="132" viewBox="0 0 120 120" role="img">' +
         '<g transform="rotate(-90 60 60)">' + segs + '</g>' +
         '<text x="60" y="58" text-anchor="middle" font-size="14" font-weight="700" fill="var(--text-primary)">' + esc(centerTop) + '</text>' +
         '<text x="60" y="72" text-anchor="middle" font-size="8.5" fill="var(--text-muted)">' + esc(centerSub) + '</text>' +
         '</svg>' +
-        '<div class="pie-legend">' + legend + '</div></div></div>';
+        '<div class="pie-legend">' + legend + '</div></div>';
     }
-    function barCard(title, rows, footer) {
+    function barsBody(rows) {
       var max = Math.max.apply(null, rows.map(function (r) { return r.amount; }).concat([1]));
-      return '<div class="card"><h4>' + esc(title) + '</h4>' +
-        rows.map(function (r) {
-          return '<div class="ub-row">' +
-            '<div class="ub-label">' + r.label + '</div>' +
-            '<div><div class="ub-bar" style="width:' + Math.max(3, Math.round(r.amount / max * 100)) + '%;' +
-            (r.color ? 'background:var(--' + r.color + ');' : '') + '"></div></div>' +
-            '<div class="ub-val">' + r.value + '</div></div>';
-        }).join("") +
-        (footer ? '<p class="detail-note" style="margin-top:8px;">' + footer + '</p>' : '') +
-        '</div>';
+      return rows.map(function (r) {
+        return '<div class="ub-row">' +
+          '<div class="ub-label">' + r.label + '</div>' +
+          '<div><div class="ub-bar" style="width:' + Math.max(3, Math.round(r.amount / max * 100)) + '%;' +
+          'background:var(--' + r.color + ');"></div></div>' +
+          '<div class="ub-val">' + r.value + '</div></div>';
+      }).join("");
+    }
+    function chartBody(cfg) {
+      var rows = computeRows(cfg);
+      if (cfg.t === "donut") {
+        var centerTop = cfg.m === "mrr" ? moneyK(mrr) + "/mo" : String(A.length);
+        var centerSub = cfg.m === "mrr" ? "total MRR" : "customers";
+        return donutBody(rows, centerTop, centerSub);
+      }
+      var foot = (cfg.g === "customer" && A.length > DIMENSIONS.customer.top)
+        ? '<p class="detail-note" style="margin-top:8px;">Top ' + DIMENSIONS.customer.top + ' of ' + A.length + ' customers.</p>' : "";
+      return barsBody(rows) + foot;
     }
 
-    var tierSlices = ["Strategic", "Gold", "Silver"].map(function (t) {
-      var list = A.filter(function (a) { return a.tier === t; });
-      var m = mrrOf(list);
-      return {
-        label: '<b>' + t + '</b> · ' + list.length,
-        amount: m, color: TIER_DOT[t],
-        value: money(m) + '/mo · ' + pctOfTotal(m)
+    /* layout persistence — saved per browser */
+    var STORE_KEY = "geoedge.insights.charts.v1";
+    var DEFAULT_CHARTS = [
+      { m: "mrr", g: "tier", t: "donut", w: 48 },
+      { m: "mrr", g: "product", t: "donut", w: 48 },
+      { m: "mrr", g: "region", t: "bars", w: 48 },
+      { m: "clients", g: "healthStatus", t: "donut", w: 48 },
+      { m: "mrr", g: "csm", t: "bars", w: 48 },
+      { m: "mrr", g: "customer", t: "bars", w: 98 }
+    ];
+    var charts = null;
+    try { charts = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { charts = null; }
+    if (!charts || !charts.length) charts = DEFAULT_CHARTS.slice();
+    charts = charts.filter(function (c) { return c && MEASURES[c.m] && DIMENSIONS[c.g]; })
+      .map(function (c) {
+        /* migrate old fixed sizes (s/m/l) to free-form width percentages */
+        if (c.size) {
+          c.w = c.size === "s" ? 32 : c.size === "l" ? 98 : 48;
+          delete c.size;
+        }
+        if (!c.w) c.w = 48;
+        return c;
+      });
+    function saveCharts() {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(charts)); } catch (e) {}
+    }
+
+    function renderGrid() {
+      grid.innerHTML = charts.map(function (c, i) {
+        var style = 'width:calc(' + (c.w || 48) + '% - 8px);' + (c.h ? 'height:' + c.h + 'px;' : '');
+        return '<div class="card ins-card" data-ins="' + i + '" style="' + style + '">' +
+          '<div class="card-head-row">' +
+          '<h4>' + esc(chartTitle(c)) + '</h4>' +
+          '<span class="ins-controls">' +
+          '<button class="icon-link ins-drag" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button>' +
+          '<button class="icon-link ins-focus" title="Focus — open large with data table" aria-label="Focus chart">⤢</button>' +
+          '<button class="icon-link ins-remove" title="Remove chart" aria-label="Remove chart">✕</button>' +
+          '</span></div>' +
+          '<div class="ins-body">' + chartBody(c) + '</div>' +
+          '<span class="ins-resize" title="Drag to resize · double-click to reset height">◢</span>' +
+          '</div>';
+      }).join("") ||
+        '<div class="empty-note" style="grid-column:1/-1;">No charts yet — click “＋ Add chart” to build one.</div>';
+    }
+    renderGrid();
+
+    /* resize + remove */
+    grid.addEventListener("click", function (e) {
+      var card = e.target.closest(".ins-card");
+      if (!card) return;
+      var i = parseInt(card.getAttribute("data-ins"), 10);
+      if (e.target.closest(".ins-focus")) {
+        openChartFocus(i);
+      } else if (e.target.closest(".ins-remove")) {
+        charts.splice(i, 1);
+        saveCharts(); renderGrid();
+      }
+    });
+
+    /* drag to reorder via the ⋮⋮ handle — a ghost card follows the cursor and the
+       other cards slide out of the way (FLIP). Mouse-driven rather than native
+       HTML5 drag-and-drop, because browsers can cancel a native drag when the
+       dragged node is repositioned mid-drag (which broke reordering after the
+       first hover). */
+    function flipMove(mutate) {
+      var cards = Array.prototype.slice.call(grid.querySelectorAll(".ins-card"));
+      var firsts = cards.map(function (el) { return { el: el, rect: el.getBoundingClientRect() }; });
+      mutate();
+      firsts.forEach(function (f) {
+        var last = f.el.getBoundingClientRect();
+        var dx = f.rect.left - last.left, dy = f.rect.top - last.top;
+        if (dx || dy) {
+          f.el.style.transition = "none";
+          f.el.style.transform = "translate(" + dx + "px," + dy + "px)";
+          void f.el.offsetWidth; /* flush styles so the move animates from the old spot */
+          f.el.style.transition = "transform .18s ease";
+          f.el.style.transform = "";
+        }
+      });
+    }
+    var dnd = null;
+    grid.addEventListener("mousedown", function (e) {
+      var handle = e.target.closest(".ins-drag");
+      if (!handle) return;
+      e.preventDefault();
+      var card = handle.closest(".ins-card");
+      var rect = card.getBoundingClientRect();
+      var ghost = card.cloneNode(true);
+      ghost.className = "card ins-card drag-ghost";
+      ghost.style.cssText = "position:fixed;left:" + rect.left + "px;top:" + rect.top + "px;" +
+        "width:" + rect.width + "px;height:" + rect.height + "px;margin:0;z-index:120;" +
+        "pointer-events:none;opacity:.92;box-shadow:0 12px 30px rgba(0,0,0,.25);";
+      document.body.appendChild(ghost);
+      card.classList.add("dragging");
+      dnd = { card: card, ghost: ghost, dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+      document.body.style.userSelect = "none";
+    });
+    document.addEventListener("mousemove", function (e) {
+      if (!dnd) return;
+      e.preventDefault();
+      dnd.ghost.style.left = (e.clientX - dnd.dx) + "px";
+      dnd.ghost.style.top = (e.clientY - dnd.dy) + "px";
+      var under = document.elementFromPoint(e.clientX, e.clientY);
+      var over = under && under.closest ? under.closest(".ins-card") : null;
+      if (!over || over === dnd.card || !grid.contains(over)) return;
+      var rect = over.getBoundingClientRect();
+      var after = (e.clientX - rect.left) > rect.width / 2;
+      var anchor = after ? over.nextSibling : over;
+      if (anchor === dnd.card || dnd.card.nextSibling === anchor) return; /* already in place */
+      flipMove(function () { grid.insertBefore(dnd.card, anchor); });
+    });
+    document.addEventListener("mouseup", function () {
+      if (!dnd) return;
+      dnd.ghost.remove();
+      dnd.card.classList.remove("dragging");
+      document.body.style.userSelect = "";
+      dnd = null;
+      /* the DOM order is the new order — persist it */
+      var order = Array.prototype.slice.call(grid.querySelectorAll(".ins-card")).map(function (el) {
+        return parseInt(el.getAttribute("data-ins"), 10);
+      });
+      charts = order.map(function (i) { return charts[i]; });
+      saveCharts();
+      renderGrid();
+    });
+
+    /* free-form resize by dragging the ◢ corner grip — any width and height */
+    var rs = null;
+    grid.addEventListener("mousedown", function (e) {
+      var grip = e.target.closest(".ins-resize");
+      if (!grip) return;
+      e.preventDefault();
+      var card = grip.closest(".ins-card");
+      rs = { idx: parseInt(card.getAttribute("data-ins"), 10), card: card, moved: false };
+      card.classList.add("resizing");
+      document.body.style.cursor = "nwse-resize";
+    });
+    document.addEventListener("mousemove", function (e) {
+      if (!rs) return;
+      e.preventDefault();
+      var cardRect = rs.card.getBoundingClientRect();
+      rs.w = Math.max(230, e.clientX - cardRect.left);
+      rs.h = Math.max(120, e.clientY - cardRect.top);
+      rs.card.style.width = rs.w + "px";
+      rs.card.style.height = rs.h + "px";
+      rs.moved = true;
+    });
+    document.addEventListener("mouseup", function () {
+      if (!rs) return;
+      if (rs.moved) {
+        var gridW = grid.getBoundingClientRect().width || 1;
+        charts[rs.idx].w = Math.min(98, Math.max(20, Math.round(rs.w / gridW * 100)));
+        charts[rs.idx].h = Math.round(rs.h);
+        saveCharts();
+      }
+      rs.card.classList.remove("resizing");
+      document.body.style.cursor = "";
+      rs = null;
+      renderGrid();
+    });
+    /* double-click the grip: reset height back to automatic */
+    grid.addEventListener("dblclick", function (e) {
+      var grip = e.target.closest(".ins-resize");
+      if (!grip) return;
+      var i = parseInt(grip.closest(".ins-card").getAttribute("data-ins"), 10);
+      delete charts[i].h;
+      saveCharts();
+      renderGrid();
+    });
+
+    /* focus modal — big chart + underlying data table */
+    var cfEl = document.getElementById("chartFocusModal");
+    function openChartFocus(i) {
+      if (!cfEl) return;
+      var cfg = charts[i];
+      var M = MEASURES[cfg.m], G = DIMENSIONS[cfg.g];
+      var rows = computeRows(cfg);
+      document.getElementById("cfTitle").textContent = chartTitle(cfg);
+      document.getElementById("cfChart").innerHTML = chartBody(cfg);
+      var showShare = M.share;
+      var showCount = cfg.m !== "clients";
+      var head = '<tr><th>' + esc(G.label) + '</th><th>' + esc(M.label) + '</th>' +
+        (showShare ? '<th>% of total</th>' : '') +
+        (showCount ? '<th>Customers</th>' : '') + '</tr>';
+      var body = rows.map(function (r) {
+        return '<tr><td><b>' + esc(r.display) + '</b></td><td>' + M.fmt(r.amount) + '</td>' +
+          (showShare ? '<td>' + r.pct + '%</td>' : '') +
+          (showCount ? '<td>' + r.count + '</td>' : '') + '</tr>';
+      }).join("");
+      var foot = '<tr class="table-total"><td>' + (cfg.m === "health" ? "Overall — all customers" : "Total — all customers") + '</td>' +
+        '<td>' + M.fmt(M.agg(A)) + '</td>' +
+        (showShare ? '<td>100%</td>' : '') +
+        (showCount ? '<td>' + A.length + '</td>' : '') + '</tr>';
+      document.getElementById("cfTable").innerHTML =
+        '<div class="table-wrap"><table class="data-table"><thead>' + head + '</thead>' +
+        '<tbody>' + body + '</tbody><tfoot>' + foot + '</tfoot></table></div>';
+      cfEl.style.display = "flex";
+      document.getElementById("cfClose").focus();
+    }
+    var closeChartFocus = function () { if (cfEl) cfEl.style.display = "none"; };
+    if (cfEl) {
+      document.getElementById("cfClose").addEventListener("click", closeChartFocus);
+      cfEl.addEventListener("click", function (e) { if (e.target === cfEl) closeChartFocus(); });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && cfEl.style.display !== "none") closeChartFocus();
+      });
+    }
+
+    /* chart builder modal */
+    var cbEl = document.getElementById("chartBuilderModal");
+    var addChartBtn = document.getElementById("addChartBtn");
+    if (cbEl && addChartBtn) {
+      var cbM = document.getElementById("cbMeasure");
+      var cbG = document.getElementById("cbGroup");
+      var cbT = document.getElementById("cbType");
+      cbM.innerHTML = Object.keys(MEASURES).map(function (k) {
+        return '<option value="' + k + '">' + esc(MEASURES[k].label) + '</option>';
+      }).join("");
+      cbG.innerHTML = Object.keys(DIMENSIONS).map(function (k) {
+        return '<option value="' + k + '">' + esc(DIMENSIONS[k].label) + '</option>';
+      }).join("");
+      var currentCfg = function () { return { m: cbM.value, g: cbG.value, t: cbT.value, w: 48 }; };
+      var refreshPreview = function () {
+        /* pies need parts-of-a-whole: averages and truncated top-10 lists can't be pies */
+        var donutOk = cbM.value !== "health" && cbG.value !== "customer";
+        var donutOpt = cbT.querySelector('option[value="donut"]');
+        donutOpt.disabled = !donutOk;
+        donutOpt.textContent = donutOk ? "Pie" : "Pie (n/a for this combo)";
+        if (!donutOk) cbT.value = "bars";
+        var cfg = currentCfg();
+        document.getElementById("cbPreviewTitle").textContent = chartTitle(cfg);
+        document.getElementById("cbPreview").innerHTML = chartBody(cfg);
       };
-    });
-
-    var PRODUCT_COLOR = { "RUM": "accent", "Verification": "cat-purple" };
-    var productSlices = ["RUM", "Verification"].map(function (p) {
-      var list = A.filter(function (a) { return a.product === p; });
-      var m = mrrOf(list);
-      return {
-        label: '<b>' + p + '</b> · ' + list.length,
-        amount: m, color: PRODUCT_COLOR[p],
-        value: money(m) + '/mo · ' + pctOfTotal(m)
-      };
-    });
-
-    var regionRows = ["USA", "EU", "APAC", "Other"].map(function (rg) {
-      var list = A.filter(function (a) { return a.region === rg; });
-      var m = mrrOf(list);
-      return { label: '<b>' + rg + '</b> · ' + list.length + ' customers', amount: m, value: money(m) + '/mo · ' + pctOfTotal(m) };
-    });
-
-    var healthSlices = ["healthy", "needs-attention", "at-risk"].map(function (hk) {
-      var list = A.filter(function (a) { return a.health === hk; });
-      return {
-        label: '<b>' + HEALTH[hk].label + '</b>',
-        amount: list.length, color: HEALTH[hk].color,
-        value: list.length + ' · ' + money(mrrOf(list)) + '/mo'
-      };
-    });
-
-    var csms = [];
-    A.forEach(function (a) { if (csms.indexOf(a.csm) === -1) csms.push(a.csm); });
-    var csmRows = csms.map(function (c) {
-      var list = A.filter(function (a) { return a.csm === c; });
-      return { label: '<b>' + esc(c) + '</b> · ' + list.length + ' customers', amount: mrrOf(list), value: money(mrrOf(list)) + '/mo' };
-    }).sort(function (a, b) { return b.amount - a.amount; });
-
-    var top5 = A.slice().sort(function (a, b) { return b.mrr - a.mrr; }).slice(0, 5);
-    var top5Rows = top5.map(function (a) {
-      return { label: clientLink(a, a.name), amount: a.mrr, value: money(a.mrr) + '/mo' };
-    });
-    var top5Sum = mrrOf(top5);
-
-    grid.innerHTML =
-      donutCard("MRR by tier", tierSlices, moneyK(mrr) + "/mo", "total MRR") +
-      donutCard("MRR by product", productSlices, moneyK(mrr) + "/mo", "total MRR") +
-      barCard("MRR by region", regionRows) +
-      donutCard("Health distribution", healthSlices, String(A.length), "customers") +
-      barCard("Book of business by CSM", csmRows) +
-      barCard("MRR concentration — top 5 customers", top5Rows,
-        "The top 5 customers hold <b>" + pctOfTotal(top5Sum) + "</b> of total MRR (" +
-        money(top5Sum) + "/mo of " + money(mrr) + "/mo). Concentration = renewal risk worth watching.");
+      cbM.addEventListener("change", refreshPreview);
+      cbG.addEventListener("change", refreshPreview);
+      cbT.addEventListener("change", refreshPreview);
+      var closeBuilder = function () { cbEl.style.display = "none"; };
+      addChartBtn.addEventListener("click", function () {
+        refreshPreview();
+        cbEl.style.display = "flex";
+        document.getElementById("cbClose").focus();
+      });
+      document.getElementById("cbClose").addEventListener("click", closeBuilder);
+      document.getElementById("cbCancel").addEventListener("click", closeBuilder);
+      cbEl.addEventListener("click", function (e) { if (e.target === cbEl) closeBuilder(); });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && cbEl.style.display !== "none") closeBuilder();
+      });
+      document.getElementById("cbAdd").addEventListener("click", function () {
+        charts.push(currentCfg());
+        saveCharts(); renderGrid(); closeBuilder();
+      });
+    }
   })();
 
   /* re-apply any active health filter now that rows exist */
