@@ -592,6 +592,51 @@
   .modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
   .modal-foot .left { margin-right: auto; }
 
+  /* completed-tasks tile is clickable */
+  #tTileDone { cursor: pointer; transition: border-color .12s ease, transform .12s ease; }
+  #tTileDone:hover { border-color: var(--accent); transform: translateY(-1px); }
+  #tTileDone:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #tTileDone.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+
+  /* ============ task completion celebrations ============ */
+  .celebrate-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 300; overflow: hidden; }
+  .celebrate-caption { position: absolute; bottom: 12vh; left: 0; width: 100%; text-align: center; }
+  .celebrate-caption span {
+    display: inline-block; background: rgba(11,11,11,.72); color: #fff;
+    font-size: 18px; font-weight: 800; padding: 10px 22px; border-radius: 999px;
+    animation: capPop .45s cubic-bezier(.2,1.6,.4,1) both;
+  }
+  @keyframes capPop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .cf-piece { position: absolute; top: -14px; width: 9px; height: 14px; border-radius: 2px; animation-name: cfFall; animation-timing-function: linear; animation-fill-mode: forwards; }
+  @keyframes cfFall { to { transform: translate(var(--dx), 108vh) rotate(var(--rot)); } }
+  .bl-balloon { position: absolute; bottom: -70px; animation-name: blRise; animation-timing-function: ease-in; animation-fill-mode: forwards; }
+  @keyframes blRise { to { transform: translate(var(--dx), -125vh) rotate(var(--rot)); } }
+  .center-stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .trophy { font-size: 120px; animation: bigPop .5s cubic-bezier(.2,1.8,.4,1) both; filter: drop-shadow(0 0 34px rgba(250,178,25,.85)); position: relative; }
+  @keyframes bigPop { from { transform: scale(0) rotate(-20deg); } to { transform: scale(1) rotate(0deg); } }
+  .shine-rays {
+    position: absolute; width: 400px; height: 400px; border-radius: 50%;
+    background: repeating-conic-gradient(rgba(250,178,25,.26) 0 10deg, transparent 10deg 30deg);
+    animation: raysSpin 2.6s linear infinite;
+  }
+  @keyframes raysSpin { to { transform: rotate(360deg); } }
+  .sparkle { position: absolute; font-size: 22px; animation: sparkleTwinkle 1.1s ease-in-out infinite; }
+  @keyframes sparkleTwinkle { 0%, 100% { opacity: 0; transform: scale(.4); } 50% { opacity: 1; transform: scale(1.15); } }
+  .disco-ball { position: absolute; left: 50%; top: -90px; font-size: 84px; margin-left: -42px; animation: discoDrop .55s ease-out forwards; }
+  @keyframes discoDrop { to { top: 6vh; } }
+  .disco-lights {
+    position: absolute; left: 50%; top: 10vh; width: 200vmax; height: 200vmax;
+    transform: translate(-50%, -50%); border-radius: 50%;
+    background: repeating-conic-gradient(rgba(122,95,208,.16) 0 14deg, rgba(42,120,214,.16) 14deg 28deg, rgba(194,88,143,.16) 28deg 42deg, rgba(14,138,126,.16) 42deg 56deg);
+    animation: discoSpin 1.6s linear infinite;
+  }
+  @keyframes discoSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+  .dancer { position: absolute; bottom: 6vh; font-size: 56px; animation: dance .5s ease-in-out infinite alternate; }
+  @keyframes dance { from { transform: translateY(0) rotate(-8deg); } to { transform: translateY(-26px) rotate(8deg); } }
+  .champ-face { font-size: 110px; animation: bigPop .5s cubic-bezier(.2,1.8,.4,1) both; }
+  .champ-thumb { position: absolute; top: 38%; font-size: 90px; animation: thumbIn .5s cubic-bezier(.2,1.6,.4,1) both; }
+  @keyframes thumbIn { from { transform: translateX(var(--from)); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
   #toast {
     position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
     background: var(--text-primary); color: var(--page);
@@ -1022,7 +1067,7 @@
       <div class="tile" id="tTileOverdue"><span class="label">Overdue</span><span class="value">—</span></div>
       <div class="tile" id="tTileToday"><span class="label">Due today</span><span class="value">—</span></div>
       <div class="tile" id="tTileWeek"><span class="label">Due this week</span><span class="value">—</span></div>
-      <div class="tile" id="tTileDone"><span class="label">Completed this week</span><span class="value">—</span></div>
+      <div class="tile" id="tTileDone" role="button" tabindex="0" title="Show / hide completed tasks"><span class="label">Completed this week</span><span class="value">—</span><span class="delta">click to view</span></div>
     </div>
 
     <div class="card">
@@ -1063,6 +1108,11 @@
       <div class="stub-note" id="tkDragHint" style="margin:0 0 6px;">Drag ⋮⋮ to rearrange — your order is kept while “Sort: My order” is selected.</div>
       <div id="taskRows"></div>
       <div class="empty-note" id="taskRowsEmpty" style="display:none;">No tasks match these filters.</div>
+    </div>
+
+    <div class="card" id="completedCard" style="display:none;">
+      <h4>Completed tasks</h4>
+      <div id="completedRows"></div>
     </div>
   </section>
 
@@ -2184,6 +2234,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     if (!box) return;
     var list = D.tasks.map(function (t, i) { return { t: t, i: i }; }).filter(function (x) {
       var t = x.t;
+      if (t.completed) return false;
       if (tkState.priority !== "all" && t.priority !== tkState.priority) return false;
       if (tkState.owner !== "all" && t.owner !== tkState.owner) return false;
       if (tkState.show === "overdue" && daysUntil(t.due) >= 0) return false;
@@ -2216,7 +2267,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         '<span>' + (manual ? '<span class="drag-handle" title="Drag to reorder">⋮⋮</span>' : '') +
         '<span class="prio" style="background:var(--' + (PRIO_DOT[t.priority] || "baseline") + ')" title="' + esc(t.priority || "") + ' priority"></span> ' +
         '☐ <b>' + esc(t.title) + '</b> · ' + nameLink(t.account) + ' · owner ' + esc(t.owner) + ' · ' + taskDueText(t) + extra + '</span>' +
-        '<button class="btn" data-action="Complete task">Done</button></div>';
+        '<button class="btn task-complete" data-complete="' + i + '" title="Mark this task complete">✓ Complete</button></div>';
     }).join("");
     var empty = document.getElementById("taskRowsEmpty");
     if (empty) empty.style.display = list.length ? "none" : "";
@@ -2280,21 +2331,150 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       dragIndex = null;
     });
   })();
-  var tOverdue = 0, tToday = 0, tWeek = 0;
-  D.tasks.forEach(function (t) {
-    var d = daysUntil(t.due);
-    if (d < 0) tOverdue++;
-    else if (d === 0) tToday++;
-    else if (d <= 7) tWeek++;
-  });
+  function updateTaskStats() {
+    var tOverdue = 0, tToday = 0, tWeek = 0, doneNow = 0;
+    D.tasks.forEach(function (t) {
+      if (t.completed) { doneNow++; return; }
+      var d = daysUntil(t.due);
+      if (d < 0) tOverdue++;
+      else if (d === 0) tToday++;
+      else if (d <= 7) tWeek++;
+    });
+    setStat("tOverdue", tOverdue);
+    setStat("tToday", tToday);
+    setStat("tWeek", tWeek);
+    setText("#tTileOverdue .value", tOverdue);
+    setText("#tTileToday .value", tToday);
+    setText("#tTileWeek .value", tWeek);
+    setText("#tTileDone .value", K.completedTasksThisWeek + doneNow);
+  }
   renderTaskRows();
-  setStat("tOverdue", tOverdue);
-  setStat("tToday", tToday);
-  setStat("tWeek", tWeek);
-  setText("#tTileOverdue .value", tOverdue);
-  setText("#tTileToday .value", tToday);
-  setText("#tTileWeek .value", tWeek);
-  setText("#tTileDone .value", K.completedTasksThisWeek);
+  updateTaskStats();
+
+  /* ---- completed tasks: section behind the 'Completed this week' tile ---- */
+  function renderCompletedRows() {
+    var box = document.getElementById("completedRows");
+    if (!box) return;
+    var done = D.tasks.map(function (t, i) { return { t: t, i: i }; })
+      .filter(function (x) { return x.t.completed; });
+    box.innerHTML = done.map(function (x) {
+      return '<div class="row-slot" style="opacity:.8;">' +
+        '<span>☑ <b style="text-decoration:line-through;">' + esc(x.t.title) + '</b> · ' + nameLink(x.t.account) +
+        ' · owner ' + esc(x.t.owner) + ' · completed ' + fmtDateShort(x.t.completedDate) + '</span>' +
+        '<button class="btn task-reopen" data-reopen="' + x.i + '" title="Move back to open tasks">↩ Reopen</button></div>';
+    }).join("") ||
+      '<div class="empty-note">Nothing completed in this session yet — the weekly count includes ' +
+      K.completedTasksThisWeek + ' earlier completions not shown in the sample data.</div>';
+  }
+  (function initCompletedToggle() {
+    var tile = document.getElementById("tTileDone");
+    var card = document.getElementById("completedCard");
+    if (!tile || !card) return;
+    var toggle = function () {
+      var show = card.style.display === "none";
+      card.style.display = show ? "" : "none";
+      tile.classList.toggle("active", show);
+      if (show) renderCompletedRows();
+    };
+    tile.addEventListener("click", toggle);
+    tile.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+    });
+  })();
+
+  /* ---- complete / reopen + celebration ---- */
+  function refreshTaskViews() {
+    renderTaskRows();
+    updateTaskStats();
+    renderCompletedRows();
+    renderHomeTasks();
+    handleClientRoute();
+  }
+  document.addEventListener("click", function (e) {
+    var cbtn = e.target.closest(".task-complete");
+    if (cbtn) {
+      var i = parseInt(cbtn.getAttribute("data-complete"), 10);
+      var t = D.tasks[i];
+      if (t && !t.completed) {
+        t.completed = true;
+        t.completedDate = new Date().toISOString().slice(0, 10);
+        refreshTaskViews();
+        celebrate();
+      }
+      return;
+    }
+    var rbtn = e.target.closest(".task-reopen");
+    if (rbtn) {
+      var j = parseInt(rbtn.getAttribute("data-reopen"), 10);
+      if (D.tasks[j]) {
+        delete D.tasks[j].completed;
+        delete D.tasks[j].completedDate;
+        refreshTaskViews();
+      }
+    }
+  });
+
+  /* a few seconds of joy — random pick per completion */
+  function celebrateCaption(txt) {
+    return '<div class="celebrate-caption"><span>' + txt + '</span></div>';
+  }
+  function celebrate() {
+    var ov = document.createElement("div");
+    ov.className = "celebrate-overlay";
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      ov.innerHTML = celebrateCaption("✅ Task completed — nice work!");
+      document.body.appendChild(ov);
+      setTimeout(function () { ov.remove(); }, 2200);
+      return;
+    }
+    var kinds = ["confetti", "balloons", "trophy", "disco", "champ"];
+    var kind = kinds[Math.floor(Math.random() * kinds.length)];
+    var CFCOLORS = ["#2a78d6", "#7a5fd0", "#0e8a7e", "#c2588f", "#fab219", "#d03b3b", "#0ca30c"];
+    var html = "", i;
+    if (kind === "confetti") {
+      for (i = 0; i < 130; i++) {
+        html += '<div class="cf-piece" style="left:' + (Math.random() * 100).toFixed(1) + 'vw;' +
+          'background:' + CFCOLORS[i % CFCOLORS.length] + ';' +
+          '--dx:' + Math.round(Math.random() * 240 - 120) + 'px;' +
+          '--rot:' + Math.round(Math.random() * 900 + 360) + 'deg;' +
+          'animation-duration:' + (1.6 + Math.random() * 1.2).toFixed(2) + 's;' +
+          'animation-delay:' + (Math.random() * 0.5).toFixed(2) + 's;"></div>';
+      }
+      html += celebrateCaption("🎉 Task completed!");
+    } else if (kind === "balloons") {
+      for (i = 0; i < 14; i++) {
+        html += '<div class="bl-balloon" style="left:' + (4 + Math.random() * 90).toFixed(1) + 'vw;' +
+          'font-size:' + Math.round(30 + Math.random() * 26) + 'px;' +
+          'filter:hue-rotate(' + Math.round(Math.random() * 360) + 'deg);' +
+          '--dx:' + Math.round(Math.random() * 120 - 60) + 'px;' +
+          '--rot:' + Math.round(Math.random() * 40 - 20) + 'deg;' +
+          'animation-duration:' + (2 + Math.random() * 1.1).toFixed(2) + 's;' +
+          'animation-delay:' + (Math.random() * 0.4).toFixed(2) + 's;">🎈</div>';
+      }
+      html += celebrateCaption("Up, up and done! 🎈");
+    } else if (kind === "trophy") {
+      html += '<div class="center-stage"><div class="shine-rays"></div><div class="trophy">🏆</div></div>';
+      for (i = 0; i < 8; i++) {
+        html += '<div class="sparkle" style="left:' + (30 + Math.random() * 40).toFixed(1) + 'vw;' +
+          'top:' + (22 + Math.random() * 42).toFixed(1) + 'vh;' +
+          'animation-delay:' + (Math.random() * 0.9).toFixed(2) + 's;">✨</div>';
+      }
+      html += celebrateCaption("Champion! Task completed 🏆");
+    } else if (kind === "disco") {
+      html += '<div class="disco-lights"></div><div class="disco-ball">🪩</div>' +
+        '<div class="dancer" style="left:26vw;">🕺</div>' +
+        '<div class="dancer" style="left:66vw;animation-delay:.25s;">💃</div>' +
+        celebrateCaption("Disco break — task done! 🪩");
+    } else {
+      html += '<div class="center-stage"><div class="champ-face">😎</div></div>' +
+        '<div class="champ-thumb" style="left:28vw;--from:-60vw;">👍</div>' +
+        '<div class="champ-thumb" style="right:28vw;--from:60vw;">👍</div>' +
+        celebrateCaption("Two thumbs up. That task never stood a chance.");
+    }
+    ov.innerHTML = html;
+    document.body.appendChild(ov);
+    setTimeout(function () { ov.remove(); }, 2800);
+  }
   /* ---- header notifications dropdown ---- */
   (function notifications() {
     var list = document.getElementById("notifList");
@@ -2381,7 +2561,8 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   function renderHomeTasks() {
     var homeTaskList = document.getElementById("homeTaskList");
     if (!homeTaskList) return;
-    var classified = D.tasks.map(function (t) { return { t: t, u: taskUrgency(t) }; });
+    var openTasks = D.tasks.filter(function (t) { return !t.completed; });
+    var classified = openTasks.map(function (t) { return { t: t, u: taskUrgency(t) }; });
     var urgent = classified.filter(function (x) { return x.u.urgent; })
       .sort(function (a, b) { return daysUntil(a.t.due) - daysUntil(b.t.due); });
     var other = classified.filter(function (x) { return !x.u.urgent; })
@@ -2400,7 +2581,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       html += '<div class="task-group-head other">Other tasks</div>' +
         shownOther.map(function (x) { return homeTaskRow(x.t, null); }).join("");
     }
-    var moreCount = D.tasks.length - shown.length;
+    var moreCount = openTasks.length - shown.length;
     if (moreCount > 0) {
       html += '<div class="task-more" data-nav="tasks" role="link" tabindex="0" title="Open the full Tasks page">+ ' + moreCount + ' more on the Tasks page →</div>';
     }
@@ -2864,7 +3045,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   }
   /* any task row (tasks page or client page) opens the modal — but not its buttons/links */
   document.addEventListener("click", function (e) {
-    if (e.target.closest("[data-action]") || e.target.closest("a")) return;
+    if (e.target.closest("a") || e.target.closest("button")) return;
     var row = e.target.closest("[data-task-open]");
     if (row) openTaskModal(parseInt(row.getAttribute("data-task-open"), 10));
   });
@@ -3031,7 +3212,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
           '<span class="right">' + esc(t.status) + ' · ' + fmtDateShort(t.opened) + '</span></div>';
       }).join("") || '<div class="empty-note">No open tickets.</div>') + '</div>';
 
-    var tasks = D.tasks.filter(function (t) { return t.account === a.name; });
+    var tasks = D.tasks.filter(function (t) { return t.account === a.name && !t.completed; });
     var tasksCard = '<div class="card"><h4><a class="hlink" href="#tasks" title="Open the Tasks page">Tasks' + (tasks.length ? ' · ' + tasks.length : '') + ' →</a></h4>' +
       (tasks.map(function (t) {
         var d = daysUntil(t.due);
