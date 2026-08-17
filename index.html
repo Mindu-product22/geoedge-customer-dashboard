@@ -3136,7 +3136,9 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
 
     function renderGrid() {
       grid.innerHTML = charts.map(function (c, i) {
-        var style = 'width:calc(' + (c.w || 48) + '% - 8px);' + (c.h ? 'height:' + c.h + 'px;' : '');
+        /* -12px slack per card more than covers the 14px flex gaps, so any mix of
+           widths that sums to ~100% genuinely fits on one row (3x33%, 4x25%, ...) */
+        var style = 'width:calc(' + (c.w || 48) + '% - 12px);' + (c.h ? 'height:' + c.h + 'px;' : '');
         return '<div class="card ins-card" data-ins="' + i + '" style="' + style + '">' +
           '<div class="card-head-row">' +
           '<h4>' + esc(chartTitle(c)) + '</h4>' +
