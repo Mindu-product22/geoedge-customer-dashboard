@@ -2358,28 +2358,29 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
 
   /* ---- home: today's top 5 tasks widget ---- */
   var TASK_PRIO = { High: "status-critical", Medium: "status-warning", Low: "status-good" };
-  var homeTaskList = document.getElementById("homeTaskList");
-  if (homeTaskList) {
-    /* urgent = overdue, due today, or High priority — these must be done ASAP */
-    function taskUrgency(t) {
-      var d = daysUntil(t.due);
-      if (d < 0) return { urgent: true, cls: "overdue", label: "Overdue" };
-      if (d === 0) return { urgent: true, cls: "today", label: "Due today" };
-      if (t.priority === "High") return { urgent: true, cls: "high", label: "High priority" };
-      return { urgent: false };
-    }
-    function taskRow(t, badge) {
-      return '<div class="task-row" data-task-open="' + D.tasks.indexOf(t) + '" title="Open this task">' +
-        '<span class="pdot" style="background:var(--' + (TASK_PRIO[t.priority] || "baseline") + ')"></span>' +
-        '<span class="t-main"><b>' + esc(t.title) + '</b>' +
-          '<span class="t-sub"> · ' + esc(t.account) + '</span>' +
-          (t.description ? '<div class="t-desc">' + esc(t.description) + '</div>' : '') +
-          '<div class="task-prog"><div class="task-prog-fill" style="width:' + (t.percent || 0) + '%"></div></div></span>' +
-        '<span class="t-right">' +
-          (badge ? '<div class="task-badge ' + badge.cls + '">' + badge.label + '</div>' : '') +
-          '<div>' + fmtDate(t.due) + '</div><div class="t-sub">' + esc(t.priority) + ' · ' + (t.percent || 0) + '%</div>' +
-        '</span></div>';
-    }
+  /* urgent = overdue, due today, or High priority — these must be done ASAP */
+  function taskUrgency(t) {
+    var d = daysUntil(t.due);
+    if (d < 0) return { urgent: true, cls: "overdue", label: "Overdue" };
+    if (d === 0) return { urgent: true, cls: "today", label: "Due today" };
+    if (t.priority === "High") return { urgent: true, cls: "high", label: "High priority" };
+    return { urgent: false };
+  }
+  function homeTaskRow(t, badge) {
+    return '<div class="task-row" data-task-open="' + D.tasks.indexOf(t) + '" title="Open this task">' +
+      '<span class="pdot" style="background:var(--' + (TASK_PRIO[t.priority] || "baseline") + ')"></span>' +
+      '<span class="t-main"><b>' + esc(t.title) + '</b>' +
+        '<span class="t-sub"> · ' + esc(t.account) + '</span>' +
+        (t.description ? '<div class="t-desc">' + esc(t.description) + '</div>' : '') +
+        '<div class="task-prog"><div class="task-prog-fill" style="width:' + (t.percent || 0) + '%"></div></div></span>' +
+      '<span class="t-right">' +
+        (badge ? '<div class="task-badge ' + badge.cls + '">' + badge.label + '</div>' : '') +
+        '<div>' + fmtDate(t.due) + '</div><div class="t-sub">' + esc(t.priority) + ' · ' + (t.percent || 0) + '%</div>' +
+      '</span></div>';
+  }
+  function renderHomeTasks() {
+    var homeTaskList = document.getElementById("homeTaskList");
+    if (!homeTaskList) return;
     var classified = D.tasks.map(function (t) { return { t: t, u: taskUrgency(t) }; });
     var urgent = classified.filter(function (x) { return x.u.urgent; })
       .sort(function (a, b) { return daysUntil(a.t.due) - daysUntil(b.t.due); });
@@ -2393,11 +2394,11 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     var html = "";
     if (shownUrgent.length) {
       html += '<div class="task-group-head urgent">⚠ Needs action now · ' + shownUrgent.length + '</div>' +
-        '<div class="task-urgent-box">' + shownUrgent.map(function (x) { return taskRow(x.t, x.u); }).join("") + '</div>';
+        '<div class="task-urgent-box">' + shownUrgent.map(function (x) { return homeTaskRow(x.t, x.u); }).join("") + '</div>';
     }
     if (shownOther.length) {
       html += '<div class="task-group-head other">Other tasks</div>' +
-        shownOther.map(function (x) { return taskRow(x.t, null); }).join("");
+        shownOther.map(function (x) { return homeTaskRow(x.t, null); }).join("");
     }
     var moreCount = D.tasks.length - shown.length;
     if (moreCount > 0) {
@@ -2405,6 +2406,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     }
     homeTaskList.innerHTML = html;
   }
+  renderHomeTasks();
 
   /* ---- open tickets (aggregated from every customer's detail record) ---- */
   var allTickets = [];
@@ -2849,6 +2851,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         if (txt) t.notes.push({ date: new Date().toISOString().slice(0, 10), text: txt });
         renderTaskRows();
         handleClientRoute(); /* refresh client page task list if we're on one */
+        renderHomeTasks();   /* refresh the home top-tasks widget (% / priority / grouping) */
       }
       closeTaskModal();
     });
