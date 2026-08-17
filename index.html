@@ -1051,7 +1051,7 @@
     <div class="page-head">
       <button class="btn" data-nav="home">← Home</button>
       <h2>Onboarding</h2>
-      <div class="desc">Customers in onboarding with stage, progress, blockers and target go-live.</div>
+      <div class="desc">New customer onboarding — mirrors the CS New Client Onboarding board: stage, temperature, tier, owner, integration stage, dates and links.</div>
     </div>
     <div class="stub-note">Populated with sample (dummy) data — all customers and numbers are fictional.</div>
 
@@ -1063,8 +1063,25 @@
     </div>
 
     <div class="card">
-      <h4>Onboarding pipeline</h4>
-      <div id="onboardingRows"></div>
+      <div class="table-wrap">
+        <table class="data-table" id="onboardingTable">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Product</th>
+              <th>Stage</th>
+              <th>Temperature</th>
+              <th>Tier</th>
+              <th>Owner</th>
+              <th>Integration Stage</th>
+              <th>Target Date</th>
+              <th>Admin</th>
+              <th>SF</th>
+            </tr>
+          </thead>
+          <tbody id="onboardingRows"></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -2230,12 +2247,25 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   setText("#obTileBlocked .value", blocked);
   setText("#obTileAvg .value", K.onboardingAvgDaysToGoLive);
   setText("#obTileGoLives .value", goLivesThisMonth);
+  var OB_TIER = { "Strategic": "status-critical", "Gold": "status-warning", "Silver": "baseline" };
+  var OB_TEMP = { "Low": "status-good", "Medium": "status-warning", "High": "status-serious", "Critical": "status-critical" };
+  var OB_PROD = { "Verification": "Verif", "RUM": "RUM" };
+  var OB_GEO = "https://www.geoedge.com/wp-content/uploads/2023/01/Logo-Geoedge-1-1-1-1.png";
+  var OB_SF = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="#00A1E0" d="M10.6 5.1a3.6 3.6 0 0 1 6 1.1 3.2 3.2 0 0 1 4.2 3 3.2 3.2 0 0 1-3.2 3.2H8.1A3 3 0 0 1 7.5 6.4a3.8 3.8 0 0 1 3.1-1.3z"/></svg>';
   document.getElementById("onboardingRows").innerHTML = D.onboarding.map(function (o) {
-    var s = OB[o.status];
-    return '<div class="row-slot">' +
-      '<span>' + nameLink(o.account) + ' · stage ' + esc(o.stage) + ' · go-live ' + fmtDateShort(o.goLive) +
-      (o.blocker ? ' · blocker: ' + esc(o.blocker) : '') + '</span>' +
-      pill(s.label, s.color) + '</div>';
+    var a = byName[o.account] || {};
+    return '<tr' + (o.blocker ? ' title="Blocker: ' + esc(o.blocker) + '"' : '') + '>' +
+      '<td><b>' + nameLink(o.account) + '</b></td>' +
+      '<td>' + esc(OB_PROD[a.product] || a.product || "—") + '</td>' +
+      '<td>' + esc(o.stage) + '</td>' +
+      '<td>' + pill(o.temperature || "—", OB_TEMP[o.temperature] || "baseline") + '</td>' +
+      '<td>' + (a.tier ? pill(a.tier, OB_TIER[a.tier] || "baseline") : "—") + '</td>' +
+      '<td>' + esc(a.csm || "—") + '</td>' +
+      '<td>' + esc(o.integrationStage || "—") + '</td>' +
+      '<td>' + fmtDate(o.goLive) + '</td>' +
+      '<td><a class="icon-link geoedge" data-action="Open admin panel" title="Open admin panel" aria-label="Open admin panel"><img src="' + OB_GEO + '" alt="Admin"></a></td>' +
+      '<td><a class="icon-link sf" data-action="Open in Salesforce" title="Open in Salesforce" aria-label="Open in Salesforce">' + OB_SF + '</a></td>' +
+      '</tr>';
   }).join("");
 
   /* ---- tasks ---- */

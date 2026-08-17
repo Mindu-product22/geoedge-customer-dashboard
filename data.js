@@ -70,10 +70,12 @@ window.DASHBOARD_DATA = {
     { account: "MetroNews Digital",     owner: "Noa Levi",   stage: "Closed Lost",           oppName: "SpecHub — lost to budget",     monthly: 700,  est: 8400,  probability: 0,   openDate: "2026-05-18", closeDate: "2026-08-02", nextStep: "Re-approach in next budget cycle",       nextStepUpdate: "2026-08-02" }
   ],
 
+  /* fields mirror the "CS - New Client Onboarding" monday board:
+     Stage, Temperature, Integration Stage, Date (go-live); Tier/Owner/Product/links derive from the account */
   onboarding: [
-    { account: "Spark Media Group",   stage: "setup",    goLive: "2026-08-28", status: "on-track" },
-    { account: "Quantum Ads Network", stage: "training", goLive: "2026-09-15", status: "blocked", blocker: "waiting on tag deployment" },
-    { account: "PlayGrid Media",      stage: "kickoff",  goLive: "2026-09-30", status: "delayed" }
+    { account: "Spark Media Group",   stage: "Onboarding with trial", temperature: "Medium", integrationStage: "Tag deployed", goLive: "2026-08-28", status: "on-track" },
+    { account: "Quantum Ads Network", stage: "Integration",           temperature: "High",   integrationStage: "Testing",     goLive: "2026-09-15", status: "blocked", blocker: "waiting on tag deployment" },
+    { account: "PlayGrid Media",      stage: "Internal Handover",     temperature: "Low",    integrationStage: "Not started", goLive: "2026-09-30", status: "delayed" }
   ],
 
   /* percent: 0-100 complete; blockers: free text (empty = none); notes: newest last;
