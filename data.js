@@ -113,6 +113,17 @@ window.DASHBOARD_DATA = {
       notes: [] }
   ],
 
+  /* recent things the CSM should know about — shown in the header bell.
+     type drives the icon/colour: risk | task | ticket | opportunity | renewal | status */
+  notifications: [
+    { type: "risk",        unread: true,  when: "1h ago",     account: "StreamCast TV",        title: "Health dropped to At risk",   detail: "Fell from Needs attention to At risk (health 45). Usage down 30% since integration issues." },
+    { type: "task",        unread: true,  when: "3h ago",     account: "MetroNews Digital",     title: "Task now overdue",            detail: "“Escalate billing discrepancy” was due 11 Aug and is now overdue." },
+    { type: "ticket",      unread: true,  when: "Today",      account: "AdNexa",                title: "New support ticket",          detail: "GE-4812 opened — discrepancy in blocked-impression counts vs internal logs." },
+    { type: "opportunity", unread: false, when: "Yesterday",  account: "PixelBridge",           title: "Opportunity won",             detail: "AppHarbr SDK add-on closed won — $1,200/mo." },
+    { type: "renewal",     unread: false, when: "2 days ago", account: "MobiReach",             title: "Renewal within 30 days",      detail: "Renews 28 Aug — auto-renew on, health 58 (watch). Confirm alert-noise fixes." },
+    { type: "status",      unread: false, when: "3 days ago", account: "Quantum Ads Network",   title: "Onboarding blocked",          detail: "Tag deployment blocked by the customer’s CSP policy; fix ships in their next release." }
+  ],
+
   /* per-client detail (keyed by portal) — health breakdown dims average to the
      account's healthScore; contacts/tickets/news are fictional like everything else */
   clientDetails: {
