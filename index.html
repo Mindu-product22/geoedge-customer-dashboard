@@ -651,6 +651,70 @@
   .champ-face { font-size: 110px; animation: bigPop .5s cubic-bezier(.2,1.8,.4,1) both; }
   .champ-thumb { position: absolute; top: 38%; font-size: 90px; animation: thumbIn .5s cubic-bezier(.2,1.6,.4,1) both; }
   @keyframes thumbIn { from { transform: translateX(var(--from)); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .fw-particle {
+    position: absolute; width: 7px; height: 7px; border-radius: 50%;
+    animation: fwBurst ease-out both;
+  }
+  @keyframes fwBurst {
+    from { transform: translate(0, 0) scale(1); opacity: 1; }
+    to { transform: translate(var(--tx), var(--ty)) scale(.3); opacity: 0; }
+  }
+  .rocket { position: absolute; left: var(--x); bottom: -90px; font-size: 74px; animation: rocketUp 1.5s cubic-bezier(.4,0,.8,.4) forwards; }
+  @keyframes rocketUp { to { transform: translateY(-135vh) rotate(-4deg); } }
+  .rocket-spark { position: absolute; font-size: 18px; animation: sparkleTwinkle .9s ease-in-out both; }
+  .uni { position: absolute; top: 34vh; left: -140px; font-size: 96px; transform: scaleX(-1); animation: uniRun 2.1s linear forwards; }
+  @keyframes uniRun {
+    0% { margin-left: 0; top: 34vh; }
+    25% { top: 31vh; }
+    50% { top: 34vh; }
+    75% { top: 31vh; }
+    100% { margin-left: 115vw; top: 34vh; }
+  }
+  .rainbow {
+    position: absolute; top: calc(34vh + 58px); left: 0; height: 26px; width: 0;
+    background: linear-gradient(180deg, #d03b3b 0 16%, #ec835a 16% 33%, #fab219 33% 50%, #0ca30c 50% 66%, #2a78d6 66% 83%, #7a5fd0 83% 100%);
+    opacity: .75; border-radius: 0 13px 13px 0;
+    animation: rainbowGrow 2.1s linear forwards;
+  }
+  @keyframes rainbowGrow { to { width: 115vw; } }
+  .slot-machine { font-size: 110px; animation: bigPop .5s cubic-bezier(.2,1.8,.4,1) both; }
+  .cf-emoji { position: absolute; top: -34px; animation-name: cfFall; animation-timing-function: linear; animation-fill-mode: forwards; }
+  .hf-hand { position: absolute; top: 34%; font-size: 100px; animation: thumbIn .42s cubic-bezier(.3,1.4,.5,1) both; }
+  .hf-impact { position: absolute; top: 30%; left: 50%; margin-left: -55px; font-size: 110px; animation: bigPop .35s cubic-bezier(.2,1.8,.4,1) both; animation-delay: .4s; }
+  .ninja { position: absolute; top: 30vh; left: -120px; font-size: 90px; animation: ninjaDash .55s cubic-bezier(.7,0,.9,.4) forwards; }
+  @keyframes ninjaDash { to { margin-left: 120vw; } }
+  .slash {
+    position: absolute; top: 37vh; left: -30vw; width: 160vw; height: 4px;
+    background: linear-gradient(90deg, transparent, var(--accent) 25%, var(--accent) 75%, transparent);
+    box-shadow: 0 0 16px var(--accent);
+    transform: rotate(-5deg); animation: slashFlash .55s ease-out .12s both;
+  }
+  @keyframes slashFlash { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
+  .levelup {
+    font-size: 62px; font-weight: 900; letter-spacing: 4px;
+    font-family: "Courier New", Courier, monospace;
+    color: #fab219; -webkit-text-stroke: 2px #b07c00;
+    text-shadow: 0 5px 0 rgba(0,0,0,.28);
+    animation: levelZoom .6s cubic-bezier(.2,1.8,.4,1) both;
+  }
+  @keyframes levelZoom { from { transform: scale(.15) rotate(-8deg); opacity: 0; } to { transform: scale(1) rotate(0deg); opacity: 1; } }
+  .stamp {
+    font-size: 56px; font-weight: 900; letter-spacing: 8px;
+    color: #d03b3b; border: 7px solid #d03b3b; border-radius: 14px; padding: 12px 30px;
+    background: rgba(255,255,255,.78);
+    animation: stampSlam .45s cubic-bezier(.2,1.8,.3,1) both;
+    box-shadow: 0 12px 40px rgba(0,0,0,.28);
+  }
+  @keyframes stampSlam {
+    from { transform: scale(3.2) rotate(-32deg); opacity: 0; }
+    70% { transform: scale(.94) rotate(-9deg); opacity: 1; }
+    to { transform: scale(1) rotate(-12deg); }
+  }
+  .bullseye-target { font-size: 130px; animation: bigPop .4s cubic-bezier(.2,1.8,.4,1) both; }
+  .bullseye-arrow { position: absolute; top: calc(50% - 30px); left: -140px; font-size: 64px; animation: arrowFly .4s cubic-bezier(.6,0,.9,.5) .35s both; }
+  @keyframes arrowFly { to { left: calc(50% - 92px); } }
+  .wave-hand { position: absolute; bottom: 5vh; font-size: 44px; animation: waveUp .4s ease-in-out 4 alternate both; }
+  @keyframes waveUp { from { transform: translateY(0); } to { transform: translateY(-44px) scale(1.15); } }
 
   #toast {
     position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
@@ -2466,16 +2530,38 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   function celebrateCaption(txt) {
     return '<div class="celebrate-caption"><span>' + txt + '</span></div>';
   }
+  /* generic cheers — used by celebrations whose caption isn't tied to the visual */
+  var GENERIC_CHEERS = [
+    "Task completed!",
+    "Nice work!",
+    "Crushed it!",
+    "Another one bites the dust.",
+    "Look at you go!",
+    "Productivity level: legendary.",
+    "That's how it's done.",
+    "One less thing to worry about.",
+    "You're unstoppable today.",
+    "Momentum looks good on you.",
+    "Done and dusted.",
+    "Keep the streak alive!",
+    "The to-do list is shrinking.",
+    "Your future self says thanks."
+  ];
+  function randomCheer() {
+    return GENERIC_CHEERS[Math.floor(Math.random() * GENERIC_CHEERS.length)];
+  }
   function celebrate() {
     var ov = document.createElement("div");
     ov.className = "celebrate-overlay";
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      ov.innerHTML = celebrateCaption("✅ Task completed — nice work!");
+      ov.innerHTML = celebrateCaption("✅ " + randomCheer());
       document.body.appendChild(ov);
       setTimeout(function () { ov.remove(); }, 2200);
       return;
     }
-    var kinds = ["confetti", "balloons", "trophy", "disco", "champ"];
+    var kinds = ["confetti", "balloons", "trophy", "disco", "champ",
+                 "fireworks", "rocket", "unicorn", "jackpot", "highfive",
+                 "ninja", "levelup", "stamp", "bullseye", "wave"];
     var kind = kinds[Math.floor(Math.random() * kinds.length)];
     var CFCOLORS = ["#2a78d6", "#7a5fd0", "#0e8a7e", "#c2588f", "#fab219", "#d03b3b", "#0ca30c"];
     var html = "", i;
@@ -2488,7 +2574,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
           'animation-duration:' + (1.6 + Math.random() * 1.2).toFixed(2) + 's;' +
           'animation-delay:' + (Math.random() * 0.5).toFixed(2) + 's;"></div>';
       }
-      html += celebrateCaption("🎉 Task completed!");
+      html += celebrateCaption("🎉 " + randomCheer());
     } else if (kind === "balloons") {
       for (i = 0; i < 14; i++) {
         html += '<div class="bl-balloon" style="left:' + (4 + Math.random() * 90).toFixed(1) + 'vw;' +
@@ -2513,11 +2599,80 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         '<div class="dancer" style="left:26vw;">🕺</div>' +
         '<div class="dancer" style="left:66vw;animation-delay:.25s;">💃</div>' +
         celebrateCaption("Disco break — task done! 🪩");
-    } else {
+    } else if (kind === "champ") {
       html += '<div class="center-stage"><div class="champ-face">😎</div></div>' +
         '<div class="champ-thumb" style="left:28vw;--from:-60vw;">👍</div>' +
         '<div class="champ-thumb" style="right:28vw;--from:60vw;">👍</div>' +
         celebrateCaption("Two thumbs up. That task never stood a chance.");
+    } else if (kind === "fireworks") {
+      var bursts = 5;
+      for (var b = 0; b < bursts; b++) {
+        var bx = 15 + Math.random() * 70, by = 15 + Math.random() * 45;
+        var bcolor = CFCOLORS[b % CFCOLORS.length];
+        var bdelay = (b * 0.35).toFixed(2);
+        for (i = 0; i < 16; i++) {
+          var ang = (i / 16) * Math.PI * 2;
+          var dist = 70 + Math.random() * 70;
+          html += '<div class="fw-particle" style="left:' + bx.toFixed(1) + 'vw;top:' + by.toFixed(1) + 'vh;' +
+            'background:' + bcolor + ';' +
+            '--tx:' + Math.round(Math.cos(ang) * dist) + 'px;--ty:' + Math.round(Math.sin(ang) * dist) + 'px;' +
+            'animation-duration:.9s;animation-delay:' + bdelay + 's;"></div>';
+        }
+      }
+      html += celebrateCaption("💥 " + randomCheer());
+    } else if (kind === "rocket") {
+      html += '<div class="rocket" style="--x:' + Math.round(30 + Math.random() * 40) + 'vw;">🚀</div>';
+      for (i = 0; i < 10; i++) {
+        html += '<div class="rocket-spark" style="left:' + (30 + Math.random() * 40).toFixed(1) + 'vw;' +
+          'top:' + (30 + Math.random() * 55).toFixed(1) + 'vh;' +
+          'animation-delay:' + (0.2 + Math.random() * 1).toFixed(2) + 's;">✨</div>';
+      }
+      html += celebrateCaption("To the moon — task done! 🚀");
+    } else if (kind === "unicorn") {
+      html += '<div class="rainbow"></div><div class="uni">🦄</div>' +
+        celebrateCaption("Magical. Task obliterated 🦄🌈");
+    } else if (kind === "jackpot") {
+      html += '<div class="center-stage"><div class="slot-machine">🎰</div></div>';
+      for (i = 0; i < 26; i++) {
+        html += '<div class="cf-emoji" style="left:' + (Math.random() * 96).toFixed(1) + 'vw;' +
+          'font-size:' + Math.round(18 + Math.random() * 16) + 'px;' +
+          '--dx:' + Math.round(Math.random() * 160 - 80) + 'px;' +
+          '--rot:' + Math.round(Math.random() * 720) + 'deg;' +
+          'animation-duration:' + (1.3 + Math.random() * 0.9).toFixed(2) + 's;' +
+          'animation-delay:' + (0.2 + Math.random() * 0.4).toFixed(2) + 's;">🪙</div>';
+      }
+      html += celebrateCaption("JACKPOT! 💰 Task completed!");
+    } else if (kind === "highfive") {
+      html += '<div class="hf-hand" style="left:20vw;--from:-50vw;">🖐️</div>' +
+        '<div class="hf-hand" style="right:20vw;--from:50vw;">🤚</div>' +
+        '<div class="hf-impact">💥</div>' +
+        celebrateCaption("High five! ✋ Another one down.");
+    } else if (kind === "ninja") {
+      html += '<div class="slash"></div><div class="ninja">🥷</div>' +
+        celebrateCaption("Sliced. What's next? 🥷");
+    } else if (kind === "levelup") {
+      html += '<div class="center-stage"><div class="levelup">LEVEL UP!</div></div>';
+      for (i = 0; i < 10; i++) {
+        var lang = (i / 10) * Math.PI * 2;
+        html += '<div class="fw-particle" style="left:50vw;top:45vh;width:12px;height:12px;border-radius:2px;' +
+          'background:' + CFCOLORS[i % CFCOLORS.length] + ';' +
+          '--tx:' + Math.round(Math.cos(lang) * 150) + 'px;--ty:' + Math.round(Math.sin(lang) * 150) + 'px;' +
+          'animation-duration:.9s;animation-delay:.3s;"></div>';
+      }
+      html += celebrateCaption("+100 XP · You're on a roll 🕹️");
+    } else if (kind === "stamp") {
+      html += '<div class="center-stage"><div class="stamp">DONE ✓</div></div>' +
+        celebrateCaption("Stamped and shipped. 📬");
+    } else if (kind === "bullseye") {
+      html += '<div class="center-stage"><div class="bullseye-target">🎯</div></div>' +
+        '<div class="bullseye-arrow">➤</div>' +
+        celebrateCaption("Bullseye! Dead center. 🎯");
+    } else {
+      for (i = 0; i < 14; i++) {
+        html += '<div class="wave-hand" style="left:' + (i * 7 + 1) + 'vw;' +
+          'animation-delay:' + (i * 0.08).toFixed(2) + 's;">🙌</div>';
+      }
+      html += celebrateCaption("The crowd goes wild! 🙌");
     }
     ov.innerHTML = html;
     document.body.appendChild(ov);
