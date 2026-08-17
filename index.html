@@ -586,9 +586,19 @@
   }
   .tm-pair { display: flex; gap: 14px; flex-wrap: wrap; }
   .tm-pair > div { flex: 1; min-width: 140px; }
-  .tm-note { font-size: 12.5px; padding: 7px 0; border-bottom: 1px solid var(--grid); }
+  .tm-note { font-size: 12.5px; padding: 7px 0; border-bottom: 1px solid var(--grid); display: flex; align-items: baseline; gap: 6px; }
   .tm-note:last-child { border-bottom: none; }
-  .tm-note .d { color: var(--text-muted); font-size: 11px; margin-right: 6px; }
+  .tm-note .d { color: var(--text-muted); font-size: 11px; flex: none; }
+  .tm-note .tm-note-text { flex: 1 1 auto; min-width: 0; }
+  .tm-note .tm-note-author { color: var(--text-muted); font-size: 11px; font-style: italic; flex: none; }
+  .tm-note-actions { display: inline-flex; gap: 8px; flex: none; }
+  .tm-note-btn { border: none; background: none; padding: 0; font: inherit; font-size: 11px; font-weight: 600; color: var(--accent); cursor: pointer; }
+  .tm-note-btn:hover { text-decoration: underline; }
+  .tm-note-btn.del { color: var(--status-critical); }
+  .tm-note-edit { display: flex; gap: 6px; align-items: flex-start; width: 100%; }
+  .tm-note-edit textarea { flex: 1 1 auto; font: inherit; font-size: 12.5px; padding: 5px 7px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); color: var(--text-primary); }
+  #tmComplete { border-color: var(--status-good); color: var(--status-good); font-weight: 600; }
+  #tmComplete:hover { background: rgba(12,163,12,0.08); }
   .modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
   .modal-foot .left { margin-right: auto; }
 
@@ -1371,7 +1381,8 @@
     <div id="tmNotes"></div>
     <textarea id="tmNewNote" rows="2" placeholder="Add a note…" style="margin-top:8px;"></textarea>
     <div class="modal-foot">
-      <span style="display:flex;gap:8px;margin-right:auto;">
+      <span style="display:flex;gap:8px;margin-right:auto;flex-wrap:wrap;">
+        <button class="btn" id="tmComplete">✓ Mark complete</button>
         <button class="btn" id="tmEscalate">🚨 Escalate</button>
         <button class="btn" id="tmAddNote">＋ Add note</button>
       </span>
@@ -2935,6 +2946,8 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   /* ---- task modal: open a task, add notes, update % complete and blockers ---- */
   var tmEl = document.getElementById("taskModal");
   var tmTaskIndex = null;
+  var noteUser = (D.user && D.user.displayName) || "You";  /* the logged-in user (placeholder for real auth) */
+  var tmEditNote = -1;                                     /* index of the note being edited, -1 = none */
   function tmRenderNotes(t) {
     var box = document.getElementById("tmNotes");
     box.textContent = "";
@@ -2945,14 +2958,43 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       box.appendChild(none);
       return;
     }
-    t.notes.forEach(function (n) {
+    t.notes.forEach(function (n, idx) {
       var row = document.createElement("div");
       row.className = "tm-note";
-      var d = document.createElement("span");
-      d.className = "d";
-      d.textContent = fmtDateShort(n.date);
-      row.appendChild(d);
-      row.appendChild(document.createTextNode(n.text));
+      if (tmEditNote === idx) {
+        var wrap = document.createElement("div"); wrap.className = "tm-note-edit";
+        var ta = document.createElement("textarea"); ta.rows = 2; ta.value = n.text;
+        var save = document.createElement("button"); save.type = "button"; save.className = "tm-note-btn"; save.textContent = "Save";
+        var cancel = document.createElement("button"); cancel.type = "button"; cancel.className = "tm-note-btn"; cancel.textContent = "Cancel";
+        save.addEventListener("click", function () {
+          var v = ta.value.trim();
+          if (v) { n.text = v; n.editedBy = noteUser; }
+          tmEditNote = -1; tmRenderNotes(t);
+        });
+        cancel.addEventListener("click", function () { tmEditNote = -1; tmRenderNotes(t); });
+        wrap.appendChild(ta); wrap.appendChild(save); wrap.appendChild(cancel);
+        row.appendChild(wrap); box.appendChild(row);
+        ta.focus();
+        return;
+      }
+      var d = document.createElement("span"); d.className = "d"; d.textContent = fmtDateShort(n.date);
+      var txt = document.createElement("span"); txt.className = "tm-note-text"; txt.textContent = n.text;
+      row.appendChild(d); row.appendChild(txt);
+      if (n.author) {
+        var au = document.createElement("span"); au.className = "tm-note-author";
+        au.textContent = "— " + n.author + (n.editedBy && n.editedBy !== n.author ? " (edited)" : "");
+        row.appendChild(au);
+      }
+      var actions = document.createElement("span"); actions.className = "tm-note-actions";
+      var edit = document.createElement("button"); edit.type = "button"; edit.className = "tm-note-btn"; edit.textContent = "Edit";
+      edit.addEventListener("click", function () { tmEditNote = idx; tmRenderNotes(t); });
+      actions.appendChild(edit);
+      if (n.author && n.author === noteUser) {  /* only the author can delete */
+        var del = document.createElement("button"); del.type = "button"; del.className = "tm-note-btn del"; del.textContent = "Delete";
+        del.addEventListener("click", function () { t.notes.splice(idx, 1); tmEditNote = -1; tmRenderNotes(t); });
+        actions.appendChild(del);
+      }
+      row.appendChild(actions);
       box.appendChild(row);
     });
   }
@@ -2978,6 +3020,9 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     document.getElementById("tmPctVal").textContent = (t.percent || 0) + "%";
     document.getElementById("tmBlockers").value = t.blockers || "";
     document.getElementById("tmNewNote").value = "";
+    tmEditNote = -1;
+    var compBtn = document.getElementById("tmComplete");
+    if (compBtn) compBtn.textContent = t.completed ? "↩ Reopen task" : "✓ Mark complete";
     tmRenderNotes(t);
     tmEl.style.display = "flex";
     document.getElementById("tmClose").focus();
@@ -2997,7 +3042,8 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       t.notes = t.notes || [];
       t.notes.push({
         date: new Date().toISOString().slice(0, 10),
-        text: t.escalated ? "🚨 Escalated — flagged to management." : "Escalation cleared."
+        text: t.escalated ? "🚨 Escalated — flagged to management." : "Escalation cleared.",
+        author: "System"
       });
       tmRenderNotes(t);
       /* refresh meta + button without resetting unsaved %/blocker edits */
@@ -3016,9 +3062,23 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       var txt = document.getElementById("tmNewNote").value.trim();
       if (!t || !txt) return;
       t.notes = t.notes || [];
-      t.notes.push({ date: new Date().toISOString().slice(0, 10), text: txt });
+      t.notes.push({ date: new Date().toISOString().slice(0, 10), text: txt, author: noteUser });
       document.getElementById("tmNewNote").value = "";
       tmRenderNotes(t);
+    });
+    document.getElementById("tmComplete").addEventListener("click", function () {
+      var t = D.tasks[tmTaskIndex];
+      if (!t) return;
+      if (t.completed) {
+        t.completed = false; t.completedDate = null;
+      } else {
+        t.completed = true;
+        t.completedDate = new Date().toISOString().slice(0, 10);
+        t.percent = 100;
+        if (typeof celebrate === "function") celebrate();
+      }
+      refreshTaskViews();
+      closeTaskModal();
     });
     document.getElementById("tmSave").addEventListener("click", function () {
       var t = D.tasks[tmTaskIndex];
@@ -3029,7 +3089,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         t.estimateMin = parseInt(document.getElementById("tmEstimate").value, 10);
         /* pending note text counts as a note on save too */
         var txt = document.getElementById("tmNewNote").value.trim();
-        if (txt) t.notes.push({ date: new Date().toISOString().slice(0, 10), text: txt });
+        if (txt) t.notes.push({ date: new Date().toISOString().slice(0, 10), text: txt, author: noteUser });
         renderTaskRows();
         handleClientRoute(); /* refresh client page task list if we're on one */
         renderHomeTasks();   /* refresh the home top-tasks widget (% / priority / grouping) */
