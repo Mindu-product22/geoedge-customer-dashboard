@@ -3255,10 +3255,12 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       'stroke-dasharray="' + (a.healthScore / 100 * CIRC).toFixed(1) + ' ' + CIRC + '"/></svg>' +
       '<div class="num"><b>' + a.healthScore + '</b><span>health</span></div></div>';
 
+    var onboardingRec = (D.onboarding || []).filter(function (o) { return o.account === a.name; })[0];
     var badges =
       pill(a.tier, TIER_DOT[a.tier] || "baseline") + " " +
       '<span class="pill">' + esc(a.product) + '</span> ' +
-      pill(r.label, r.color);
+      pill(r.label, r.color) +
+      (onboardingRec ? " " + pill("Onboarding" + (onboardingRec.stage ? " · " + onboardingRec.stage : ""), "accent") : "");
 
     var renewalChipExtra = "";
     if (daysLeft >= 0 && daysLeft <= 90) {
@@ -3287,7 +3289,9 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       '<div class="hero-meta">' + esc(a.portal) + ' · CSM ' + esc(a.csm) + ' · ' + esc(a.location || "") + ' · ' + esc(a.region) + '</div>' +
       '<div class="hero-chips">' + chips + '</div>' + progress + '</div>' +
       '<div class="hero-actions">' +
-      '<button class="btn primary" data-action="Make QBR">📊 Make QBR</button>' +
+      (onboardingRec
+        ? '<button class="btn primary" data-action="Make Onboarding Summary">📋 Make Onboarding Summary</button>'
+        : '<button class="btn primary" data-action="Make QBR">📊 Make QBR</button>') +
       '<button class="btn" data-action="Make PDF">📄 Make PDF</button>' +
       '<button class="btn" data-action="Log Call">📞 Log Call</button>' +
       '<button class="btn" data-action="Run Deep Dive">🔎 Run Deep Dive</button>' +
