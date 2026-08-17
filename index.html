@@ -205,12 +205,13 @@
   }
 
   /* home: top-tasks widget */
-  .task-widget { margin-top: 14px; cursor: pointer; transition: border-color .12s ease; }
-  .task-widget:hover { border-color: var(--accent); }
-  .task-widget:hover .task-widget-title { text-decoration: underline; }
-  .task-widget:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .task-widget-title { font-size: 14px; font-weight: 700; color: var(--accent); }
+  .task-widget { margin-top: 14px; }
+  .task-widget-title { font-size: 14px; font-weight: 700; color: var(--accent); cursor: pointer; }
+  .task-widget-title:hover { text-decoration: underline; }
+  .task-widget-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
   .task-widget-sub { font-size: 11.5px; color: var(--text-muted); }
+  #homeTaskList .task-row { cursor: pointer; border-radius: 6px; }
+  #homeTaskList .task-row:hover { background: var(--slot-bg); }
   .t-desc { font-size: 11.5px; color: var(--text-secondary); margin-top: 3px; line-height: 1.4; }
   .task-group-head { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin: 12px 0 4px; }
   .task-group-head.urgent { color: var(--status-critical); }
@@ -221,7 +222,8 @@
   .task-badge.overdue { background: var(--status-critical); color: #fff; }
   .task-badge.today { background: var(--status-warning); color: #3a2b00; }
   .task-badge.high { background: var(--accent-soft); color: var(--accent); }
-  .task-more { margin-top: 12px; font-size: 12px; font-weight: 600; color: var(--accent); }
+  .task-more { margin-top: 12px; font-size: 12px; font-weight: 600; color: var(--accent); cursor: pointer; display: inline-block; }
+  .task-more:hover { text-decoration: underline; }
   .task-row {
     display: grid; grid-template-columns: 10px 1fr auto; gap: 12px; align-items: center;
     padding: 10px 0; border-bottom: 1px solid var(--grid); font-size: 12.5px;
@@ -758,10 +760,10 @@
 
     </div>
 
-    <div class="card task-widget" data-nav="tasks" role="link" tabindex="0" title="Open the Tasks page to see all tasks">
+    <div class="card task-widget">
       <div class="card-head-row">
-        <h4 class="task-widget-title">Today's top tasks →</h4>
-        <span class="task-widget-sub">most urgent first · click to see all tasks</span>
+        <h4 class="task-widget-title" data-nav="tasks" role="link" tabindex="0" title="Open the full Tasks page">Today's top tasks →</h4>
+        <span class="task-widget-sub">most urgent first · click a task for its details</span>
       </div>
       <div id="homeTaskList"></div>
     </div>
@@ -2361,7 +2363,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       return { urgent: false };
     }
     function taskRow(t, badge) {
-      return '<div class="task-row">' +
+      return '<div class="task-row" data-task-open="' + D.tasks.indexOf(t) + '" title="Open this task">' +
         '<span class="pdot" style="background:var(--' + (TASK_PRIO[t.priority] || "baseline") + ')"></span>' +
         '<span class="t-main"><b>' + esc(t.title) + '</b>' +
           '<span class="t-sub"> · ' + esc(t.account) + '</span>' +
@@ -2393,7 +2395,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     }
     var moreCount = D.tasks.length - shown.length;
     if (moreCount > 0) {
-      html += '<div class="task-more">+ ' + moreCount + ' more on the Tasks page →</div>';
+      html += '<div class="task-more" data-nav="tasks" role="link" tabindex="0" title="Open the full Tasks page">+ ' + moreCount + ' more on the Tasks page →</div>';
     }
     homeTaskList.innerHTML = html;
   }
