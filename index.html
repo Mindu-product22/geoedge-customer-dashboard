@@ -138,7 +138,9 @@
     font-size: 12px; font-style: italic; padding: 6px 14px; min-width: 200px;
   }
 
-  main { max-width: 1160px; margin: 0 auto; padding: 26px 28px 48px; }
+  /* use the full window — wide tables shouldn't scroll while the page has room
+     (1800px cap only kicks in on ultra-wide monitors to keep lines readable) */
+  main { max-width: 1800px; margin: 0 auto; padding: 26px 28px 48px; }
 
   /* ============ home: hero ============ */
   .hero { margin-bottom: 22px; }
@@ -344,6 +346,10 @@
   }
   .data-table tfoot .table-total td { border-top: 2px solid var(--baseline); font-weight: 700; padding: 11px 12px; }
   .data-table tfoot .table-total td:first-child { color: var(--text-secondary); font-weight: 650; text-align: right; }
+  /* the opportunities table is 11 columns — tighter cells + wrapping text columns */
+  #oppTable th, #oppTable td { padding: 9px 8px; }
+  #oppTable td.wrap { min-width: 170px; }
+  #oppTable td.wrap-name { white-space: normal; min-width: 140px; }
   .data-table th.sortable { cursor: pointer; user-select: none; }
   .data-table th.sortable:hover { color: var(--accent); }
   .data-table th .arrow { font-size: 9px; margin-left: 4px; display: inline-block; min-width: 9px; }
@@ -832,15 +838,15 @@
             <tr>
               <th class="sortable" data-sort="account">Customer Name<span class="arrow"></span></th>
               <th class="sortable" data-sort="oppName">Opportunity Name<span class="arrow"></span></th>
-              <th class="sortable" data-sort="monthly">Monthly Amount<span class="arrow"></span></th>
-              <th class="sortable" data-sort="probability">Probability (%)<span class="arrow"></span></th>
+              <th class="sortable" data-sort="monthly">Monthly<span class="arrow"></span></th>
+              <th class="sortable" data-sort="probability">Prob %<span class="arrow"></span></th>
               <th class="sortable" data-sort="stage">Stage<span class="arrow"></span></th>
-              <th class="sortable" data-sort="owner">Opportunity Owner<span class="arrow"></span></th>
+              <th class="sortable" data-sort="owner">Owner<span class="arrow"></span></th>
               <th class="sortable" data-sort="openDate">Open Date<span class="arrow"></span></th>
               <th class="sortable" data-sort="closeDate">Close Date<span class="arrow"></span></th>
               <th class="sortable" data-sort="daysOpen">Days Open<span class="arrow"></span></th>
               <th class="sortable" data-sort="nextStep">Next Step<span class="arrow"></span></th>
-              <th class="sortable" data-sort="nextStepUpdate">Next Step Update<span class="arrow"></span></th>
+              <th class="sortable" data-sort="nextStepUpdate">Updated<span class="arrow"></span></th>
             </tr>
           </thead>
           <tbody id="oppRows"></tbody>
@@ -1617,7 +1623,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       oppBody.innerHTML = rows.map(function (o) {
         return '<tr>' +
           '<td>' + nameLink(o.account) + '</td>' +
-          '<td><a class="client-link" data-action="Open opportunity in Salesforce" title="Open this opportunity in Salesforce">' + esc(o.oppName) + '</a></td>' +
+          '<td class="wrap-name"><a class="client-link" data-action="Open opportunity in Salesforce" title="Open this opportunity in Salesforce">' + esc(o.oppName) + '</a></td>' +
           '<td>' + money(o.monthly) + '</td>' +
           '<td>' + o.probability + '%</td>' +
           '<td>' + esc(o.stage) + '</td>' +
