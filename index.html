@@ -278,6 +278,19 @@
   }
   .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--grid); vertical-align: middle; white-space: nowrap; }
   .data-table td.wrap { white-space: normal; min-width: 150px; }
+  /* onboarding checklist (sub-items) */
+  .ob-name { display: flex; align-items: center; gap: 7px; }
+  .ob-expand { border: none; background: none; cursor: pointer; font-size: 11px; color: var(--text-secondary); padding: 0 2px; line-height: 1; }
+  .ob-expand:hover { color: var(--accent); }
+  .ob-prog-num { font-size: 12px; font-weight: 650; white-space: nowrap; }
+  .ob-prog { width: 92px; height: 6px; border-radius: 999px; background: var(--slot-bg); border: 1px solid var(--border); overflow: hidden; margin-top: 4px; }
+  .ob-prog-fill { height: 100%; background: var(--status-good); border-radius: 999px; }
+  .ob-checklist > td { background: var(--slot-bg); }
+  .ob-checklist-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 2px 0 8px; }
+  .ob-steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 7px 18px; padding-bottom: 4px; }
+  .ob-step { display: flex; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer; }
+  .ob-step input { accent-color: var(--accent); flex: none; }
+  .ob-step.done { color: var(--text-muted); text-decoration: line-through; }
   .data-table .price-unit { color: var(--text-muted); font-size: 10px; margin-left: 4px; }
   .data-table tr:last-child td { border-bottom: none; }
   .admin-link { color: var(--accent); font-weight: 600; text-decoration: none; cursor: pointer; }
@@ -1138,6 +1151,7 @@
               <th>Tier</th>
               <th>Owner</th>
               <th>Integration Stage</th>
+              <th>Steps</th>
               <th>Target Date</th>
               <th>Admin</th>
               <th>SF</th>
@@ -2316,21 +2330,80 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   var OB_PROD = { "Verification": "Verif", "RUM": "RUM" };
   var OB_GEO = "https://www.geoedge.com/wp-content/uploads/2023/01/Logo-Geoedge-1-1-1-1.png";
   var OB_SF = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="#00A1E0" d="M10.6 5.1a3.6 3.6 0 0 1 6 1.1 3.2 3.2 0 0 1 4.2 3 3.2 3.2 0 0 1-3.2 3.2H8.1A3 3 0 0 1 7.5 6.4a3.8 3.8 0 0 1 3.1-1.3z"/></svg>';
-  document.getElementById("onboardingRows").innerHTML = D.onboarding.map(function (o) {
-    var a = byName[o.account] || {};
-    return '<tr' + (o.blocker ? ' title="Blocker: ' + esc(o.blocker) + '"' : '') + '>' +
-      '<td><b>' + nameLink(o.account) + '</b></td>' +
-      '<td>' + esc(OB_PROD[a.product] || a.product || "—") + '</td>' +
-      '<td>' + esc(o.stage) + '</td>' +
-      '<td>' + pill(o.temperature || "—", OB_TEMP[o.temperature] || "baseline") + '</td>' +
-      '<td>' + (a.tier ? pill(a.tier, OB_TIER[a.tier] || "baseline") : "—") + '</td>' +
-      '<td>' + esc(a.csm || "—") + '</td>' +
-      '<td>' + esc(o.integrationStage || "—") + '</td>' +
-      '<td>' + fmtDate(o.goLive) + '</td>' +
-      '<td><a class="icon-link geoedge" data-action="Open admin panel" title="Open admin panel" aria-label="Open admin panel"><img src="' + OB_GEO + '" alt="Admin"></a></td>' +
-      '<td><a class="icon-link sf" data-action="Open in Salesforce" title="Open in Salesforce" aria-label="Open in Salesforce">' + OB_SF + '</a></td>' +
-      '</tr>';
-  }).join("");
+  /* sub-item checklist from the monday board (minus the Monday-only "Duplicate Card") */
+  var ONBOARDING_STEPS = [
+    "Fill in Admin and SF Link", "Ensure Contract is in Admin", "Schedule Internal Handover",
+    "Send Handover Template to Sales", "Have Internal Handover", "Integration Internal with Nicole",
+    "Tell Sales to Send Pre-Onboarding Questionnaire", "Schedule KOC", "Review Questionnaire and Prep for KOC",
+    "Get GAM access", "Have KOC", "Log KOC in SF", "Send KOC Recap", "Send KOC Notes to Yael",
+    "Follow on LI and Connect with Stakeholder", "2 Week Check-In", "1 Month - Health Check",
+    "Update Admin, SF, Bill Them", "Build Onboarding Summary", "Have Onboarding Summary",
+    "Send Onboarding Recap and Log in SFDC", "Have 6 Month Check In", "Get Ready for 1st Renewal"
+  ];
+  var OB_STAGE_DONE = { "Internal Handover": 5, "Integration": 11, "Onboarding with trial": 16, "Onboarded": 23 };
+  function obEnsureSteps(o) {
+    if (!o.steps) {
+      var n = OB_STAGE_DONE[o.stage] != null ? OB_STAGE_DONE[o.stage] : 3;
+      o.steps = ONBOARDING_STEPS.map(function (_, i) { return i < n; });
+    }
+    return o.steps;
+  }
+  function obProgCell(done, total) {
+    var pct = total ? Math.round(done / total * 100) : 0;
+    return '<div class="ob-prog-num">' + done + ' / ' + total + '</div>' +
+      '<div class="ob-prog"><div class="ob-prog-fill" style="width:' + pct + '%"></div></div>';
+  }
+  function renderOnboarding() {
+    var body = document.getElementById("onboardingRows");
+    if (!body) return;
+    body.innerHTML = D.onboarding.map(function (o, i) {
+      var a = byName[o.account] || {};
+      var steps = obEnsureSteps(o);
+      var done = steps.filter(Boolean).length;
+      var main = '<tr' + (o.blocker ? ' title="Blocker: ' + esc(o.blocker) + '"' : '') + '>' +
+        '<td><div class="ob-name"><button class="ob-expand" data-ob="' + i + '" aria-label="Toggle checklist">▸</button><b>' + nameLink(o.account) + '</b></div></td>' +
+        '<td>' + esc(OB_PROD[a.product] || a.product || "—") + '</td>' +
+        '<td>' + esc(o.stage) + '</td>' +
+        '<td>' + pill(o.temperature || "—", OB_TEMP[o.temperature] || "baseline") + '</td>' +
+        '<td>' + (a.tier ? pill(a.tier, OB_TIER[a.tier] || "baseline") : "—") + '</td>' +
+        '<td>' + esc(a.csm || "—") + '</td>' +
+        '<td>' + esc(o.integrationStage || "—") + '</td>' +
+        '<td id="obProg-' + i + '">' + obProgCell(done, steps.length) + '</td>' +
+        '<td>' + fmtDate(o.goLive) + '</td>' +
+        '<td><a class="icon-link geoedge" data-action="Open admin panel" title="Open admin panel" aria-label="Open admin panel"><img src="' + OB_GEO + '" alt="Admin"></a></td>' +
+        '<td><a class="icon-link sf" data-action="Open in Salesforce" title="Open in Salesforce" aria-label="Open in Salesforce">' + OB_SF + '</a></td>' +
+        '</tr>';
+      var checklist = '<tr class="ob-checklist" id="obChecklist-' + i + '" hidden><td colspan="11">' +
+        '<div class="ob-checklist-head">Onboarding checklist · ' + done + ' of ' + steps.length + ' done</div>' +
+        '<div class="ob-steps">' + steps.map(function (dn, j) {
+          return '<label class="ob-step' + (dn ? ' done' : '') + '"><input type="checkbox" class="ob-step-cb" data-ob="' + i + '" data-step="' + j + '"' + (dn ? ' checked' : '') + '>' + esc(ONBOARDING_STEPS[j]) + '</label>';
+        }).join("") + '</div></td></tr>';
+      return main + checklist;
+    }).join("");
+  }
+  renderOnboarding();
+  document.addEventListener("click", function (e) {
+    var ex = e.target.closest ? e.target.closest(".ob-expand") : null;
+    if (!ex) return;
+    var i = ex.getAttribute("data-ob");
+    var row = document.getElementById("obChecklist-" + i);
+    if (row) { row.hidden = !row.hidden; ex.textContent = row.hidden ? "▸" : "▾"; }
+  });
+  document.addEventListener("change", function (e) {
+    var cb = e.target;
+    if (!cb.classList || !cb.classList.contains("ob-step-cb")) return;
+    var i = +cb.getAttribute("data-ob"), j = +cb.getAttribute("data-step");
+    var o = D.onboarding[i];
+    if (o && o.steps) {
+      o.steps[j] = cb.checked;
+      var lbl = cb.closest(".ob-step"); if (lbl) lbl.classList.toggle("done", cb.checked);
+      var done = o.steps.filter(Boolean).length;
+      var cell = document.getElementById("obProg-" + i);
+      if (cell) cell.innerHTML = obProgCell(done, o.steps.length);
+      var head = document.querySelector("#obChecklist-" + i + " .ob-checklist-head");
+      if (head) head.textContent = "Onboarding checklist · " + done + " of " + o.steps.length + " done";
+    }
+  });
 
   /* ---- tasks ---- */
   function taskDueText(t) {
