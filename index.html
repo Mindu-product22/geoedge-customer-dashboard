@@ -599,6 +599,11 @@
   .tm-note-edit textarea { flex: 1 1 auto; font: inherit; font-size: 12.5px; padding: 5px 7px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); color: var(--text-primary); }
   #tmComplete { border-color: var(--status-good); color: var(--status-good); font-weight: 600; }
   #tmComplete:hover { background: rgba(12,163,12,0.08); }
+  #tmActivity { max-height: 160px; overflow-y: auto; }
+  .tm-act { font-size: 12px; padding: 5px 0; border-bottom: 1px dashed var(--grid); color: var(--text-secondary); }
+  .tm-act:last-child { border-bottom: none; }
+  .tm-act .d { color: var(--text-muted); font-size: 11px; margin-right: 6px; }
+  .tm-act b { color: var(--text-primary); font-weight: 650; }
   .modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
   .modal-foot .left { margin-right: auto; }
 
@@ -1380,6 +1385,8 @@
     <div class="tm-label">Notes</div>
     <div id="tmNotes"></div>
     <textarea id="tmNewNote" rows="2" placeholder="Add a note…" style="margin-top:8px;"></textarea>
+    <div class="tm-label">Activity</div>
+    <div id="tmActivity"></div>
     <div class="modal-foot">
       <span style="display:flex;gap:8px;margin-right:auto;flex-wrap:wrap;">
         <button class="btn" id="tmComplete">✓ Mark complete</button>
@@ -2948,6 +2955,45 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
   var tmTaskIndex = null;
   var noteUser = (D.user && D.user.displayName) || "You";  /* the logged-in user (placeholder for real auth) */
   var tmEditNote = -1;                                     /* index of the note being edited, -1 = none */
+
+  /* ---- per-task activity log (in-memory; seed gives each task some history) ---- */
+  var TASK_ACTIVITY_SEED = {
+    "T-101": [
+      { ts: "26 Jul 10:12", actor: "Dana Katz", text: "Task created" },
+      { ts: "26 Jul 14:40", actor: "Dana Katz", text: "Added a note" },
+      { ts: "28 Jul 09:05", actor: "Dana Katz", text: "Progress set to 60%" }
+    ],
+    "T-102": [
+      { ts: "1 Aug 08:30", actor: "Tom Rosen", text: "Task created" },
+      { ts: "3 Aug 11:20", actor: "Tom Rosen", text: "Progress 0% → 40%" }
+    ],
+    "T-103": [
+      { ts: "4 Aug 09:00", actor: "Noa Levi", text: "Task created" },
+      { ts: "5 Aug 16:15", actor: "Noa Levi", text: "Logged a blocker" }
+    ]
+  };
+  function nowStamp() {
+    var d = new Date();
+    function p(n) { return ("0" + n).slice(-2); }
+    return d.getDate() + " " + d.toLocaleString("en-US", { month: "short" }) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+  function ensureActivity(t) {
+    if (!t.activity) t.activity = (TASK_ACTIVITY_SEED[t.id] ? TASK_ACTIVITY_SEED[t.id].slice() : []);
+    return t.activity;
+  }
+  function logTaskChange(t, text) {
+    ensureActivity(t).push({ ts: nowStamp(), actor: noteUser, text: text });
+    tmRenderActivity(t);
+  }
+  function tmRenderActivity(t) {
+    var box = document.getElementById("tmActivity");
+    if (!box) return;
+    var acts = t.activity || [];
+    if (!acts.length) { box.innerHTML = '<div class="empty-note">No activity recorded yet.</div>'; return; }
+    box.innerHTML = acts.slice().reverse().map(function (a) {
+      return '<div class="tm-act"><span class="d">' + esc(a.ts) + '</span> <b>' + esc(a.actor) + '</b> ' + esc(a.text) + '</div>';
+    }).join("");
+  }
   function tmRenderNotes(t) {
     var box = document.getElementById("tmNotes");
     box.textContent = "";
@@ -2968,7 +3014,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         var cancel = document.createElement("button"); cancel.type = "button"; cancel.className = "tm-note-btn"; cancel.textContent = "Cancel";
         save.addEventListener("click", function () {
           var v = ta.value.trim();
-          if (v) { n.text = v; n.editedBy = noteUser; }
+          if (v) { n.text = v; n.editedBy = noteUser; logTaskChange(t, "Edited a note"); }
           tmEditNote = -1; tmRenderNotes(t);
         });
         cancel.addEventListener("click", function () { tmEditNote = -1; tmRenderNotes(t); });
@@ -2991,7 +3037,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       actions.appendChild(edit);
       if (n.author && n.author === noteUser) {  /* only the author can delete */
         var del = document.createElement("button"); del.type = "button"; del.className = "tm-note-btn del"; del.textContent = "Delete";
-        del.addEventListener("click", function () { t.notes.splice(idx, 1); tmEditNote = -1; tmRenderNotes(t); });
+        del.addEventListener("click", function () { t.notes.splice(idx, 1); logTaskChange(t, "Deleted a note"); tmEditNote = -1; tmRenderNotes(t); });
         actions.appendChild(del);
       }
       row.appendChild(actions);
@@ -3024,6 +3070,8 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     var compBtn = document.getElementById("tmComplete");
     if (compBtn) compBtn.textContent = t.completed ? "↩ Reopen task" : "✓ Mark complete";
     tmRenderNotes(t);
+    ensureActivity(t);
+    tmRenderActivity(t);
     tmEl.style.display = "flex";
     document.getElementById("tmClose").focus();
   }
@@ -3046,6 +3094,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         author: "System"
       });
       tmRenderNotes(t);
+      logTaskChange(t, t.escalated ? "Escalated" : "De-escalated");
       /* refresh meta + button without resetting unsaved %/blocker edits */
       document.getElementById("tmMeta").textContent =
         t.account + " · owner " + t.owner + " · due " + fmtDate(t.due) +
@@ -3065,6 +3114,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       t.notes.push({ date: new Date().toISOString().slice(0, 10), text: txt, author: noteUser });
       document.getElementById("tmNewNote").value = "";
       tmRenderNotes(t);
+      logTaskChange(t, "Added a note");
     });
     document.getElementById("tmComplete").addEventListener("click", function () {
       var t = D.tasks[tmTaskIndex];
@@ -3077,19 +3127,25 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         t.percent = 100;
         if (typeof celebrate === "function") celebrate();
       }
+      logTaskChange(t, t.completed ? "Marked complete" : "Reopened");
       refreshTaskViews();
       closeTaskModal();
     });
     document.getElementById("tmSave").addEventListener("click", function () {
       var t = D.tasks[tmTaskIndex];
       if (t) {
-        t.percent = parseInt(document.getElementById("tmPct").value, 10);
-        t.blockers = document.getElementById("tmBlockers").value.trim();
-        t.priority = document.getElementById("tmPriority").value;
-        t.estimateMin = parseInt(document.getElementById("tmEstimate").value, 10);
+        var newPct = parseInt(document.getElementById("tmPct").value, 10);
+        var newBlockers = document.getElementById("tmBlockers").value.trim();
+        var newPriority = document.getElementById("tmPriority").value;
+        var newEst = parseInt(document.getElementById("tmEstimate").value, 10);
+        if (newPct !== (t.percent || 0)) logTaskChange(t, "Progress " + (t.percent || 0) + "% → " + newPct + "%");
+        if (newPriority !== t.priority) logTaskChange(t, "Priority " + t.priority + " → " + newPriority);
+        if (newEst !== t.estimateMin) logTaskChange(t, "Estimate updated to " + fmtEstimate(newEst));
+        if (newBlockers !== (t.blockers || "")) logTaskChange(t, newBlockers ? "Blocker updated" : "Blocker cleared");
+        t.percent = newPct; t.blockers = newBlockers; t.priority = newPriority; t.estimateMin = newEst;
         /* pending note text counts as a note on save too */
         var txt = document.getElementById("tmNewNote").value.trim();
-        if (txt) t.notes.push({ date: new Date().toISOString().slice(0, 10), text: txt, author: noteUser });
+        if (txt) { t.notes.push({ date: new Date().toISOString().slice(0, 10), text: txt, author: noteUser }); logTaskChange(t, "Added a note"); }
         renderTaskRows();
         handleClientRoute(); /* refresh client page task list if we're on one */
         renderHomeTasks();   /* refresh the home top-tasks widget (% / priority / grouping) */
