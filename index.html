@@ -177,8 +177,12 @@
   /* ============ home: nav cards ============ */
   .nav-grid {
     display: grid; gap: 14px;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    /* fixed column count so the arrangement stays identical on every screen size
+       (was auto-fit, which packed 5 across on wide screens and orphaned a card) */
+    grid-template-columns: repeat(3, 1fr);
   }
+  @media (max-width: 1024px) { .nav-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px)  { .nav-grid { grid-template-columns: 1fr; } }
   .nav-card {
     background: var(--surface-1); border: 1px solid var(--border);
     border-radius: 12px; padding: 18px;
