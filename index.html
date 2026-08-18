@@ -1248,6 +1248,7 @@
               <th>Ticket</th>
               <th>Customer</th>
               <th>Subject</th>
+              <th>Summary</th>
               <th>Priority</th>
               <th>Opened</th>
               <th>Status</th>
@@ -2876,7 +2877,8 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     var det = (D.clientDetails || {})[a.portal] || {};
     (det.tickets || []).forEach(function (t) {
       allTickets.push({ id: t.id, title: t.title, status: t.status || "Open",
-        priority: t.priority || "—", opened: t.opened || "", account: a.name });
+        priority: t.priority || "—", opened: t.opened || "", account: a.name,
+        summary: t.summary || "" });
     });
   });
   var openTickets = allTickets.filter(function (t) {
@@ -2896,6 +2898,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         '<td>' + esc(t.id) + '</td>' +
         '<td><b>' + esc(t.account) + '</b></td>' +
         '<td class="wrap">' + esc(t.title) + '</td>' +
+        '<td class="wrap" style="min-width:280px;color:var(--text-secondary);">' + esc(t.summary || "—") + '</td>' +
         '<td>' + pill(t.priority, TASK_PRIO[t.priority] || "baseline") + '</td>' +
         '<td>' + (t.opened ? fmtDate(t.opened) : "—") + '</td>' +
         '<td>' + esc(t.status) + '</td>' +

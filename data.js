@@ -137,7 +137,7 @@ window.DASHBOARD_DATA = {
         { name: "Rina Patel", title: "Procurement Manager", location: "Jersey City, USA", tz: "ET (UTC-5)" }
       ],
       tickets: [
-        { id: "GE-4812", title: "Discrepancy in blocked-impression counts vs internal logs", status: "Open", priority: "Medium", opened: "2026-07-29" }
+        { id: "GE-4812", title: "Discrepancy in blocked-impression counts vs internal logs", status: "Open", priority: "Medium", opened: "2026-07-29", summary: "AdNexa's internal logs show ~4% more blocked impressions than our reporting; data team is comparing event definitions ahead of the QBR." }
       ],
       news: [
         { date: "2026-08-01", title: "AdNexa Q2 revenue up 18% YoY", url: "https://www.example.com/news/adnexa-q2-revenue-up-18-yoy" },
@@ -167,7 +167,7 @@ window.DASHBOARD_DATA = {
         { name: "Tom Wills", title: "Ad Ops Analyst", location: "Austin, USA", tz: "CT (UTC-6)" }
       ],
       tickets: [
-        { id: "GE-4790", title: "False-positive block on house creative", status: "Open", priority: "Low", opened: "2026-08-03" }
+        { id: "GE-4790", title: "False-positive block on house creative", status: "Open", priority: "Low", opened: "2026-08-03", summary: "One of their own house ads was auto-blocked as suspicious; whitelist rule proposed, awaiting their ad-ops confirmation." }
       ],
       news: [
         { date: "2026-07-22", title: "Daily Chronicle Group acquires two regional news sites", url: "https://www.example.com/news/daily-chronicle-group-acquires-two-regional-news-sites" }
@@ -182,7 +182,7 @@ window.DASHBOARD_DATA = {
         { name: "Derek Johnson", title: "Exchange QA Lead", location: "Austin, USA", tz: "CT (UTC-6)" }
       ],
       tickets: [
-        { id: "GE-4801", title: "Slow dashboard load on large date ranges", status: "Open", priority: "Low", opened: "2026-07-25" }
+        { id: "GE-4801", title: "Slow dashboard load on large date ranges", status: "Open", priority: "Low", opened: "2026-07-25", summary: "Dashboard takes 20s+ to load 90-day date ranges; engineering traced it to an unindexed query, fix scheduled." }
       ],
       news: [
         { date: "2026-07-30", title: "AdVantage Exchange partners with major CTV platform", url: "https://www.example.com/news/advantage-exchange-partners-with-major-ctv-platform" }
@@ -210,8 +210,8 @@ window.DASHBOARD_DATA = {
         { name: "Marcus Lim", title: "SDK Engineer", location: "Singapore", tz: "SGT (UTC+8)" }
       ],
       tickets: [
-        { id: "GE-4756", title: "Alert noise — tuning thresholds for video campaigns", status: "Open", priority: "High", opened: "2026-07-08" },
-        { id: "GE-4788", title: "API rate limits hit during reporting pulls", status: "In progress", priority: "Medium", opened: "2026-07-27" }
+        { id: "GE-4756", title: "Alert noise — tuning thresholds for video campaigns", status: "Open", priority: "High", opened: "2026-07-08", summary: "Video campaigns trigger dozens of low-value alerts daily; threshold tuning in progress — the key blocker for the renewal conversation." },
+        { id: "GE-4788", title: "API rate limits hit during reporting pulls", status: "In progress", priority: "Medium", opened: "2026-07-27", summary: "Their nightly reporting pulls hit our API rate limit and fail mid-run; temporary limit raise granted while they batch requests." }
       ],
       news: [
         { date: "2026-07-05", title: "MobiReach expands into Indonesian market", url: "https://www.example.com/news/mobireach-expands-into-indonesian-market" }
@@ -226,8 +226,8 @@ window.DASHBOARD_DATA = {
         { name: "Yuki Tanaka", title: "Ad Tech Manager", location: "Tokyo, Japan", tz: "JST (UTC+9)" }
       ],
       tickets: [
-        { id: "GE-4699", title: "Integration errors after player migration", status: "In progress", priority: "High", opened: "2026-06-14" },
-        { id: "GE-4771", title: "Latency reports on video verification", status: "Open", priority: "Medium", opened: "2026-07-19" }
+        { id: "GE-4699", title: "Integration errors after player migration", status: "In progress", priority: "High", opened: "2026-06-14", summary: "Since their player migration our tag misfires on ~15% of video loads; weekly joint debugging sessions running." },
+        { id: "GE-4771", title: "Latency reports on video verification", status: "Open", priority: "Medium", opened: "2026-07-19", summary: "They report added latency from video verification; running a side-by-side test to measure real impact vs perception." }
       ],
       news: [
         { date: "2026-07-28", title: "StreamCast TV announces streaming platform relaunch", url: "https://www.example.com/news/streamcast-tv-announces-streaming-platform-relaunch" }
@@ -255,7 +255,7 @@ window.DASHBOARD_DATA = {
         { name: "Dana Mizrahi", title: "Ad Ops Lead", location: "Tel Aviv, Israel", tz: "IST (UTC+2)" }
       ],
       tickets: [
-        { id: "GE-4805", title: "Question on video verification coverage", status: "Open", priority: "Low", opened: "2026-08-02" }
+        { id: "GE-4805", title: "Question on video verification coverage", status: "Open", priority: "Low", opened: "2026-08-02", summary: "Champion asked which video formats verification covers before committing to the pilot; docs shared, awaiting follow-up." }
       ],
       news: [
         { date: "2026-07-12", title: "Velocity Ads hires new CRO from major SSP", url: "https://www.example.com/news/velocity-ads-hires-new-cro-from-major-ssp" }
@@ -283,7 +283,7 @@ window.DASHBOARD_DATA = {
         { name: "Aoife Kelly", title: "Integration Engineer", location: "Dublin, Ireland", tz: "GMT (UTC+0)" }
       ],
       tickets: [
-        { id: "GE-4809", title: "Onboarding: tag configuration for secondary domain", status: "In progress", priority: "Medium", opened: "2026-08-05" }
+        { id: "GE-4809", title: "Onboarding: tag configuration for secondary domain", status: "In progress", priority: "Medium", opened: "2026-08-05", summary: "Secondary domain throws config errors during onboarding; correct tag template sent, waiting on their deploy window." }
       ],
       news: [
         { date: "2026-07-18", title: "Spark Media Group merges EU sales houses", url: "https://www.example.com/news/spark-media-group-merges-eu-sales-houses" }
@@ -298,7 +298,7 @@ window.DASHBOARD_DATA = {
         { name: "Min-seo Choi", title: "Ad Quality Engineer", location: "Seoul, South Korea", tz: "KST (UTC+9)" }
       ],
       tickets: [
-        { id: "GE-4795", title: "Tag deployment blocked by CSP policy", status: "Open", priority: "High", opened: "2026-07-22" }
+        { id: "GE-4795", title: "Tag deployment blocked by CSP policy", status: "Open", priority: "High", opened: "2026-07-22", summary: "Their Content-Security-Policy blocks our tag domain entirely; fix ships in their next release — onboarding paused until then." }
       ],
       news: [
         { date: "2026-06-25", title: "Quantum Ads Network raises Series B", url: "https://www.example.com/news/quantum-ads-network-raises-series-b" }
@@ -325,9 +325,9 @@ window.DASHBOARD_DATA = {
         { name: "Petra Svobodova", title: "Finance Manager", location: "Prague, Czechia", tz: "CET (UTC+1)" }
       ],
       tickets: [
-        { id: "GE-4692", title: "Recurring false positives on native creatives", status: "Open", priority: "High", opened: "2026-06-10" },
-        { id: "GE-4760", title: "Portal login issues for sub-users", status: "In progress", priority: "Medium", opened: "2026-07-12" },
-        { id: "GE-4802", title: "Billing query — scan overage line item", status: "Open", priority: "Low", opened: "2026-07-31" }
+        { id: "GE-4692", title: "Recurring false positives on native creatives", status: "Open", priority: "High", opened: "2026-06-10", summary: "Native creatives keep getting blocked as clickbait; exclusions applied twice but it recurs — escalated to the detection team." },
+        { id: "GE-4760", title: "Portal login issues for sub-users", status: "In progress", priority: "Medium", opened: "2026-07-12", summary: "Three sub-users can't log in since their SSO change; workaround shared, permanent fix with engineering." },
+        { id: "GE-4802", title: "Billing query — scan overage line item", status: "Open", priority: "Low", opened: "2026-07-31", summary: "Their finance team disputes the scan-overage line on July's invoice; usage report sent for reconciliation." }
       ],
       news: [
         { date: "2026-07-20", title: "TrafficLane downsizes EU operations", url: "https://www.example.com/news/trafficlane-downsizes-eu-operations" }
@@ -342,7 +342,7 @@ window.DASHBOARD_DATA = {
         { name: "Hugo Martin", title: "Ad Quality Analyst", location: "Paris, France", tz: "CET (UTC+1)" }
       ],
       tickets: [
-        { id: "GE-4778", title: "Block-rate spike investigation on sports section", status: "In progress", priority: "Medium", opened: "2026-07-21" }
+        { id: "GE-4778", title: "Block-rate spike investigation on sports section", status: "In progress", priority: "Medium", opened: "2026-07-21", summary: "Block rate on their sports section tripled mid-July; investigating a demand-partner change as the likely cause." }
       ],
       news: [
         { date: "2026-07-25", title: "MetroNews Digital launches paid newsletter tier", url: "https://www.example.com/news/metronews-digital-launches-paid-newsletter-tier" }
