@@ -223,8 +223,12 @@
   .task-group-head { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin: 12px 0 4px; }
   .task-group-head.urgent { color: var(--status-critical); }
   .task-group-head.other { color: var(--text-muted); }
-  .task-urgent-box { border: 1px solid var(--status-critical); background: rgba(208,59,59,0.06); border-radius: 10px; padding: 2px 14px; }
-  :root[data-theme="dark"] .task-urgent-box { background: rgba(208,59,59,0.14); }
+  /* urgent tasks are highlighted individually, not as one block */
+  .task-row.urgent {
+    border: 1px solid var(--status-critical); background: rgba(208,59,59,0.06);
+    border-radius: 10px; padding: 10px 12px; margin: 5px 0; border-bottom: 1px solid var(--status-critical);
+  }
+  :root[data-theme="dark"] .task-row.urgent { background: rgba(208,59,59,0.14); }
   .task-badge { font-size: 10px; font-weight: 700; border-radius: 999px; padding: 2px 8px; white-space: nowrap; display: inline-block; }
   .task-badge.overdue { background: var(--status-critical); color: #fff; }
   .task-badge.today { background: var(--status-warning); color: #3a2b00; }
@@ -2829,7 +2833,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     return { urgent: false };
   }
   function homeTaskRow(t, badge) {
-    return '<div class="task-row" data-task-open="' + D.tasks.indexOf(t) + '" title="Open this task">' +
+    return '<div class="task-row' + (badge ? ' urgent' : '') + '" data-task-open="' + D.tasks.indexOf(t) + '" title="Open this task">' +
       '<span class="pdot" style="background:var(--' + (TASK_PRIO[t.priority] || "baseline") + ')"></span>' +
       '<span class="t-main"><b>' + esc(t.title) + '</b>' +
         '<span class="t-sub"> · ' + esc(t.account) + '</span>' +
@@ -2857,7 +2861,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     var html = "";
     if (shownUrgent.length) {
       html += '<div class="task-group-head urgent">⚠ Needs action now · ' + shownUrgent.length + '</div>' +
-        '<div class="task-urgent-box">' + shownUrgent.map(function (x) { return homeTaskRow(x.t, x.u); }).join("") + '</div>';
+        shownUrgent.map(function (x) { return homeTaskRow(x.t, x.u); }).join("");
     }
     if (shownOther.length) {
       html += '<div class="task-group-head other">Other tasks</div>' +
@@ -2896,7 +2900,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     tbody.innerHTML = rows.map(function (t) {
       return '<tr>' +
         '<td>' + esc(t.id) + '</td>' +
-        '<td><b>' + esc(t.account) + '</b></td>' +
+        '<td>' + nameLink(t.account) + '</td>' +
         '<td class="wrap">' + esc(t.title) + '</td>' +
         '<td class="wrap" style="min-width:280px;color:var(--text-secondary);">' + esc(t.summary || "—") + '</td>' +
         '<td>' + pill(t.priority, TASK_PRIO[t.priority] || "baseline") + '</td>' +
