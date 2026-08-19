@@ -352,6 +352,17 @@ window.DASHBOARD_DATA = {
     }
   },
 
+  /* internal team for the meeting scheduler — availability is simulated */
+  team: [
+    { name: "Avi B.",     role: "CSM",                tz: "IST (UTC+3)" },
+    { name: "Dana Katz",  role: "CSM",                tz: "IST (UTC+3)" },
+    { name: "Tom Rosen",  role: "CSM",                tz: "ET (UTC-4)"  },
+    { name: "Maya Stern", role: "CSM",                tz: "IST (UTC+3)" },
+    { name: "Noa Levi",   role: "CSM",                tz: "IST (UTC+3)" },
+    { name: "Rona Peled", role: "Solutions Engineer", tz: "IST (UTC+3)" },
+    { name: "Asaf Dagan", role: "Product",            tz: "IST (UTC+3)" }
+  ],
+
   /* MRR losses this year — upgrades come from Closed-Won opportunities above.
      Together these drive the KPI page: MRR %, logo churn % and the movement chart. */
   downgrades: [

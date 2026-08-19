@@ -133,11 +133,28 @@
   .notif-detail { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; line-height: 1.35; }
   .notif-acct { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
   .notif-empty { padding: 22px 14px; text-align: center; color: var(--text-muted); font-size: 12.5px; font-style: italic; }
-  .search-slot {
-    border: 1.5px dashed var(--baseline); border-radius: 7px;
-    background: var(--slot-bg); color: var(--text-muted);
-    font-size: 12px; font-style: italic; padding: 6px 14px; min-width: 200px;
+  .search-wrap { position: relative; }
+  .search-input {
+    font: inherit; font-size: 12px; padding: 6px 14px; min-width: 230px;
+    border: 1px solid var(--border); border-radius: 7px;
+    background: var(--page); color: var(--text-primary);
   }
+  .search-input::placeholder { color: var(--text-muted); font-style: italic; }
+  .search-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .search-results {
+    position: absolute; top: calc(100% + 6px); left: 0; width: min(350px, calc(100vw - 24px));
+    max-height: 60vh; overflow-y: auto; padding: 6px;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.16); z-index: 90;
+  }
+  .sr-group { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; padding: 7px 10px 2px; }
+  .sr-item { display: flex; gap: 9px; align-items: center; padding: 7px 10px; border-radius: 7px; cursor: pointer; font-size: 12.5px; }
+  .sr-item:hover, .sr-item.sel { background: var(--slot-bg); }
+  .sr-item.sel { box-shadow: inset 0 0 0 1px var(--accent); }
+  .sr-icon { flex: none; width: 22px; text-align: center; }
+  .sr-main { min-width: 0; }
+  .sr-main b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sr-sub { color: var(--text-muted); font-size: 11px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* use the full window — wide tables shouldn't scroll while the page has room
      (1800px cap only kicks in on ultra-wide monitors to keep lines readable) */
@@ -516,6 +533,26 @@
   .pie-row .dot { width: 9px; height: 9px; border-radius: 3px; flex: none; }
   .pie-row .v { margin-left: auto; font-weight: 650; text-align: right; font-variant-numeric: tabular-nums; padding-left: 10px; }
 
+  /* meeting scheduler */
+  .mm-select, .mm-date {
+    font: inherit; font-size: 12.5px; padding: 6px 10px; width: 100%;
+    border: 1px solid var(--border); border-radius: 7px;
+    background: var(--surface-1); color: var(--text-primary);
+  }
+  .mm-date { width: auto; }
+  .mm-filter { margin-bottom: 6px; font-size: 12px; padding: 5px 10px; }
+  .meet-check-list { border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; max-height: 132px; overflow-y: auto; }
+  .meet-check-list label { display: flex; gap: 8px; align-items: center; padding: 5px 0; font-size: 12.5px; cursor: pointer; }
+  .meet-check-list .sub { color: var(--text-muted); font-size: 11px; margin-left: auto; text-align: right; }
+  .meet-slot {
+    display: block; width: 100%; text-align: left; font: inherit; cursor: pointer;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 12px; margin-top: 7px; color: var(--text-primary);
+  }
+  .meet-slot:hover { border-color: var(--accent); }
+  .meet-slot b { font-size: 13px; }
+  .meet-slot .times { display: block; color: var(--text-secondary); font-size: 11.5px; margin-top: 3px; line-height: 1.5; }
+
   /* reach-out modal options */
   .ro-options { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
   .ro-option {
@@ -762,8 +799,12 @@
   </div>
   <nav class="crumb" id="crumb"><a data-nav="home">Home</a> <span>›</span> <span id="crumbHere"></span></nav>
   <div class="top-actions">
-    <div class="search-slot">search customers, tasks, contacts…</div>
+    <div class="search-wrap">
+      <input type="search" id="globalSearch" class="search-input" placeholder="Search customers, tasks, contacts…" autocomplete="off" aria-label="Search the dashboard">
+      <div id="searchResults" class="search-results" style="display:none;"></div>
+    </div>
     <button class="btn" data-nav="insights" title="Open Insights" aria-label="Open Insights">📈</button>
+    <button class="btn" id="meetBtn" title="Schedule a meeting" aria-label="Schedule a meeting">📅</button>
     <div class="notif-wrap">
       <button class="btn" id="notifBtn" aria-haspopup="true" aria-expanded="false" title="Notifications" aria-label="Notifications">🔔 <span id="notifCount" class="notif-count">0</span></button>
       <div class="notif-panel" id="notifPanel" hidden>
@@ -1369,6 +1410,40 @@
 </main>
 
 <div id="toast"></div>
+
+<!-- ================= MEETING SCHEDULER MODAL ================= -->
+<div id="meetModal" class="modal-overlay" style="display:none;">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mmTitle" style="max-width:640px;">
+    <div class="modal-head">
+      <h3 id="mmTitle">📅 Schedule a meeting</h3>
+      <button class="btn" id="mmClose" aria-label="Close">✕</button>
+    </div>
+    <label class="tm-label" for="mmCustomerFilter">1 · Customer</label>
+    <input type="search" id="mmCustomerFilter" class="mm-select mm-filter" placeholder="Type to filter customers…" autocomplete="off">
+    <select id="mmCustomer" class="mm-select"><option value="">Choose a customer…</option></select>
+    <div class="tm-label">2 · Customer contacts</div>
+    <input type="search" id="mmContactFilter" class="mm-select mm-filter" placeholder="Filter contacts…" autocomplete="off">
+    <div id="mmContacts" class="meet-check-list"><div class="empty-note" style="padding:4px 0;">Pick a customer first.</div></div>
+    <div class="tm-label">3 · Internal team</div>
+    <input type="search" id="mmTeamFilter" class="mm-select mm-filter" placeholder="Filter team members…" autocomplete="off">
+    <div id="mmTeam" class="meet-check-list"></div>
+    <div class="filter-row" style="margin-top:14px;">
+      <label>4 · Date
+        <input type="date" id="mmDate" class="mm-date">
+      </label>
+      <label>Length
+        <select id="mmDuration">
+          <option value="30">30 min</option>
+          <option value="60">60 min</option>
+        </select>
+      </label>
+      <button class="btn primary" id="mmFind">Find times</button>
+    </div>
+    <div class="tm-label" id="mmResultsLabel" style="display:none;">Times that work — your time zone and theirs</div>
+    <div id="mmResults"></div>
+    <p class="modal-desc">Assumes customer business hours 09:00–17:00 and internal hours 10:00–19:30, local time. Internal availability is simulated sample data — real Outlook calendars connect in the login/backend phase.</p>
+  </div>
+</div>
 
 <!-- ================= CHART FOCUS MODAL ================= -->
 <div id="chartFocusModal" class="modal-overlay" style="display:none;">
@@ -3472,6 +3547,189 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); location.hash = "home"; }
   });
 
+  /* ---- meeting scheduler ---- */
+  (function initMeetingScheduler() {
+    var mmEl = document.getElementById("meetModal");
+    var mmBtn = document.getElementById("meetBtn");
+    if (!mmEl || !mmBtn) return;
+    var custSel = document.getElementById("mmCustomer");
+    var contactsBox = document.getElementById("mmContacts");
+    var teamBox = document.getElementById("mmTeam");
+    var dateInput = document.getElementById("mmDate");
+    var durSel = document.getElementById("mmDuration");
+    var resultsBox = document.getElementById("mmResults");
+    var resultsLabel = document.getElementById("mmResultsLabel");
+
+    function tzOff(tzStr) {
+      var m = /UTC([+-]\d+(?:\.\d+)?)/.exec(tzStr || "");
+      return m ? parseFloat(m[1]) : 0;
+    }
+    function fmtHM(dec) {
+      dec = ((dec % 24) + 24) % 24;
+      var h = Math.floor(dec), mn = Math.round((dec - h) * 60);
+      if (mn === 60) { h = (h + 1) % 24; mn = 0; }
+      return (h < 10 ? "0" : "") + h + ":" + (mn < 10 ? "0" : "") + mn;
+    }
+    function firstName(n) { return String(n).split(" ")[0]; }
+    /* deterministic fake busy calendar: same person + date always shows the same blocks */
+    function seedHash(s) {
+      var h = 0;
+      for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) & 0xffffff;
+      return h;
+    }
+    function busyBlocks(name, dateStr) {
+      var h = seedHash(name + dateStr);
+      var b1 = 10 + (h % 8);
+      var b2 = 10 + ((h >> 4) % 8) + 0.5;
+      var b3 = 10 + ((h >> 8) % 8);
+      return [[b1, b1 + 1], [b2, b2 + 1], [b3, b3 + 0.5]];
+    }
+    function overlaps(s, e, blocks) {
+      for (var i = 0; i < blocks.length; i++) {
+        if (s < blocks[i][1] && e > blocks[i][0]) return true;
+      }
+      return false;
+    }
+
+    /* populate customer + team lists (filterable) */
+    var custAll = A.slice().sort(function (a, b) { return a.name < b.name ? -1 : 1; });
+    var custFilter = document.getElementById("mmCustomerFilter");
+    function renderCustomerOptions() {
+      var q = (custFilter.value || "").toLowerCase();
+      var prev = custSel.value;
+      var list = custAll.filter(function (a) {
+        return !q || a.name.toLowerCase().indexOf(q) !== -1 || a.portal.toLowerCase().indexOf(q) !== -1;
+      });
+      /* never filter away the current selection */
+      if (prev && !list.some(function (a) { return a.portal === prev; })) {
+        var sel = custAll.filter(function (a) { return a.portal === prev; })[0];
+        if (sel) list.unshift(sel);
+      }
+      custSel.innerHTML = '<option value="">Choose a customer…</option>' +
+        list.map(function (a) {
+          return '<option value="' + esc(a.portal) + '">' + esc(a.name) + '</option>';
+        }).join("");
+      custSel.value = prev && list.some(function (a) { return a.portal === prev; }) ? prev : "";
+      /* if exactly one match and nothing chosen yet, preselect it */
+      if (!custSel.value && q && list.length === 1) {
+        custSel.value = list[0].portal;
+        custSel.dispatchEvent(new Event("change"));
+      }
+    }
+    renderCustomerOptions();
+    custFilter.addEventListener("input", renderCustomerOptions);
+    /* checkbox-list filters: hide non-matching rows, checked state is preserved */
+    function wireListFilter(inputId, boxEl) {
+      var inp = document.getElementById(inputId);
+      if (!inp) return;
+      inp.addEventListener("input", function () {
+        var q = inp.value.toLowerCase();
+        var labels = boxEl.querySelectorAll("label");
+        for (var i = 0; i < labels.length; i++) {
+          labels[i].style.display = (!q || labels[i].textContent.toLowerCase().indexOf(q) !== -1) ? "" : "none";
+        }
+      });
+    }
+    wireListFilter("mmContactFilter", contactsBox);
+    wireListFilter("mmTeamFilter", teamBox);
+    function renderTeam(defaultCsm) {
+      teamBox.innerHTML = (D.team || []).map(function (t, i) {
+        var checked = t.name === defaultCsm || t.name === D.user.displayName;
+        return '<label><input type="checkbox" class="mm-team" value="' + i + '"' + (checked ? " checked" : "") + '>' +
+          '<span>' + esc(t.name) + '</span><span class="sub">' + esc(t.role) + ' · ' + esc(t.tz) + '</span></label>';
+      }).join("");
+    }
+    renderTeam(null);
+    custSel.addEventListener("change", function () {
+      var a = A.filter(function (x) { return x.portal === custSel.value; })[0];
+      resultsBox.innerHTML = ""; resultsLabel.style.display = "none";
+      if (!a) {
+        contactsBox.innerHTML = '<div class="empty-note" style="padding:4px 0;">Pick a customer first.</div>';
+        return;
+      }
+      var det = (D.clientDetails || {})[a.portal] || {};
+      contactsBox.innerHTML = ((det.contacts || []).map(function (c, i) {
+        return '<label><input type="checkbox" class="mm-contact" value="' + i + '"' + (i === 0 ? " checked" : "") + '>' +
+          '<span>' + esc(c.name) + '</span><span class="sub">' + esc(c.title) + ' · ' + esc(c.tz) + '</span></label>';
+      }).join("")) || '<div class="empty-note" style="padding:4px 0;">No contacts on file for this customer.</div>';
+      renderTeam(a.csm);
+      document.getElementById("mmContactFilter").value = "";
+      document.getElementById("mmTeamFilter").value = "";
+    });
+
+    document.getElementById("mmFind").addEventListener("click", function () {
+      var a = A.filter(function (x) { return x.portal === custSel.value; })[0];
+      var det = a ? ((D.clientDetails || {})[a.portal] || {}) : {};
+      var contacts = Array.prototype.slice.call(contactsBox.querySelectorAll(".mm-contact:checked"))
+        .map(function (cb) { return (det.contacts || [])[parseInt(cb.value, 10)]; }).filter(Boolean);
+      var team = Array.prototype.slice.call(teamBox.querySelectorAll(".mm-team:checked"))
+        .map(function (cb) { return (D.team || [])[parseInt(cb.value, 10)]; }).filter(Boolean);
+      var dateStr = dateInput.value;
+      resultsLabel.style.display = "";
+      if (!a || !contacts.length || !team.length || !dateStr) {
+        resultsBox.innerHTML = '<div class="empty-note">Pick a customer, at least one contact, at least one team member and a date.</div>';
+        return;
+      }
+      var parts = dateStr.split("-");
+      var dur = parseInt(durSel.value, 10);
+      var slots = [];
+      for (var mins = 0; mins < 24 * 60 && slots.length < 8; mins += 30) {
+        var start = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 0, mins);
+        var utcHrs = start.getTime() / 3600000;
+        var viewerOff = -start.getTimezoneOffset() / 60;
+        var viewerDay = Math.floor(utcHrs + viewerOff / 1 * 1); /* placeholder, fixed below */
+        viewerDay = Math.floor((utcHrs + viewerOff) / 24);
+        var ok = true, lines = [];
+        for (var ci = 0; ci < contacts.length && ok; ci++) {
+          var cOff = tzOff(contacts[ci].tz);
+          var cLocal = ((utcHrs + cOff) % 24 + 24) % 24;
+          /* customer business hours: 09:00–17:00 local */
+          if (cLocal < 9 || cLocal + dur / 60 > 17) { ok = false; break; }
+          var cDay = Math.floor((utcHrs + cOff) / 24) - viewerDay;
+          lines.push(firstName(contacts[ci].name) + " " + fmtHM(cLocal) + (cDay > 0 ? " (+1d)" : cDay < 0 ? " (−1d)" : ""));
+        }
+        for (var ti = 0; ti < team.length && ok; ti++) {
+          var tOff = tzOff(team[ti].tz);
+          var tLocal = ((utcHrs + tOff) % 24 + 24) % 24;
+          /* internal hours: 10:00–19:30 local */
+          if (tLocal < 10 || tLocal + dur / 60 > 19.5) { ok = false; break; }
+          if (overlaps(tLocal, tLocal + dur / 60, busyBlocks(team[ti].name, dateStr))) { ok = false; break; }
+          lines.push(firstName(team[ti].name) + " " + fmtHM(tLocal));
+        }
+        if (ok) {
+          slots.push({
+            viewer: fmtHM(mins / 60) + " – " + fmtHM((mins + dur) / 60),
+            lines: lines.join(" · ")
+          });
+        }
+      }
+      resultsBox.innerHTML = slots.length ? slots.map(function (s) {
+        return '<button class="meet-slot" data-action="Send Outlook invite">' +
+          '<b>' + s.viewer + '</b> <span style="color:var(--text-muted);font-size:11px;">your time</span>' +
+          '<span class="times">' + esc(s.lines) + '</span></button>';
+      }).join("") :
+        '<div class="empty-note">No times work for everyone on this date — try another date, a shorter meeting, or fewer people.</div>';
+    });
+
+    /* open / close */
+    var closeMeet = function () { mmEl.style.display = "none"; };
+    mmBtn.addEventListener("click", function () {
+      if (!dateInput.value) {
+        var t = new Date(today.getTime() + 86400000);
+        dateInput.value = t.getFullYear() + "-" +
+          String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0");
+        dateInput.min = new Date().toISOString().slice(0, 10);
+      }
+      mmEl.style.display = "flex";
+      document.getElementById("mmClose").focus();
+    });
+    document.getElementById("mmClose").addEventListener("click", closeMeet);
+    mmEl.addEventListener("click", function (e) { if (e.target === mmEl) closeMeet(); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && mmEl.style.display !== "none") closeMeet();
+    });
+  })();
+
   /* ---- reach-out modal (Customers page) ---- */
   var roEl = document.getElementById("reachOutModal");
   var roBtn = document.getElementById("reachOutBtn");
@@ -4043,6 +4301,113 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         saveCharts(); renderGrid(); closeBuilder();
       });
     }
+  })();
+
+  /* ---- global search (header) ---- */
+  (function initSearch() {
+    var input = document.getElementById("globalSearch");
+    var panel = document.getElementById("searchResults");
+    if (!input || !panel) return;
+    var results = [], sel = -1;
+
+    function buildResults(q) {
+      var out = [];
+      var ql = q.toLowerCase();
+      function m(s) { return s && String(s).toLowerCase().indexOf(ql) !== -1; }
+      A.forEach(function (a) {
+        if (m(a.name) || m(a.portal)) {
+          out.push({ group: "Customers", icon: "👥", title: a.name,
+            sub: a.portal + " · " + a.tier + " · CSM " + a.csm,
+            go: function () { location.hash = "client/" + encodeURIComponent(a.portal); } });
+        }
+      });
+      A.forEach(function (a) {
+        var det = (D.clientDetails || {})[a.portal] || {};
+        (det.contacts || []).forEach(function (c) {
+          if (m(c.name) || m(c.title)) {
+            out.push({ group: "Contacts", icon: "👤", title: c.name,
+              sub: c.title + " · " + a.name,
+              go: function () { location.hash = "client/" + encodeURIComponent(a.portal); } });
+          }
+        });
+      });
+      D.tasks.forEach(function (t, i) {
+        if (t.completed) return;
+        if (m(t.title) || m(t.account) || m(t.id)) {
+          out.push({ group: "Tasks", icon: "☑", title: t.title,
+            sub: (t.id ? t.id + " · " : "") + t.account + " · due " + fmtDateShort(t.due),
+            go: function () { location.hash = "tasks"; openTaskModal(i); } });
+        }
+      });
+      allTickets.forEach(function (t) {
+        if (m(t.id) || m(t.title) || m(t.account) || m(t.summary)) {
+          out.push({ group: "Tickets", icon: "🎫", title: t.id + " — " + t.title,
+            sub: t.account + " · " + t.status,
+            go: function () { location.hash = "tickets"; } });
+        }
+      });
+      D.opportunities.forEach(function (o) {
+        if (m(o.oppName) || m(o.account)) {
+          out.push({ group: "Opportunities", icon: "↗", title: o.oppName,
+            sub: o.account + " · " + o.stage,
+            go: function () { location.hash = "opportunities"; } });
+        }
+      });
+      return out.slice(0, 9);
+    }
+
+    function renderResults() {
+      if (!results.length) {
+        panel.innerHTML = '<div class="empty-note" style="padding:10px;">No matches.</div>';
+        panel.style.display = "";
+        return;
+      }
+      var html = "", lastGroup = null;
+      results.forEach(function (r0, i) {
+        if (r0.group !== lastGroup) {
+          html += '<div class="sr-group">' + esc(r0.group) + '</div>';
+          lastGroup = r0.group;
+        }
+        html += '<div class="sr-item' + (i === sel ? " sel" : "") + '" data-sr="' + i + '">' +
+          '<span class="sr-icon">' + r0.icon + '</span>' +
+          '<span class="sr-main"><b>' + esc(r0.title) + '</b><span class="sr-sub">' + esc(r0.sub) + '</span></span>' +
+          '</div>';
+      });
+      panel.innerHTML = html;
+      panel.style.display = "";
+    }
+    function closeSearch() { panel.style.display = "none"; sel = -1; }
+    function pick(i) {
+      var r0 = results[i];
+      if (!r0) return;
+      closeSearch();
+      input.value = "";
+      input.blur();
+      r0.go();
+    }
+
+    input.addEventListener("input", function () {
+      var q = input.value.trim();
+      if (q.length < 2) { closeSearch(); return; }
+      results = buildResults(q);
+      sel = -1;
+      renderResults();
+    });
+    input.addEventListener("keydown", function (e) {
+      if (panel.style.display === "none") return;
+      if (e.key === "ArrowDown") { e.preventDefault(); sel = Math.min(results.length - 1, sel + 1); renderResults(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); sel = Math.max(0, sel - 1); renderResults(); }
+      else if (e.key === "Enter") { e.preventDefault(); pick(sel >= 0 ? sel : 0); }
+      else if (e.key === "Escape") { closeSearch(); input.blur(); }
+    });
+    /* mousedown (not click) so selection happens before the input loses focus */
+    panel.addEventListener("mousedown", function (e) {
+      var item = e.target.closest("[data-sr]");
+      if (item) { e.preventDefault(); pick(parseInt(item.getAttribute("data-sr"), 10)); }
+    });
+    document.addEventListener("click", function (e) {
+      if (!e.target.closest(".search-wrap")) closeSearch();
+    });
   })();
 
   /* re-apply any active health filter now that rows exist */
