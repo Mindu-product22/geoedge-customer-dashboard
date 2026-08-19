@@ -2931,7 +2931,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     return '<div class="task-row' + (badge ? ' urgent' : '') + '" data-task-open="' + D.tasks.indexOf(t) + '" title="Open this task">' +
       '<span class="pdot" style="background:var(--' + (TASK_PRIO[t.priority] || "baseline") + ')"></span>' +
       '<span class="t-main"><b>' + esc(t.title) + '</b>' +
-        '<span class="t-sub"> · ' + esc(t.account) + '</span>' +
+        '<span class="t-sub"> · ' + nameLink(t.account) + '</span>' +
         (t.description ? '<div class="t-desc">' + esc(t.description) + '</div>' : '') +
         '<div class="task-prog"><div class="task-prog-fill" style="width:' + (t.percent || 0) + '%"></div></div></span>' +
       '<span class="t-right">' +
@@ -3414,8 +3414,8 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     if (!t || !tmEl) return;
     tmTaskIndex = i;
     document.getElementById("tmTitle").textContent = (t.id ? t.id + " — " : "") + t.title;
-    document.getElementById("tmMeta").textContent =
-      t.account + " · owner " + t.owner + " · due " + fmtDate(t.due) +
+    document.getElementById("tmMeta").innerHTML =
+      nameLink(t.account) + " · owner " + esc(t.owner) + " · due " + fmtDate(t.due) +
       (t.escalated ? " · 🚨 escalated" : "");
     var escBtn = document.getElementById("tmEscalate");
     escBtn.textContent = t.escalated ? "✓ De-escalate" : "🚨 Escalate";
@@ -3461,8 +3461,8 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       tmRenderNotes(t);
       logTaskChange(t, t.escalated ? "Escalated" : "De-escalated");
       /* refresh meta + button without resetting unsaved %/blocker edits */
-      document.getElementById("tmMeta").textContent =
-        t.account + " · owner " + t.owner + " · due " + fmtDate(t.due) +
+      document.getElementById("tmMeta").innerHTML =
+        nameLink(t.account) + " · owner " + esc(t.owner) + " · due " + fmtDate(t.due) +
         (t.escalated ? " · 🚨 escalated" : "");
       var escBtn = document.getElementById("tmEscalate");
       escBtn.textContent = t.escalated ? "✓ De-escalate" : "🚨 Escalate";
@@ -3516,6 +3516,10 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         renderHomeTasks();   /* refresh the home top-tasks widget (% / priority / grouping) */
       }
       closeTaskModal();
+    });
+    /* clicking the customer link in the meta line should close the modal as it navigates */
+    document.getElementById("tmMeta").addEventListener("click", function (e) {
+      if (e.target.closest("a")) closeTaskModal();
     });
     document.getElementById("tmClose").addEventListener("click", closeTaskModal);
     document.getElementById("tmCancel").addEventListener("click", closeTaskModal);
@@ -3917,7 +3921,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     var healthCard = '<div class="card"><h4>Health breakdown</h4>' + (hbRows || '<div class="empty-note">No breakdown available.</div>') + '</div>';
 
     var tickets = det.tickets || [];
-    var ticketsCard = '<div class="card"><h4>Open tickets' + (tickets.length ? ' · ' + tickets.length : '') + '</h4>' +
+    var ticketsCard = '<div class="card"><h4><a class="hlink" href="#tickets" title="Open the Tickets page">Open tickets' + (tickets.length ? ' · ' + tickets.length : '') + ' →</a></h4>' +
       (tickets.map(function (t) {
         return '<div class="lrow"><span><span class="prio" style="background:var(--' + (PRIO_DOT[t.priority] || "baseline") + ')"></span> ' +
           '<b>' + esc(t.id) + '</b> ' + esc(t.title) + '</span>' +
