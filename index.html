@@ -544,14 +544,18 @@
   .meet-check-list { border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; max-height: 132px; overflow-y: auto; }
   .meet-check-list label { display: flex; gap: 8px; align-items: center; padding: 5px 0; font-size: 12.5px; cursor: pointer; }
   .meet-check-list .sub { color: var(--text-muted); font-size: 11px; margin-left: auto; text-align: right; }
+  .mm-combo { position: relative; }
+  .mm-combo-list { left: 0; right: auto; top: calc(100% + 4px); width: 100%; max-height: 220px; }
   .meet-slot {
-    display: block; width: 100%; text-align: left; font: inherit; cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
     background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
     padding: 9px 12px; margin-top: 7px; color: var(--text-primary);
   }
-  .meet-slot:hover { border-color: var(--accent); }
   .meet-slot b { font-size: 13px; }
+  .meet-slot .ms-main { flex: 1; min-width: 0; }
   .meet-slot .times { display: block; color: var(--text-secondary); font-size: 11.5px; margin-top: 3px; line-height: 1.5; }
+  .meet-slot .ms-actions { display: flex; gap: 6px; flex: none; flex-wrap: wrap; justify-content: flex-end; }
+  .meet-slot .ms-actions .btn { padding: 4px 9px; font-size: 11.5px; white-space: nowrap; }
 
   /* reach-out modal options */
   .ro-options { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
@@ -1418,17 +1422,33 @@
       <h3 id="mmTitle">📅 Schedule a meeting</h3>
       <button class="btn" id="mmClose" aria-label="Close">✕</button>
     </div>
-    <label class="tm-label" for="mmCustomerFilter">1 · Customer</label>
-    <input type="search" id="mmCustomerFilter" class="mm-select mm-filter" placeholder="Type to filter customers…" autocomplete="off">
-    <select id="mmCustomer" class="mm-select"><option value="">Choose a customer…</option></select>
+    <label class="tm-label" for="mmCustomerInput">1 · Customer</label>
+    <div class="mm-combo">
+      <input type="search" id="mmCustomerInput" class="mm-select" placeholder="Search and select a customer…" autocomplete="off">
+      <div id="mmCustomerList" class="search-results mm-combo-list" style="display:none;"></div>
+    </div>
     <div class="tm-label">2 · Customer contacts</div>
     <input type="search" id="mmContactFilter" class="mm-select mm-filter" placeholder="Filter contacts…" autocomplete="off">
     <div id="mmContacts" class="meet-check-list"><div class="empty-note" style="padding:4px 0;">Pick a customer first.</div></div>
     <div class="tm-label">3 · Internal team</div>
     <input type="search" id="mmTeamFilter" class="mm-select mm-filter" placeholder="Filter team members…" autocomplete="off">
     <div id="mmTeam" class="meet-check-list"></div>
-    <div class="filter-row" style="margin-top:14px;">
-      <label>4 · Date
+    <div class="tm-label">4 · Meeting details</div>
+    <input type="text" id="mmName" class="mm-select" placeholder="Meeting name — e.g. Q3 QBR" autocomplete="off">
+    <div class="filter-row" style="margin-top:8px;">
+      <label>Room
+        <select id="mmRoom">
+          <option>No room (virtual)</option>
+          <option>TLV — Sunset Room</option>
+          <option>TLV — Fishbowl</option>
+          <option>TLV — Rooftop</option>
+          <option>NY — Hudson Room</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="mmZoom" checked> Add Zoom link</label>
+    </div>
+    <div class="filter-row" style="margin-top:12px;">
+      <label>5 · Date
         <input type="date" id="mmDate" class="mm-date">
       </label>
       <label>Length
@@ -3552,13 +3572,15 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     var mmEl = document.getElementById("meetModal");
     var mmBtn = document.getElementById("meetBtn");
     if (!mmEl || !mmBtn) return;
-    var custSel = document.getElementById("mmCustomer");
+    var custInput = document.getElementById("mmCustomerInput");
+    var custList = document.getElementById("mmCustomerList");
     var contactsBox = document.getElementById("mmContacts");
     var teamBox = document.getElementById("mmTeam");
     var dateInput = document.getElementById("mmDate");
     var durSel = document.getElementById("mmDuration");
     var resultsBox = document.getElementById("mmResults");
     var resultsLabel = document.getElementById("mmResultsLabel");
+    var mmPortal = "";
 
     function tzOff(tzStr) {
       var m = /UTC([+-]\d+(?:\.\d+)?)/.exec(tzStr || "");
@@ -3571,6 +3593,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       return (h < 10 ? "0" : "") + h + ":" + (mn < 10 ? "0" : "") + mn;
     }
     function firstName(n) { return String(n).split(" ")[0]; }
+    function attrEsc(s) { return esc(s).replace(/"/g, "&quot;"); }
     /* deterministic fake busy calendar: same person + date always shows the same blocks */
     function seedHash(s) {
       var h = 0;
@@ -3591,33 +3614,89 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
       return false;
     }
 
-    /* populate customer + team lists (filterable) */
+    /* customer combobox: search and select in one bar */
     var custAll = A.slice().sort(function (a, b) { return a.name < b.name ? -1 : 1; });
-    var custFilter = document.getElementById("mmCustomerFilter");
-    function renderCustomerOptions() {
-      var q = (custFilter.value || "").toLowerCase();
-      var prev = custSel.value;
-      var list = custAll.filter(function (a) {
-        return !q || a.name.toLowerCase().indexOf(q) !== -1 || a.portal.toLowerCase().indexOf(q) !== -1;
-      });
-      /* never filter away the current selection */
-      if (prev && !list.some(function (a) { return a.portal === prev; })) {
-        var sel = custAll.filter(function (a) { return a.portal === prev; })[0];
-        if (sel) list.unshift(sel);
-      }
-      custSel.innerHTML = '<option value="">Choose a customer…</option>' +
-        list.map(function (a) {
-          return '<option value="' + esc(a.portal) + '">' + esc(a.name) + '</option>';
+    var custMatches = [], custSelIdx = -1;
+    function renderCustList() {
+      if (!custMatches.length) {
+        custList.innerHTML = '<div class="empty-note" style="padding:8px;">No matching customers.</div>';
+      } else {
+        custList.innerHTML = custMatches.map(function (a, i) {
+          return '<div class="sr-item' + (i === custSelIdx ? " sel" : "") + '" data-cust="' + esc(a.portal) + '">' +
+            '<span class="sr-icon">👥</span>' +
+            '<span class="sr-main"><b>' + esc(a.name) + '</b><span class="sr-sub">' + esc(a.portal) + ' · ' + esc(a.tier) + ' · CSM ' + esc(a.csm) + '</span></span></div>';
         }).join("");
-      custSel.value = prev && list.some(function (a) { return a.portal === prev; }) ? prev : "";
-      /* if exactly one match and nothing chosen yet, preselect it */
-      if (!custSel.value && q && list.length === 1) {
-        custSel.value = list[0].portal;
-        custSel.dispatchEvent(new Event("change"));
+      }
+      custList.style.display = "";
+    }
+    function closeCustList() { custList.style.display = "none"; custSelIdx = -1; }
+    function selectCustomer(portal) {
+      var a = custAll.filter(function (x) { return x.portal === portal; })[0];
+      mmPortal = a ? a.portal : "";
+      custInput.value = a ? a.name : "";
+      closeCustList();
+      resultsBox.innerHTML = ""; resultsLabel.style.display = "none";
+      if (!a) {
+        contactsBox.innerHTML = '<div class="empty-note" style="padding:4px 0;">Pick a customer first.</div>';
+        renderTeam(null);
+        return;
+      }
+      var det = (D.clientDetails || {})[a.portal] || {};
+      contactsBox.innerHTML = ((det.contacts || []).map(function (c, i) {
+        return '<label><input type="checkbox" class="mm-contact" value="' + i + '"' + (i === 0 ? " checked" : "") + '>' +
+          '<span>' + esc(c.name) + '</span><span class="sub">' + esc(c.title) + ' · ' + esc(c.tz) + '</span></label>';
+      }).join("")) || '<div class="empty-note" style="padding:4px 0;">No contacts on file for this customer.</div>';
+      renderTeam(a.csm);
+      document.getElementById("mmContactFilter").value = "";
+      document.getElementById("mmTeamFilter").value = "";
+      if (!document.getElementById("mmName").value.trim()) {
+        document.getElementById("mmName").placeholder = "Meeting name — e.g. " + a.name + " QBR";
       }
     }
-    renderCustomerOptions();
-    custFilter.addEventListener("input", renderCustomerOptions);
+    custInput.addEventListener("input", function () {
+      var q = custInput.value.trim().toLowerCase();
+      mmPortal = ""; /* typing invalidates the previous selection */
+      if (!q) { closeCustList(); selectCustomer(""); custInput.value = ""; return; }
+      custMatches = custAll.filter(function (a) {
+        return a.name.toLowerCase().indexOf(q) !== -1 || a.portal.toLowerCase().indexOf(q) !== -1;
+      });
+      custSelIdx = -1;
+      renderCustList();
+    });
+    custInput.addEventListener("focus", function () {
+      if (!mmPortal) {
+        custMatches = custAll.slice();
+        custSelIdx = -1;
+        renderCustList();
+      }
+    });
+    custInput.addEventListener("keydown", function (e) {
+      if (custList.style.display === "none") return;
+      if (e.key === "ArrowDown") { e.preventDefault(); custSelIdx = Math.min(custMatches.length - 1, custSelIdx + 1); renderCustList(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); custSelIdx = Math.max(0, custSelIdx - 1); renderCustList(); }
+      else if (e.key === "Enter") {
+        e.preventDefault();
+        var pick = custMatches[custSelIdx >= 0 ? custSelIdx : 0];
+        if (pick) selectCustomer(pick.portal);
+      }
+      else if (e.key === "Escape") { closeCustList(); }
+    });
+    custList.addEventListener("mousedown", function (e) {
+      var item = e.target.closest("[data-cust]");
+      if (item) { e.preventDefault(); selectCustomer(item.getAttribute("data-cust")); }
+    });
+    document.addEventListener("click", function (e) {
+      if (!e.target.closest(".mm-combo")) closeCustList();
+    });
+
+    function renderTeam(defaultCsm) {
+      teamBox.innerHTML = (D.team || []).map(function (t, i) {
+        var checked = t.name === defaultCsm || t.name === D.user.displayName;
+        return '<label><input type="checkbox" class="mm-team" value="' + i + '"' + (checked ? " checked" : "") + '>' +
+          '<span>' + esc(t.name) + '</span><span class="sub">' + esc(t.role) + ' · ' + esc(t.tz) + '</span></label>';
+      }).join("");
+    }
+    renderTeam(null);
     /* checkbox-list filters: hide non-matching rows, checked state is preserved */
     function wireListFilter(inputId, boxEl) {
       var inp = document.getElementById(inputId);
@@ -3632,33 +3711,9 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
     }
     wireListFilter("mmContactFilter", contactsBox);
     wireListFilter("mmTeamFilter", teamBox);
-    function renderTeam(defaultCsm) {
-      teamBox.innerHTML = (D.team || []).map(function (t, i) {
-        var checked = t.name === defaultCsm || t.name === D.user.displayName;
-        return '<label><input type="checkbox" class="mm-team" value="' + i + '"' + (checked ? " checked" : "") + '>' +
-          '<span>' + esc(t.name) + '</span><span class="sub">' + esc(t.role) + ' · ' + esc(t.tz) + '</span></label>';
-      }).join("");
-    }
-    renderTeam(null);
-    custSel.addEventListener("change", function () {
-      var a = A.filter(function (x) { return x.portal === custSel.value; })[0];
-      resultsBox.innerHTML = ""; resultsLabel.style.display = "none";
-      if (!a) {
-        contactsBox.innerHTML = '<div class="empty-note" style="padding:4px 0;">Pick a customer first.</div>';
-        return;
-      }
-      var det = (D.clientDetails || {})[a.portal] || {};
-      contactsBox.innerHTML = ((det.contacts || []).map(function (c, i) {
-        return '<label><input type="checkbox" class="mm-contact" value="' + i + '"' + (i === 0 ? " checked" : "") + '>' +
-          '<span>' + esc(c.name) + '</span><span class="sub">' + esc(c.title) + ' · ' + esc(c.tz) + '</span></label>';
-      }).join("")) || '<div class="empty-note" style="padding:4px 0;">No contacts on file for this customer.</div>';
-      renderTeam(a.csm);
-      document.getElementById("mmContactFilter").value = "";
-      document.getElementById("mmTeamFilter").value = "";
-    });
 
     document.getElementById("mmFind").addEventListener("click", function () {
-      var a = A.filter(function (x) { return x.portal === custSel.value; })[0];
+      var a = custAll.filter(function (x) { return x.portal === mmPortal; })[0];
       var det = a ? ((D.clientDetails || {})[a.portal] || {}) : {};
       var contacts = Array.prototype.slice.call(contactsBox.querySelectorAll(".mm-contact:checked"))
         .map(function (cb) { return (det.contacts || [])[parseInt(cb.value, 10)]; }).filter(Boolean);
@@ -3670,6 +3725,12 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         resultsBox.innerHTML = '<div class="empty-note">Pick a customer, at least one contact, at least one team member and a date.</div>';
         return;
       }
+      var meetName = document.getElementById("mmName").value.trim() || ("Meeting with " + a.name);
+      var room = document.getElementById("mmRoom").value;
+      var zoom = document.getElementById("mmZoom").checked;
+      var detail = "“" + meetName + "”" +
+        (room.indexOf("No room") === -1 ? " · " + room : "") +
+        (zoom ? " · Zoom link included" : "");
       var parts = dateStr.split("-");
       var dur = parseInt(durSel.value, 10);
       var slots = [];
@@ -3677,8 +3738,7 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         var start = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 0, mins);
         var utcHrs = start.getTime() / 3600000;
         var viewerOff = -start.getTimezoneOffset() / 60;
-        var viewerDay = Math.floor(utcHrs + viewerOff / 1 * 1); /* placeholder, fixed below */
-        viewerDay = Math.floor((utcHrs + viewerOff) / 24);
+        var viewerDay = Math.floor((utcHrs + viewerOff) / 24);
         var ok = true, lines = [];
         for (var ci = 0; ci < contacts.length && ok; ci++) {
           var cOff = tzOff(contacts[ci].tz);
@@ -3704,9 +3764,13 @@ document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script
         }
       }
       resultsBox.innerHTML = slots.length ? slots.map(function (s) {
-        return '<button class="meet-slot" data-action="Send Outlook invite">' +
-          '<b>' + s.viewer + '</b> <span style="color:var(--text-muted);font-size:11px;">your time</span>' +
-          '<span class="times">' + esc(s.lines) + '</span></button>';
+        return '<div class="meet-slot">' +
+          '<span class="ms-main"><b>' + s.viewer + '</b> <span style="color:var(--text-muted);font-size:11px;">your time</span>' +
+          '<span class="times">' + esc(s.lines) + '</span></span>' +
+          '<span class="ms-actions">' +
+          '<button class="btn primary" data-action="' + attrEsc("Send Outlook invite " + detail + " · " + s.viewer + " → all participants") + '">✉ Invite all</button>' +
+          '<button class="btn" data-action="' + attrEsc("Internal hold " + detail + " · " + s.viewer + " → internal team only, pending customer confirmation") + '" title="Send the invite only to the internal team as a hold while the customer confirms">⏳ Internal hold</button>' +
+          '</span></div>';
       }).join("") :
         '<div class="empty-note">No times work for everyone on this date — try another date, a shorter meeting, or fewer people.</div>';
     });
